@@ -9,8 +9,9 @@
 - `docs/`: Architecture documentation
 
 ## Tech Stack
-- Python 3.12+
-- agent-utilities >= 0.16.0
+- Python 3.11+
+- agent-utilities >= 0.41.0
+- requests (Camunda 7 Engine REST + Camunda 8 Zeebe/Operate/Tasklist REST, OAuth)
 - Model Context Protocol (MCP)
 
 ## Commands
