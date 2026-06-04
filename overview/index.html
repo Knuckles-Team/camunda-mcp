@@ -352,6 +352,17 @@
 
 
 <h1 id="camunda-mcp-overview">camunda-mcp Overview<a class="headerlink" href="#camunda-mcp-overview" title="Permanent link">&para;</a></h1>
+<p><code>camunda-mcp</code> wraps the Camunda process automation APIs with thin MCP tools,
+supporting both platforms:</p>
+<ul>
+<li><strong>Camunda 7</strong> — the Engine REST API (<code>/engine-rest</code>): process definitions,
+  process instances, user tasks, deployments, history, external tasks,
+  messaging, incidents and jobs.</li>
+<li><strong>Camunda 8</strong> — the Zeebe REST API (<code>/v2</code>), Operate REST API and Tasklist
+  REST API, with optional OAuth <code>client_credentials</code> authentication.</li>
+</ul>
+<p>Tools accept a <code>platform</code> argument (<code>7</code> or <code>8</code>) so a single server can target
+either deployment.</p>
 
 
 
