@@ -1,7 +1,7 @@
 {
   "name": "camunda-mcp-agent",
   "type": "agent",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Camunda (7 & 8) agent: process definitions, instances, user tasks, deployments, messaging, jobs and incidents across Engine REST and Zeebe/Operate/Tasklist.",
   "url": "https://github.com/Knuckles-Team/camunda-mcp/tree/main",
   "license": "MIT",
