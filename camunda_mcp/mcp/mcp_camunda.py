@@ -7,7 +7,7 @@ corresponding method, and returns the result. All API surface lives in
 """
 
 import json
-from typing import Any
+from typing import Any, cast
 
 from fastmcp import FastMCP
 from pydantic import Field
@@ -108,7 +108,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
                 return c8.cancel_process_instance(p["key"])
             raise ValueError(f"Unknown v8 instance action: {action!r}.")
         c7 = api.v7
-        iid = p.get("instance_id")
+        iid = cast(str, p.get("instance_id"))
         if action == "list":
             return c7.list_process_instances(p or None)
         if action == "get":
@@ -149,7 +149,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
             c8 = api.v8
-            tid = p.get("task_id")
+            tid = cast(str, p.get("task_id"))
             if action == "list":
                 return c8.search_tasks(p.get("body", {}))
             if action == "get":
@@ -166,7 +166,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
                 return c8.get_task_variables(tid, p.get("body"))
             raise ValueError(f"Unknown v8 task action: {action!r}.")
         c7 = api.v7
-        tid = p.get("task_id")
+        tid = cast(str, p.get("task_id"))
         if action == "list":
             return c7.list_tasks(p or None)
         if action == "get":
