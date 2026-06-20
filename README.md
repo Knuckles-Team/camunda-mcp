@@ -57,16 +57,16 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
-| `camunda_deploy` | `DEPLOYMENTTOOL` | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
-| `camunda_deployment` | `DEPLOYMENTTOOL` | Manage Camunda 7 deployments (list/get/delete). |
-| `camunda_external_task` | `EXTERNAL-TASKTOOL` | Camunda 7 external task worker operations. |
-| `camunda_history` | `HISTORYTOOL` | Query Camunda 7 historic data. |
-| `camunda_instance` | `PROCESSTOOL` | Work with process instances on Camunda 7 or Camunda 8. |
-| `camunda_job` | `JOBSTOOL` | Manage jobs and incidents on Camunda 7 or Camunda 8. |
-| `camunda_message` | `MESSAGINGTOOL` | Correlate/publish a message or broadcast a signal. |
-| `camunda_ops` | `OPERATETOOL` | Search Camunda 8 Operate / Tasklist surfaces. |
-| `camunda_process` | `PROCESSTOOL` | Work with process definitions on Camunda 7 or Camunda 8. |
-| `camunda_task` | `TASKTOOL` | Work with user tasks on Camunda 7 or Camunda 8 (Tasklist). |
+| `camunda_deploy` | `CAMUNDATOOL` | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
+| `camunda_deployment` | `CAMUNDATOOL` | Manage Camunda 7 deployments (list/get/delete). |
+| `camunda_external_task` | `CAMUNDATOOL` | Camunda 7 external task worker operations. |
+| `camunda_history` | `CAMUNDATOOL` | Query Camunda 7 historic data. |
+| `camunda_instance` | `CAMUNDATOOL` | Work with process instances on Camunda 7 or Camunda 8. |
+| `camunda_job` | `CAMUNDATOOL` | Manage jobs and incidents on Camunda 7 or Camunda 8. |
+| `camunda_message` | `CAMUNDATOOL` | Correlate/publish a message or broadcast a signal. |
+| `camunda_ops` | `CAMUNDATOOL` | Search Camunda 8 Operate / Tasklist surfaces. |
+| `camunda_process` | `CAMUNDATOOL` | Work with process definitions on Camunda 7 or Camunda 8. |
+| `camunda_task` | `CAMUNDATOOL` | Work with user tasks on Camunda 7 or Camunda 8 (Tasklist). |
 
 _10 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
