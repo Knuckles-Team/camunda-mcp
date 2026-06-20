@@ -1,8 +1,7 @@
 """Identity credentials loader for the Camunda client facade."""
 
-import os
-
-from agent_utilities.base_utilities import get_logger, to_boolean
+from agent_utilities.base_utilities import get_logger
+from agent_utilities.core.config import setting
 
 from camunda_mcp.api_client import Api
 
@@ -27,29 +26,25 @@ def get_client() -> Api:
         ``CAMUNDA_PLATFORM`` (``7`` or ``8``, default ``7``),
         ``CAMUNDA_SSL_VERIFY`` (default ``True``).
     """
-    platform = os.getenv("CAMUNDA_PLATFORM", "7")
-    verify = to_boolean(os.getenv("CAMUNDA_SSL_VERIFY", "True"))
+    platform = setting("CAMUNDA_PLATFORM", "7")
+    verify = setting("CAMUNDA_SSL_VERIFY", True)
 
     v7_kwargs = {
-        "base_url": os.getenv(
-            "CAMUNDA7_URL", "http://localhost:8080/engine-rest"
-        ),
-        "token": os.getenv("CAMUNDA7_TOKEN") or None,
-        "username": os.getenv("CAMUNDA7_USERNAME") or None,
-        "password": os.getenv("CAMUNDA7_PASSWORD") or None,
+        "base_url": setting("CAMUNDA7_URL", "http://localhost:8080/engine-rest"),
+        "token": setting("CAMUNDA7_TOKEN", None) or None,
+        "username": setting("CAMUNDA7_USERNAME", None) or None,
+        "password": setting("CAMUNDA7_PASSWORD", None) or None,
         "verify": verify,
     }
 
     v8_kwargs = {
-        "zeebe_url": os.getenv(
-            "CAMUNDA8_ZEEBE_REST_URL", "http://localhost:8080"
-        ),
-        "operate_url": os.getenv("CAMUNDA8_OPERATE_URL") or None,
-        "tasklist_url": os.getenv("CAMUNDA8_TASKLIST_URL") or None,
-        "client_id": os.getenv("CAMUNDA8_CLIENT_ID") or None,
-        "client_secret": os.getenv("CAMUNDA8_CLIENT_SECRET") or None,
-        "oauth_url": os.getenv("CAMUNDA8_OAUTH_URL") or None,
-        "audience": os.getenv("CAMUNDA8_AUDIENCE", "zeebe.camunda.io"),
+        "zeebe_url": setting("CAMUNDA8_ZEEBE_REST_URL", "http://localhost:8080"),
+        "operate_url": setting("CAMUNDA8_OPERATE_URL", None) or None,
+        "tasklist_url": setting("CAMUNDA8_TASKLIST_URL", None) or None,
+        "client_id": setting("CAMUNDA8_CLIENT_ID", None) or None,
+        "client_secret": setting("CAMUNDA8_CLIENT_SECRET", None) or None,
+        "oauth_url": setting("CAMUNDA8_OAUTH_URL", None) or None,
+        "audience": setting("CAMUNDA8_AUDIENCE", "zeebe.camunda.io"),
         "verify": verify,
     }
 
