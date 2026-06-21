@@ -1,5 +1,5 @@
 include README.md
 include requirements.txt
-recursive-include camunda_mcp *.py
+recursive-include camunda_mcp *.py *.json *.md *.yaml *.yml
 recursive-include camunda_mcp *.json
 recursive-include camunda_mcp/agent_data *
