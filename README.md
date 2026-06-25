@@ -71,8 +71,14 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 _10 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
-## Configuration (environment)
+## Environment Variables
 
+Every variable the server reads, grouped by purpose. Credentials left blank leave the
+corresponding platform inactive — the connector remains inactive when credentials are
+absent. A starter [`.env.example`](.env.example) ships with the repository; copy it to
+`.env` and populate the values for the platform you use.
+
+### Connection & Credentials
 | Var | Default | Meaning |
 |---|---|---|
 | `CAMUNDA_PLATFORM` | `7` | Target platform: `7` or `8` |
@@ -82,26 +88,103 @@ _10 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unl
 | `CAMUNDA8_ZEEBE_REST_URL` | `http://localhost:8080` | Camunda 8 Zeebe REST base URL |
 | `CAMUNDA8_OPERATE_URL` / `CAMUNDA8_TASKLIST_URL` | — | Camunda 8 Operate / Tasklist URLs |
 | `CAMUNDA8_CLIENT_ID` / `CAMUNDA8_CLIENT_SECRET` / `CAMUNDA8_OAUTH_URL` / `CAMUNDA8_AUDIENCE` | — | Camunda 8 OAuth `client_credentials` |
-| `CAMUNDATOOL` | `True` | Register the Camunda tool set |
 
-Credentials left blank leave the corresponding platform inactive — the connector
-remains inactive when credentials are absent. A starter [`.env.example`](.env.example)
-ships with the repository; copy it to `.env` and populate the values for the platform
-you use.
+### MCP server / transport
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TRANSPORT` | `stdio`, `streamable-http`, or `sse` | `stdio` |
+| `HOST` | Bind host (HTTP transports) | `0.0.0.0` |
+| `PORT` | Bind port (HTTP transports) | `8000` |
+| `MCP_TOOL_MODE` | Tool surface: `condensed`, `verbose`, or `both` | `condensed` |
+| `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS` | Comma-separated tool allow/deny list | — |
+| `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS` | Comma-separated tag allow/deny list | — |
+| `DEBUG` | Verbose logging | `False` |
+| `PYTHONUNBUFFERED` | Unbuffered stdout (recommended in containers) | `1` |
 
-## Install & run
+### Tool toggles
+Each action-routed tool can be disabled individually via its toggle env var (set to `false`).
+See the [Available MCP Tools](#available-mcp-tools) table above for the authoritative names.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CAMUNDATOOL` | Register the Camunda tool set | `True` |
+
+### Telemetry & governance
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ENABLE_OTEL` | Enable OpenTelemetry export | `True` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint | — |
+| `OTEL_EXPORTER_OTLP_PUBLIC_KEY` / `OTEL_EXPORTER_OTLP_SECRET_KEY` | OTLP auth keys | — |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP protocol (e.g. `http/protobuf`) | — |
+| `EUNOMIA_TYPE` | Authorization mode: `none`, `embedded`, `remote` | `none` |
+| `EUNOMIA_POLICY_FILE` | Embedded policy file | `mcp_policies.json` |
+| `EUNOMIA_REMOTE_URL` | Remote Eunomia server URL | — |
+
+### Agent CLI (full `[agent]` runtime only)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MCP_URL` | URL of the MCP server the agent connects to | `http://localhost:8000/mcp` |
+| `PROVIDER` | LLM provider (e.g. `openai`) | `openai` |
+| `MODEL_ID` | Model id (e.g. `gpt-4o`) | `gpt-4o` |
+| `ENABLE_WEB_UI` | Serve the AG-UI web interface | `True` |
+
+## Installation
+
+Pick the extra that matches what you want to run:
+
+| Extra | Installs | Use when |
+|-------|----------|----------|
+| `camunda-mcp[mcp]` | Slim MCP server only (`agent-utilities[mcp]` — FastMCP/FastAPI) | You only run the **MCP server** (smallest install / image) |
+| `camunda-mcp[agent]` | Full agent runtime (`agent-utilities[agent,logfire]` — Pydantic AI + the epistemic-graph engine) | You run the **integrated agent** |
+| `camunda-mcp[all]` | Everything (`mcp` + `agent`) | Development / both surfaces |
 
 ```bash
-pip install -e ".[all]"
+# MCP server only (recommended for tool hosting — slim deps)
+uv pip install "camunda-mcp[mcp]"
+
+# Full agent runtime (Pydantic AI + epistemic-graph engine)
+uv pip install "camunda-mcp[agent]"
+
+# Everything (development)
+uv pip install "camunda-mcp[all]"      # or: python -m pip install "camunda-mcp[all]"
+```
+
+Run the servers:
+
+```bash
 camunda-mcp                       # stdio MCP server (default transport)
 camunda-mcp --transport streamable-http --host 0.0.0.0 --port 8000
-```
 
-Run the A2A agent server against a deployed MCP endpoint:
-
-```bash
+# A2A agent server against a deployed MCP endpoint
 MCP_URL=http://camunda-mcp:8000/mcp camunda-agent --host 0.0.0.0 --port 8001
 ```
+
+### Container images (`:mcp` vs `:agent`)
+
+One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `--target`:
+
+| Image tag | Build target | Contents | Entrypoint |
+|-----------|--------------|----------|------------|
+| `knucklessg1/camunda-mcp:mcp` | `--target mcp` | `camunda-mcp[mcp]` — **slim**, no engine/`pydantic-ai`/`dspy`/`llama-index`/`tree-sitter` | `camunda-mcp` |
+| `knucklessg1/camunda-mcp:latest` | `--target agent` (default) | `camunda-mcp[agent]` — **full** agent runtime + epistemic-graph engine | `camunda-agent` |
+
+```bash
+docker build --target mcp   -t knucklessg1/camunda-mcp:mcp    docker/   # slim MCP server
+docker build --target agent -t knucklessg1/camunda-mcp:latest docker/   # full agent
+```
+
+`docker/mcp.compose.yml` runs the slim `:mcp` server; `docker/agent.compose.yml` runs the
+agent (`:latest`) with a co-located `:mcp` sidecar.
+
+### Knowledge-graph database (`epistemic-graph`)
+
+The **full agent** (`[agent]` / `:latest`) embeds the **epistemic-graph** engine (pulled in
+transitively via `agent-utilities[agent]`). For production — or to share one knowledge graph
+across multiple agents — run **epistemic-graph as its own database container** and point the
+agent at it instead of embedding it. Deployment recipes (single-node + Raft HA), connection
+config, and the full database architecture (with diagrams) are documented in the
+[epistemic-graph deployment guide](https://knuckles-team.github.io/epistemic-graph/deployment/).
+The slim `[mcp]` server does **not** require the database.
 
 ## MCP config
 
