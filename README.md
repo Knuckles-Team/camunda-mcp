@@ -55,6 +55,8 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 
 <!-- MCP-TOOLS-TABLE:START -->
 
+#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
 | `camunda_deploy` | `CAMUNDATOOL` | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
@@ -68,7 +70,18 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 | `camunda_process` | `CAMUNDATOOL` | Work with process definitions on Camunda 7 or Camunda 8. |
 | `camunda_task` | `CAMUNDATOOL` | Work with user tasks on Camunda 7 or Camunda 8 (Tasklist). |
 
-_10 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+#### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
+
+<details>
+<summary>1 per-operation tools — one per public API method (click to expand)</summary>
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `camunda_client` | `APITOOL` | Return the platform client (defaults to the configured platform). |
+
+</details>
+
+_10 action-routed tool(s) (default) · 1 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 ## Environment Variables
@@ -79,8 +92,20 @@ _10 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unl
 
 | Variable | Example | Description |
 |----------|---------|-------------|
-| `CAMUNDA_URL` | `http://localhost:8080` |  |
-| `CAMUNDA_TOKEN` | `changeme` |  |
+| `CAMUNDA_PLATFORM` | `7` | Platform selector: "7" (Engine REST) or "8" (Zeebe/Operate/Tasklist) |
+| `CAMUNDA_SSL_VERIFY` | `True` | Verify TLS certificates for Camunda HTTP calls |
+| `CAMUNDA7_URL` | `http://localhost:8080/engine-rest` |  |
+| `CAMUNDA7_TOKEN` | `changeme` |  |
+| `CAMUNDA7_USERNAME` | `demo` |  |
+| `CAMUNDA7_PASSWORD` | `changeme` |  |
+| `CAMUNDA8_ZEEBE_REST_URL` | `http://localhost:8080` |  |
+| `CAMUNDA8_OPERATE_URL` | `http://localhost:8081` |  |
+| `CAMUNDA8_TASKLIST_URL` | `http://localhost:8082` |  |
+| `CAMUNDA8_CLIENT_ID` | `changeme` |  |
+| `CAMUNDA8_CLIENT_SECRET` | `changeme` |  |
+| `CAMUNDA8_OAUTH_URL` | `https://login.cloud.camunda.io/oauth/token` |  |
+| `CAMUNDA8_AUDIENCE` | `zeebe.camunda.io` |  |
+| `CAMUNDATOOL` | `True` | Toggle registration of the Camunda tool group |
 
 #### Inherited agent-utilities variables (apply to every connector)
 
@@ -109,7 +134,7 @@ _10 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unl
 | `MODEL_ID` | `gpt-4o` | Model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_2 package + 22 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+_14 package + 22 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 
