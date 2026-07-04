@@ -1,0 +1,15 @@
+{
+  "_comment": "Tier-1 mcp_tool source presets for camunda-mcp (AU-KG.ingest.mcp-tool-connector). Syncs Camunda process definitions into the KG as business-process documents via the camunda-mcp MCP server. Contributed presets win over the central MCP_TOOL_PRESETS. Extend with instance/task presets as needed.",
+  "camunda-process-definitions": {
+    "server": "camunda-mcp",
+    "tool": "camunda_process",
+    "action": "list",
+    "params": {"platform": "7"},
+    "records_path": "",
+    "id_field": "id",
+    "title_field": "name",
+    "text_field": "key",
+    "updated_field": "version",
+    "doc_type": "business_process"
+  }
+}

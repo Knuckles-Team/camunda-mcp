@@ -19,6 +19,36 @@ def _p(params_json: str) -> dict[str, Any]:
     return json.loads(params_json) if params_json else {}
 
 
+def _as_records(result: Any) -> list[dict[str, Any]]:
+    """Coerce a Camunda list response into a list of record dicts."""
+    if isinstance(result, list):
+        return [r for r in result if isinstance(r, dict)]
+    if isinstance(result, dict):
+        for key in ("items", "results", "data"):
+            val = result.get(key)
+            if isinstance(val, list):
+                return [r for r in val if isinstance(r, dict)]
+    return []
+
+
+def _autoingest(kind: str, result: Any) -> None:
+    """Best-effort native KG ingestion of a list result (never raises)."""
+    try:
+        from camunda_mcp import kg_ingest
+
+        records = _as_records(result)
+        if not records:
+            return
+        if kind == "definitions":
+            kg_ingest.ingest_process_definitions(records)
+        elif kind == "instances":
+            kg_ingest.ingest_process_instances(records)
+        elif kind == "tasks":
+            kg_ingest.ingest_tasks(records)
+    except Exception:  # noqa: BLE001 — ingestion is best-effort, never blocks the tool
+        pass
+
+
 def register_camunda_tools(mcp: FastMCP) -> None:
     """Register Camunda 7 and Camunda 8 process automation tools."""
 
@@ -30,14 +60,12 @@ def register_camunda_tools(mcp: FastMCP) -> None:
                 "'statistics', 'suspend'. v8: 'list' (Operate search)."
             )
         ),
-        platform: str = Field(
-            default="7", description="Target platform: '7' or '8'."
-        ),
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
         params_json: str = Field(
             default="{}",
             description=(
-                "JSON args. v7 get/xml: {\"id\":..} or {\"key\":..}; "
-                "start: {\"key\":..,\"body\":{\"variables\":{...}}}; "
+                'JSON args. v7 get/xml: {"id":..} or {"key":..}; '
+                'start: {"key":..,"body":{"variables":{...}}}; '
                 "list/statistics/suspend take filter/body fields. "
                 "v8 list: an Operate search body."
             ),
@@ -49,19 +77,21 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         if str(platform) in ("8", "c8"):
             c8 = api.v8
             if action == "list":
-                return c8.search_process_definitions(p.get("body", p) or {})
+                res = c8.search_process_definitions(p.get("body", p) or {})
+                _autoingest("definitions", res)
+                return res
             raise ValueError(f"Unknown v8 process action: {action!r}.")
         c7 = api.v7
         if action == "list":
-            return c7.list_process_definitions(p or None)
+            res = c7.list_process_definitions(p or None)
+            _autoingest("definitions", res)
+            return res
         if action == "get":
             return c7.get_process_definition(p.get("id"), p.get("key"))
         if action == "xml":
             return c7.get_process_definition_xml(p.get("id"), p.get("key"))
         if action == "start":
-            return c7.start_process_instance(
-                p.get("id"), p.get("key"), p.get("body")
-            )
+            return c7.start_process_instance(p.get("id"), p.get("key"), p.get("body"))
         if action == "statistics":
             return c7.get_process_definition_statistics(p or None)
         if action == "suspend":
@@ -82,14 +112,12 @@ def register_camunda_tools(mcp: FastMCP) -> None:
                 "'statistics', 'cancel'."
             )
         ),
-        platform: str = Field(
-            default="7", description="Target platform: '7' or '8'."
-        ),
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
         params_json: str = Field(
             default="{}",
             description=(
-                "JSON args. v7: {\"instance_id\":..} plus body for "
-                "set_variables; v8: {\"key\":..} or a search {\"body\":{...}}."
+                'JSON args. v7: {"instance_id":..} plus body for '
+                'set_variables; v8: {"key":..} or a search {"body":{...}}.'
             ),
         ),
     ) -> Any:
@@ -99,7 +127,9 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         if str(platform) in ("8", "c8"):
             c8 = api.v8
             if action == "list":
-                return c8.search_process_instances(p.get("body", p) or {})
+                res = c8.search_process_instances(p.get("body", p) or {})
+                _autoingest("instances", res)
+                return res
             if action == "get":
                 return c8.get_process_instance(p["key"])
             if action == "statistics":
@@ -110,7 +140,9 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         c7 = api.v7
         iid = cast(str, p.get("instance_id"))
         if action == "list":
-            return c7.list_process_instances(p or None)
+            res = c7.list_process_instances(p or None)
+            _autoingest("instances", res)
+            return res
         if action == "get":
             return c7.get_process_instance(iid)
         if action == "delete":
@@ -132,15 +164,13 @@ def register_camunda_tools(mcp: FastMCP) -> None:
                 "'list', 'get', 'assign', 'unassign', 'complete', 'variables'."
             )
         ),
-        platform: str = Field(
-            default="7", description="Target platform: '7' or '8'."
-        ),
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
         params_json: str = Field(
             default="{}",
             description=(
-                "JSON args. v7: {\"task_id\":..,\"user_id\":..,"
-                "\"variables\":{...}}; v8: {\"task_id\":..,\"assignee\":..,"
-                "\"variables\":[{\"name\":..,\"value\":..}]} or a search body."
+                'JSON args. v7: {"task_id":..,"user_id":..,'
+                '"variables":{...}}; v8: {"task_id":..,"assignee":..,'
+                '"variables":[{"name":..,"value":..}]} or a search body.'
             ),
         ),
     ) -> Any:
@@ -151,13 +181,15 @@ def register_camunda_tools(mcp: FastMCP) -> None:
             c8 = api.v8
             tid = cast(str, p.get("task_id"))
             if action == "list":
-                return c8.search_tasks(p.get("body", {}))
+                res = c8.search_tasks(p.get("body", {}))
+                _autoingest("tasks", res)
+                return res
             if action == "get":
                 return c8.get_task(tid)
             if action == "assign":
-                return c8.assign_task(tid, p.get("body") or {
-                    k: v for k, v in p.items() if k != "task_id"
-                })
+                return c8.assign_task(
+                    tid, p.get("body") or {k: v for k, v in p.items() if k != "task_id"}
+                )
             if action == "unassign":
                 return c8.unassign_task(tid)
             if action == "complete":
@@ -168,7 +200,9 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         c7 = api.v7
         tid = cast(str, p.get("task_id"))
         if action == "list":
-            return c7.list_tasks(p or None)
+            res = c7.list_tasks(p or None)
+            _autoingest("tasks", res)
+            return res
         if action == "get":
             return c7.get_task(tid)
         if action == "claim":
@@ -187,9 +221,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
 
     @mcp.tool(tags={"deployment"})
     async def camunda_deploy(
-        platform: str = Field(
-            default="7", description="Target platform: '7' or '8'."
-        ),
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
         resource_name: str = Field(
             default="process.bpmn",
             description="File name of the resource to deploy.",
@@ -201,7 +233,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         params_json: str = Field(
             default="{}",
             description=(
-                "JSON args. v7: {\"deployment_name\":..,\"data\":{...}}. "
+                'JSON args. v7: {"deployment_name":..,"data":{...}}. '
                 "v8 ignores extra args."
             ),
         ),
@@ -224,20 +256,17 @@ def register_camunda_tools(mcp: FastMCP) -> None:
     async def camunda_message(
         action: str = Field(
             description=(
-                "Messaging action. v7: 'correlate', 'signal'. v8: 'publish', "
-                "'signal'."
+                "Messaging action. v7: 'correlate', 'signal'. v8: 'publish', 'signal'."
             )
         ),
-        platform: str = Field(
-            default="7", description="Target platform: '7' or '8'."
-        ),
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
         params_json: str = Field(
             default="{}",
             description=(
                 "JSON body for the message/signal. v7 correlate: "
-                "{\"messageName\":..,\"businessKey\":..}; v8 publish: "
-                "{\"name\":..,\"correlationKey\":..}; v8 signal: "
-                "{\"signalName\":..}."
+                '{"messageName":..,"businessKey":..}; v8 publish: '
+                '{"name":..,"correlationKey":..}; v8 signal: '
+                '{"signalName":..}.'
             ),
         ),
     ) -> Any:
@@ -270,7 +299,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
             default="{}",
             description=(
                 "JSON args. fetch_and_lock: a full request body; others: "
-                "{\"task_id\":..,\"body\":{...}}."
+                '{"task_id":..,"body":{...}}.'
             ),
         ),
     ) -> Any:
@@ -299,15 +328,13 @@ def register_camunda_tools(mcp: FastMCP) -> None:
                 "'update', 'resolve_incident'."
             )
         ),
-        platform: str = Field(
-            default="7", description="Target platform: '7' or '8'."
-        ),
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
         params_json: str = Field(
             default="{}",
             description=(
-                "JSON args. v7: {\"job_id\":..,\"retries\":..} / "
-                "{\"incident_id\":..} / filter body. v8: "
-                "{\"job_key\":..,\"body\":{...}} or {\"incident_key\":..}."
+                'JSON args. v7: {"job_id":..,"retries":..} / '
+                '{"incident_id":..} / filter body. v8: '
+                '{"job_key":..,"body":{...}} or {"incident_key":..}.'
             ),
         ),
     ) -> Any:
@@ -374,7 +401,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
             default="{}",
             description=(
                 "JSON args. list: filter body; get/delete: "
-                "{\"deployment_id\":..,\"params\":{...}}."
+                '{"deployment_id":..,"params":{...}}.'
             ),
         ),
     ) -> Any:
@@ -418,3 +445,55 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         if action == "tasks":
             return c8.search_tasks(body)
         raise ValueError(f"Unknown ops action: {action!r}.")
+
+    @mcp.tool(tags={"kg"})
+    async def camunda_ingest_processes(
+        platform: str = Field(default="7", description="Target platform: '7' or '8'."),
+        params_json: str = Field(
+            default="{}",
+            description=(
+                "JSON filter/search body for listing process definitions "
+                "(v7 query params; v8 Operate search body)."
+            ),
+        ),
+        include_instances: bool = Field(
+            default=True,
+            description="Also list running instances and ingest them (+:instanceOf).",
+        ),
+    ) -> Any:
+        """Natively ingest Camunda processes into epistemic-graph as typed nodes.
+
+        Lists process definitions (and optionally running instances) via the real
+        client and pushes them as ``:BusinessProcess`` / ``:ProcessInstance`` nodes
+        (+ ``:deployedIn`` / ``:instanceOf`` links) through the fast engine client.
+        Best-effort: ``ingested`` is ``None`` when no engine is reachable.
+        CONCEPT:AU-KG.ingest.enterprise-source-extractor.
+        """
+        from camunda_mcp import kg_ingest
+
+        api = get_client()
+        p = _p(params_json)
+        if str(platform) in ("8", "c8"):
+            defs = _as_records(
+                api.v8.search_process_definitions(p.get("body", p) or {})
+            )
+            insts = (
+                _as_records(api.v8.search_process_instances(p.get("body", p) or {}))
+                if include_instances
+                else []
+            )
+        else:
+            defs = _as_records(api.v7.list_process_definitions(p or None))
+            insts = (
+                _as_records(api.v7.list_process_instances(p or None))
+                if include_instances
+                else []
+            )
+        return {
+            "listed_definitions": len(defs),
+            "listed_instances": len(insts),
+            "ingested_definitions": kg_ingest.ingest_process_definitions(defs),
+            "ingested_instances": (
+                kg_ingest.ingest_process_instances(insts) if insts else None
+            ),
+        }

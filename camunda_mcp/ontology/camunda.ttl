@@ -1,0 +1,145 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix : <http://knuckles.team/kg#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Camunda BPM ontology — business-process automation for Camunda 7 (Engine REST) and
+# Camunda 8 (Zeebe/Operate/Tasklist REST): process definitions, running instances, the
+# flow-node steps inside them, user tasks, deployments, incidents, jobs, and external
+# tasks. All classes and properties live in the shared `:` (kg#) namespace; only the
+# owl:Ontology node gets the per-package IRI. Backs the camunda-mcp MCP tool surface
+# (camunda_process / camunda_instance / camunda_task / camunda_deploy / camunda_job / …).
+
+# --- classes (owl:Class) ---
+
+:BusinessProcess a owl:Class ;
+    rdfs:label "Business Process" ;
+    rdfs:comment "A deployed BPMN process definition — the reusable template that instances run against (camunda_process). Identified by its process definition key/id." .
+
+:ProcessInstance a owl:Class ;
+    rdfs:label "Process Instance" ;
+    rdfs:comment "A single running (or historic) execution of a BusinessProcess (camunda_instance)." .
+
+:ProcessStep a owl:Class ;
+    rdfs:label "Process Step" ;
+    rdfs:comment "A flow node / activity within a process — a BPMN task, gateway, or event; a Camunda 8 flow-node instance or a Camunda 7 historic activity instance." .
+
+:Task a owl:Class ;
+    rdfs:label "User Task" ;
+    rdfs:comment "A human work item awaiting completion in a process instance (camunda_task / Tasklist)." .
+
+:Deployment a owl:Class ;
+    rdfs:label "Deployment" ;
+    rdfs:comment "A deployed bundle of BPMN/DMN/form resources (camunda_deploy / camunda_deployment)." .
+
+:Incident a owl:Class ;
+    rdfs:label "Incident" ;
+    rdfs:comment "A runtime failure blocking a process instance (camunda_job list_incidents / Operate incidents)." .
+
+:Job a owl:Class ;
+    rdfs:label "Job" ;
+    rdfs:comment "An asynchronous unit of work the engine executes (timers, async continuations, service jobs) (camunda_job)." .
+
+:ExternalTask a owl:Class ;
+    rdfs:label "External Task" ;
+    rdfs:comment "A Camunda 7 external-task worker item fetched and locked by an external worker (camunda_external_task)." .
+
+:ProcessVariable a owl:Class ;
+    rdfs:label "Process Variable" ;
+    rdfs:comment "A named value carried by a process instance or task (variables/set_variables actions)." .
+
+# --- links (owl:ObjectProperty) ---
+
+:instanceOf a owl:ObjectProperty ;
+    rdfs:label "instance of" ;
+    rdfs:comment "Links a ProcessInstance to the BusinessProcess definition it runs." ;
+    rdfs:domain :ProcessInstance ;
+    rdfs:range :BusinessProcess .
+
+:hasStep a owl:ObjectProperty ;
+    rdfs:label "has step" ;
+    rdfs:comment "Links a ProcessInstance (or BusinessProcess) to a ProcessStep it contains." ;
+    rdfs:range :ProcessStep .
+
+:hasTask a owl:ObjectProperty ;
+    rdfs:label "has task" ;
+    rdfs:comment "Links a ProcessInstance to a user Task belonging to it." ;
+    rdfs:domain :ProcessInstance ;
+    rdfs:range :Task .
+
+:partOfInstance a owl:ObjectProperty ;
+    rdfs:label "part of instance" ;
+    rdfs:comment "Links a Task, Incident, Job, ExternalTask, or ProcessVariable to its owning ProcessInstance." ;
+    rdfs:range :ProcessInstance .
+
+:assignedTo a owl:ObjectProperty ;
+    rdfs:label "assigned to" ;
+    rdfs:comment "Links a user Task to the Person responsible for completing it." ;
+    rdfs:domain :Task ;
+    rdfs:range :Person .
+
+:deployedIn a owl:ObjectProperty ;
+    rdfs:label "deployed in" ;
+    rdfs:comment "Links a BusinessProcess to the Deployment that introduced it." ;
+    rdfs:domain :BusinessProcess ;
+    rdfs:range :Deployment .
+
+:hasIncident a owl:ObjectProperty ;
+    rdfs:label "has incident" ;
+    rdfs:comment "Links a ProcessInstance to an Incident raised against it." ;
+    rdfs:domain :ProcessInstance ;
+    rdfs:range :Incident .
+
+# --- fields (owl:DatatypeProperty) ---
+
+:processDefinitionKey a owl:DatatypeProperty ;
+    rdfs:label "process definition key" ;
+    rdfs:comment "Stable key of a BusinessProcess (shared across versions), e.g. 'invoice'." ;
+    rdfs:range xsd:string .
+
+:bpmnVersion a owl:DatatypeProperty ;
+    rdfs:label "bpmn version" ;
+    rdfs:comment "Version number of a deployed BusinessProcess definition." ;
+    rdfs:range xsd:integer .
+
+:businessKey a owl:DatatypeProperty ;
+    rdfs:label "business key" ;
+    rdfs:comment "Caller-supplied domain key correlating a ProcessInstance to a business entity." ;
+    rdfs:range xsd:string .
+
+:suspended a owl:DatatypeProperty ;
+    rdfs:label "suspended" ;
+    rdfs:comment "Whether a definition or instance is suspended (execution paused)." ;
+    rdfs:range xsd:boolean .
+
+:assignee a owl:DatatypeProperty ;
+    rdfs:label "assignee" ;
+    rdfs:comment "User id currently assigned to a Task." ;
+    rdfs:range xsd:string .
+
+:activityId a owl:DatatypeProperty ;
+    rdfs:label "activity id" ;
+    rdfs:comment "BPMN element id of a ProcessStep, Incident, or Task within the diagram." ;
+    rdfs:range xsd:string .
+
+:incidentType a owl:DatatypeProperty ;
+    rdfs:label "incident type" ;
+    rdfs:comment "Category of an Incident (failedJob, failedExternalTask, unhandledBpmnError, …)." ;
+    rdfs:range xsd:string .
+
+:processState a owl:DatatypeProperty ;
+    rdfs:label "process state" ;
+    rdfs:comment "Lifecycle state of a ProcessInstance or Job (ACTIVE, COMPLETED, CANCELED, incident)." ;
+    rdfs:range xsd:string .
+
+<http://knuckles.team/kg/camunda> a owl:Ontology ;
+    rdfs:label "Camunda BPM Ontology" ;
+    rdfs:comment """Camunda business-process-automation model — process definitions,
+    running instances, flow-node steps, user tasks, deployments, incidents, jobs and
+    external tasks, with their execution relationships across Camunda 7 (Engine REST)
+    and Camunda 8 (Zeebe/Operate/Tasklist) — federated into the agent-utilities
+    knowledge-graph hub via the enterprise layer.""" ;
+    owl:imports <http://knuckles.team/kg/enterprise> .
