@@ -3,4 +3,4 @@
 
 | Concept ID | Name | Description |
 |---|---|---|
-| `CONCEPT:CAMUNDA-001` | camunda | MCP tool domain |
+| `CONCEPT:CM-OS.governance.camunda` | camunda | MCP tool domain |
