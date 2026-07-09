@@ -1,5 +1,6 @@
 ---
 name: camunda-incident-recovery
+skill_type: skill
 description: >-
   Diagnose and recover stuck Camunda processes on Camunda 7 (Engine REST) and
   Camunda 8 (Operate) via the camunda-mcp MCP server — list jobs and incidents,

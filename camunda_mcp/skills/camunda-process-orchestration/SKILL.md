@@ -1,5 +1,6 @@
 ---
 name: camunda-process-orchestration
+skill_type: skill
 description: >-
   Orchestrate BPMN processes on Camunda 7 (Engine REST) and Camunda 8
   (Zeebe/Operate) via the camunda-mcp MCP server — deploy BPMN/DMN resources,

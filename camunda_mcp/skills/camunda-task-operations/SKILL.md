@@ -1,5 +1,6 @@
 ---
 name: camunda-task-operations
+skill_type: skill
 description: >-
   Human user-task lifecycle on Camunda 7 (Engine REST) and Camunda 8 (Tasklist)
   via the camunda-mcp MCP server — list/filter the task inbox, claim/unclaim,
