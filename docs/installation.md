@@ -23,7 +23,7 @@ The base install is intentionally minimal. Install the extra for what you need:
 | Extra | Install | Pulls in |
 |---|---|---|
 | `mcp` | `pip install "camunda-mcp[mcp]"` | FastMCP MCP-server runtime (`agent-utilities[mcp]`) |
-| `agent` | `pip install "camunda-mcp[agent]"` | Pydantic-AI agent + Logfire tracing (`agent-utilities[agent,logfire]`) |
+| `agent` | `pip install "camunda-mcp[agent]"` | Pydantic-AI agent + Logfire tracing (`agent-utilities[agent-runtime,logfire]`) |
 | `all` | `pip install "camunda-mcp[all]"` | Everything above |
 | `test` | `pip install "camunda-mcp[test]"` | `pytest`, `pytest-asyncio`, `pytest-cov`, `pytest-xdist` |
 
@@ -49,15 +49,15 @@ uv run camunda-mcp
 
 ## Prebuilt Docker image
 
-A multi-stage, slim image is published on every release (entrypoint `camunda-mcp`):
+A multi-stage runtime image is published on every release (entrypoint `camunda-mcp`):
 
 ```bash
-docker pull knucklessg1/camunda-mcp:latest
+docker pull example/camunda-mcp@sha256:<digest>
 
 docker run --rm -i \
   -e CAMUNDA_PLATFORM=7 \
   -e CAMUNDA7_URL=http://your-camunda:8080/engine-rest \
-  knucklessg1/camunda-mcp:latest        # stdio transport (default)
+  example/camunda-mcp@sha256:<digest>        # stdio transport (default)
 ```
 
 For an HTTP server with a published port, see [Deployment](deployment.md).

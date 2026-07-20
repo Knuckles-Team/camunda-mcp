@@ -5,109 +5,25 @@ process-automation data into the ONE epistemic-graph knowledge graph as **typed 
 nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:Task``, ``:Deployment``,
 ``:Incident`` …) + links, matching the classes federated by ``camunda_mcp.ontology``.
 
-The write path is the shared fleet primitive
-``agent_utilities.knowledge_graph.memory.native_ingest`` (the ONE txn implementation).
-It is imported **guarded**: if the KG stack is absent (the primitive is not yet in the
-installed agent_utilities), this module falls back to a small self-contained txn writer
-over the lightweight engine client (``GraphComputeEngine()._client`` + ``txn``) — the
-same fast client the blob ``MediaStore`` uses, NOT the heavy ingestion engine.
-
-Everything is best-effort and dependency-/engine-guarded: with no KG stack or no
-reachable engine, every entry point **no-ops** (returns ``None``), so the connector
-keeps working with zero KG infrastructure. Node ids follow ``camunda:<class>:<extId>``;
-each ``type`` matches a class in ``camunda_mcp/ontology/camunda.ttl``.
+The write path is the required
+``agent_utilities.knowledge_graph.memory.native_ingest`` authority. Node ids follow
+``camunda:<class>:<extId>``; each ``node_type`` matches a class in
+``camunda_mcp/ontology/camunda.ttl``.
 """
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
-logger = logging.getLogger("camunda_mcp.kg")
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    ingest_documents as _native_ingest_documents,
+)
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    ingest_entities as _native_ingest_entities,
+)
 
 _SOURCE = "camunda-mcp"
 _DOMAIN = "camunda"
-_DEFAULT_GRAPH = "__commons__"
-
-# --- shared primitive (preferred), imported guarded ------------------------- #
-try:
-    from agent_utilities.knowledge_graph.memory.native_ingest import (
-        ingest_documents as _shared_ingest_documents,
-    )
-    from agent_utilities.knowledge_graph.memory.native_ingest import (
-        ingest_entities as _shared_ingest_entities,
-    )
-except Exception as e:  # noqa: BLE001 — KG stack absent; self-contained fallback used
-    logger.debug("native_ingest primitive unavailable (%s); using local fallback", e)
-    _shared_ingest_entities = None
-    _shared_ingest_documents = None
-
-
-# --- self-contained fallback (used when the primitive or an injected client is present) #
-def _fallback_client() -> tuple[Any | None, str]:
-    """Return ``(engine_client, graph_name)`` or ``(None, "")`` when unavailable."""
-    try:
-        from agent_utilities.knowledge_graph.core.graph_compute import (
-            GraphComputeEngine,
-        )
-    except Exception as e:  # noqa: BLE001 — KG stack absent
-        logger.debug("KG ingest unavailable (import): %s", e)
-        return None, ""
-    try:
-        engine = GraphComputeEngine()
-        client = getattr(engine, "_client", None)
-        if client is None:
-            return None, ""
-        return client, (getattr(engine, "graph_name", None) or _DEFAULT_GRAPH)
-    except Exception as e:  # noqa: BLE001 — engine unreachable
-        logger.debug("KG ingest: engine unreachable: %s", e)
-        return None, ""
-
-
-def _fallback_write(
-    entities: list[dict[str, Any]],
-    relationships: list[dict[str, Any]] | None,
-    *,
-    source: str,
-    domain: str,
-    client: Any | None,
-    graph: str | None,
-) -> dict[str, int] | None:
-    entities = [e for e in (entities or []) if e.get("id")]
-    if not entities:
-        return None
-    if client is None:
-        client, graph = _fallback_client()
-    if client is None:
-        return None
-    graph = graph or _DEFAULT_GRAPH
-    try:
-        txn = client.txn.begin(graph=graph)
-        for ent in entities:
-            props = {k: v for k, v in ent.items() if k != "id" and v is not None}
-            props.setdefault("source", source)
-            props.setdefault("domain", domain)
-            client.txn.add_node(txn, ent["id"], props)
-        committed = client.txn.commit(txn)
-    except Exception as e:  # noqa: BLE001 — engine/txn failure is non-fatal
-        logger.warning("KG ingest: txn failed: %s", e)
-        return None
-    if not committed:
-        logger.warning("KG ingest: txn not committed (conflict)")
-        return None
-    edges = 0
-    for rel in relationships or []:
-        try:
-            client.edges.add(
-                rel["source"], rel["target"], {"type": rel.get("type", "RELATED")}
-            )
-            edges += 1
-        except Exception as e:  # noqa: BLE001 — pure edge link, best-effort
-            logger.debug("KG ingest: edge skipped: %s", e)
-    logger.info("KG ingest[%s]: wrote %d nodes, %d edges", domain, len(entities), edges)
-    return {"nodes": len(entities), "edges": edges}
-
-
 # --- public thin wrappers --------------------------------------------------- #
 def ingest_entities(
     entities: list[dict[str, Any]],
@@ -117,21 +33,12 @@ def ingest_entities(
     domain: str = _DOMAIN,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Write typed OWL nodes (+ edges) into epistemic-graph.
 
-    Delegates to the shared ``native_ingest`` primitive when it is importable and no
-    explicit ``client`` is injected; otherwise uses the self-contained fallback (also
-    the path tests exercise with a fake client). Returns ``{"nodes":n,"edges":m}`` or
-    ``None`` (never raises).
+    Validation and engine failures are surfaced as ``NativeIngestError``.
     """
-    if not entities:
-        return None
-    if client is None and _shared_ingest_entities is not None:
-        return _shared_ingest_entities(
-            entities, relationships, source=source, domain=domain
-        )
-    return _fallback_write(
+    return _native_ingest_entities(
         entities,
         relationships,
         source=source,
@@ -148,26 +55,10 @@ def ingest_documents(
     domain: str = _DOMAIN,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Write text records (e.g. BPMN XML) as ``:Document`` nodes for semantic search."""
-    if not documents:
-        return None
-    if client is None and _shared_ingest_documents is not None:
-        return _shared_ingest_documents(documents, source=source, domain=domain)
-    # Fallback: shape docs as :Document typed nodes and reuse the txn writer.
-    nodes: list[dict[str, Any]] = []
-    for doc in documents:
-        did = doc.get("id")
-        text = doc.get("text") or doc.get("content")
-        if not did or not text:
-            continue
-        node = {k: v for k, v in doc.items() if k != "content" and v is not None}
-        node["id"] = did
-        node["type"] = "Document"
-        node["text"] = text
-        nodes.append(node)
-    return _fallback_write(
-        nodes, None, source=source, domain=domain, client=client, graph=graph
+    return _native_ingest_documents(
+        documents, source=source, domain=domain, client=client, graph=graph
     )
 
 
@@ -177,7 +68,7 @@ def ingest_process_definitions(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map Camunda process-definition records → ``:BusinessProcess`` (+ ``:Deployment``).
 
     Accepts Camunda 7 Engine-REST ``process-definition`` records (fields ``id``,
@@ -193,7 +84,7 @@ def ingest_process_definitions(
         entities.append(
             {
                 "id": f"camunda:process:{did}",
-                "type": "BusinessProcess",
+                "node_type": "BusinessProcess",
                 "name": d.get("name") or d.get("key"),
                 "processDefinitionKey": d.get("key"),
                 "bpmnVersion": d.get("version"),
@@ -208,7 +99,7 @@ def ingest_process_definitions(
             entities.append(
                 {
                     "id": f"camunda:deployment:{dep}",
-                    "type": "Deployment",
+                    "node_type": "Deployment",
                     "externalToolId": str(dep),
                 }
             )
@@ -216,7 +107,7 @@ def ingest_process_definitions(
                 {
                     "source": f"camunda:process:{did}",
                     "target": f"camunda:deployment:{dep}",
-                    "type": "deployedIn",
+                    "relationship": "deployedIn",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)
@@ -227,7 +118,7 @@ def ingest_process_instances(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map process-instance records → ``:ProcessInstance`` (+ ``:instanceOf`` link)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
@@ -238,7 +129,7 @@ def ingest_process_instances(
         entities.append(
             {
                 "id": f"camunda:instance:{iid}",
-                "type": "ProcessInstance",
+                "node_type": "ProcessInstance",
                 "businessKey": i.get("businessKey"),
                 "suspended": i.get("suspended"),
                 "processState": i.get("state"),
@@ -253,7 +144,7 @@ def ingest_process_instances(
                 {
                     "source": f"camunda:instance:{iid}",
                     "target": f"camunda:process:{pdid}",
-                    "type": "instanceOf",
+                    "relationship": "instanceOf",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)
@@ -264,7 +155,7 @@ def ingest_tasks(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map user-task records → ``:Task`` (+ ``:partOfInstance`` / ``:assignedTo``)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
@@ -275,7 +166,7 @@ def ingest_tasks(
         entities.append(
             {
                 "id": f"camunda:task:{tid}",
-                "type": "Task",
+                "node_type": "Task",
                 "name": t.get("name"),
                 "assignee": t.get("assignee"),
                 "activityId": t.get("taskDefinitionKey"),
@@ -291,7 +182,7 @@ def ingest_tasks(
                 {
                     "source": f"camunda:task:{tid}",
                     "target": f"camunda:instance:{piid}",
-                    "type": "partOfInstance",
+                    "relationship": "partOfInstance",
                 }
             )
         assignee = t.get("assignee")
@@ -299,7 +190,7 @@ def ingest_tasks(
             entities.append(
                 {
                     "id": f"camunda:person:{assignee}",
-                    "type": "Person",
+                    "node_type": "Person",
                     "name": assignee,
                 }
             )
@@ -307,7 +198,7 @@ def ingest_tasks(
                 {
                     "source": f"camunda:task:{tid}",
                     "target": f"camunda:person:{assignee}",
-                    "type": "assignedTo",
+                    "relationship": "assignedTo",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)

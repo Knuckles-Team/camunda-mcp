@@ -7,7 +7,7 @@
         "camunda-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "CAMUNDA7_PASSWORD": "changeme",
         "CAMUNDA7_TOKEN": "changeme",
         "CAMUNDA7_URL": "http://localhost:8080/engine-rest",

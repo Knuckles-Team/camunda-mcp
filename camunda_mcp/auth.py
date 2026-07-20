@@ -2,6 +2,7 @@
 
 from agent_utilities.base_utilities import get_logger
 from agent_utilities.core.config import setting
+from agent_utilities.core.transport_security import resolve_configured_tls_profile
 
 from camunda_mcp.api_client import Api
 
@@ -23,18 +24,26 @@ def get_client() -> Api:
         (client_credentials), ``CAMUNDA8_AUDIENCE``.
 
     Shared:
-        ``CAMUNDA_PLATFORM`` (``7`` or ``8``, default ``7``),
-        ``CAMUNDA_SSL_VERIFY`` (default ``True``).
+        ``CAMUNDA_PLATFORM`` (``7`` or ``8``, default ``7``), plus one named
+        ``CAMUNDA_TLS_PROFILE`` or ``CAMUNDA_TLS_PROFILE_REF`` trust selector.
     """
     platform = setting("CAMUNDA_PLATFORM", "7")
-    verify = setting("CAMUNDA_SSL_VERIFY", True)
+    tls_profile = resolve_configured_tls_profile(
+        "camunda",
+        profile_name=setting("CAMUNDA_TLS_PROFILE", None),
+        profile_ref=setting("CAMUNDA_TLS_PROFILE_REF", None),
+    )
+    timeout_seconds = float(setting("CAMUNDA_TIMEOUT_SECONDS", 30.0))
+    max_response_bytes = int(setting("CAMUNDA_MAX_RESPONSE_BYTES", 8 * 1024 * 1024))
 
     v7_kwargs = {
         "base_url": setting("CAMUNDA7_URL", "http://localhost:8080/engine-rest"),
         "token": setting("CAMUNDA7_TOKEN", None) or None,
         "username": setting("CAMUNDA7_USERNAME", None) or None,
         "password": setting("CAMUNDA7_PASSWORD", None) or None,
-        "verify": verify,
+        "tls_profile": tls_profile,
+        "timeout_seconds": timeout_seconds,
+        "max_response_bytes": max_response_bytes,
     }
 
     v8_kwargs = {
@@ -45,7 +54,9 @@ def get_client() -> Api:
         "client_secret": setting("CAMUNDA8_CLIENT_SECRET", None) or None,
         "oauth_url": setting("CAMUNDA8_OAUTH_URL", None) or None,
         "audience": setting("CAMUNDA8_AUDIENCE", "zeebe.camunda.io"),
-        "verify": verify,
+        "tls_profile": tls_profile,
+        "timeout_seconds": timeout_seconds,
+        "max_response_bytes": max_response_bytes,
     }
 
     return Api(platform=platform, v7_kwargs=v7_kwargs, v8_kwargs=v8_kwargs)

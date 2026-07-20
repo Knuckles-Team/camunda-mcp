@@ -191,6 +191,7 @@ sync:
   updated_field: version
   pagination: null
   doc_type: business_process
+  tool_schema_sha256: 8c9e157ea2927d13823adc88470fef2a46f969fda551371fcdf7e2ab2fc5fa87
   raw:
     server: camunda-mcp
     tool: camunda_process
@@ -205,17 +206,20 @@ sync:
     doc_type: business_process
 provenance:
   generated_by: scripts/generate_connector_manifests.py
-  generated_at: '2026-07-09T00:00:00Z'
+  generated_at: '2026-07-18T00:00:00Z'
   source_artifacts:
   - a2a.json
   - camunda_mcp/connectors/mcp_source_presets.json
+  - camunda_mcp/connectors/tool_schema_fingerprints.json
   - camunda_mcp/ontology/camunda.ttl
   integrity:
     algorithm: urdna2015-sha256
     hash: c0c1ebacb6c9e2c3f881505b2d9c15f8ebf04f693da1076978bbab4311af5e84
     triple_count: 83
   signer: ontology-manifest-generator
-  signature: a5286460a4922f3b06cc91e7fed0a2a0044bea55fa31a8aba52935b5f3044766
+  signature_algorithm: ed25519
+  signing_public_key: q0Cp7bmQMqJhbofGKKw8xXC6KbFzukBDDke0UYVi8y4
+  signature: AA6AfObfpHFt7KJPtUswAxV_xDjaWEoM0JVmIfak31SBO3Gy4s24zvbLN_mdX7f0WmEHkOkF97VFqpHwL1CJAg
 policy:
   pii_fields: {}
   tenant_boundary: null

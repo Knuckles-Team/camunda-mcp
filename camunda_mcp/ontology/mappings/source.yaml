@@ -1,0 +1,20 @@
+schema_version: '1'
+connector: camunda-mcp
+ontology_source: camunda
+sync:
+- preset: camunda-process-definitions
+  server: camunda-mcp
+  tool: camunda_process
+  action: list
+  records_path: ''
+  id_field: id
+  title_field: name
+  text_field: key
+  updated_field: version
+  doc_type: business_process
+  tool_schema_sha256: 8c9e157ea2927d13823adc88470fef2a46f969fda551371fcdf7e2ab2fc5fa87
+governance:
+  default_acl: quarantine
+  identity: opaque-reference
+  tenant: required-at-materialization
+  provenance: required-at-materialization

@@ -21,7 +21,7 @@ following stack runs one Engine REST platform on `:8080`, mirroring
 # docker/camunda-platform.compose.yml
 services:
   camunda:
-    image: camunda/camunda-bpm-platform:latest
+    image: camunda/camunda-bpm-platform@sha256:<digest>
     container_name: camunda
     hostname: camunda
     restart: unless-stopped
@@ -69,13 +69,13 @@ server reaches Camunda by container name:
 # docker/stack.compose.yml
 services:
   camunda:
-    image: camunda/camunda-bpm-platform:latest
+    image: camunda/camunda-bpm-platform@sha256:<digest>
     hostname: camunda
     ports: ["8080:8080"]
     volumes: ["camunda_data:/camunda"]
 
   camunda-mcp:
-    image: knucklessg1/camunda-mcp:latest
+    image: example/camunda-mcp@sha256:<digest>
     depends_on: [camunda]
     environment:
       - CAMUNDA_PLATFORM=7

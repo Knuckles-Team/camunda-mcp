@@ -32,21 +32,18 @@ def _as_records(result: Any) -> list[dict[str, Any]]:
 
 
 def _autoingest(kind: str, result: Any) -> None:
-    """Best-effort native KG ingestion of a list result (never raises)."""
-    try:
-        from camunda_mcp import kg_ingest
+    """Authoritatively ingest a non-empty list result into the native KG."""
+    from camunda_mcp import kg_ingest
 
-        records = _as_records(result)
-        if not records:
-            return
-        if kind == "definitions":
-            kg_ingest.ingest_process_definitions(records)
-        elif kind == "instances":
-            kg_ingest.ingest_process_instances(records)
-        elif kind == "tasks":
-            kg_ingest.ingest_tasks(records)
-    except Exception:  # noqa: BLE001 — ingestion is best-effort, never blocks the tool
-        pass
+    records = _as_records(result)
+    if not records:
+        return
+    if kind == "definitions":
+        kg_ingest.ingest_process_definitions(records)
+    elif kind == "instances":
+        kg_ingest.ingest_process_instances(records)
+    elif kind == "tasks":
+        kg_ingest.ingest_tasks(records)
 
 
 def register_camunda_tools(mcp: FastMCP) -> None:

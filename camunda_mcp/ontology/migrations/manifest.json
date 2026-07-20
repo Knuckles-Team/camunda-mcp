@@ -1,0 +1,6 @@
+{
+  "connector": "camunda-mcp",
+  "current_ontology_source": "camunda",
+  "migrations": [],
+  "schema_version": "1"
+}

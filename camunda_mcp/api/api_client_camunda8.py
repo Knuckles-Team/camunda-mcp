@@ -20,7 +20,7 @@ without authentication).
 import time
 from typing import Any
 
-import requests
+from agent_utilities.core.transport_security import ResolvedTLSProfile
 
 from camunda_mcp.api.api_client_base import ApiClientBase
 
@@ -37,11 +37,18 @@ class Camunda8Api(ApiClientBase):
         client_secret: str | None = None,
         oauth_url: str | None = None,
         audience: str = "zeebe.camunda.io",
-        verify: bool = True,
+        tls_profile: ResolvedTLSProfile | None = None,
+        timeout_seconds: float = 30.0,
+        max_response_bytes: int = 8 * 1024 * 1024,
     ):
         # base_url tracks the Zeebe REST endpoint; the other surfaces are
         # addressed via absolute URLs built from their own base.
-        super().__init__(base_url=zeebe_url, verify=verify)
+        super().__init__(
+            base_url=zeebe_url,
+            tls_profile=tls_profile,
+            timeout_seconds=timeout_seconds,
+            max_response_bytes=max_response_bytes,
+        )
         self.zeebe_url = zeebe_url.rstrip("/")
         self.operate_url = (operate_url or "").rstrip("/")
         self.tasklist_url = (tasklist_url or "").rstrip("/")
@@ -49,6 +56,9 @@ class Camunda8Api(ApiClientBase):
         self.client_secret = client_secret
         self.oauth_url = oauth_url
         self.audience = audience
+        self.allow_origin(self.operate_url or None)
+        self.allow_origin(self.tasklist_url or None)
+        self.allow_origin(self.oauth_url)
         self._token: str | None = None
         self._token_expiry: float = 0.0
 
@@ -65,7 +75,8 @@ class Camunda8Api(ApiClientBase):
         if self._token and time.time() < self._token_expiry - 30:
             return self._token
 
-        resp = requests.post(
+        payload = self.request(
+            "POST",
             self.oauth_url,
             data={
                 "grant_type": "client_credentials",
@@ -73,15 +84,20 @@ class Camunda8Api(ApiClientBase):
                 "client_secret": self.client_secret,
                 "audience": self.audience,
             },
-            verify=self._session.verify,
+            content_type="application/x-www-form-urlencoded",
+            accept="application/json",
         )
-        if resp.status_code >= 400:
-            raise Exception(
-                f"OAuth error: {resp.status_code} - {resp.text}"
-            )
-        payload = resp.json()
-        self._token = payload["access_token"]
-        self._token_expiry = time.time() + int(payload.get("expires_in", 300))
+        if not isinstance(payload, dict):
+            raise RuntimeError("Camunda OAuth response was invalid")
+        token = payload.get("access_token")
+        if not isinstance(token, str) or not token or len(token) > 64 * 1024:
+            raise RuntimeError("Camunda OAuth response did not contain a valid token")
+        try:
+            expires_in = int(payload.get("expires_in", 300))
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError("Camunda OAuth token lifetime was invalid") from exc
+        self._token = token
+        self._token_expiry = time.time() + min(max(expires_in, 1), 604_800)
         return self._token
 
     def _auth_headers(
