@@ -9,8 +9,14 @@ CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 
 from __future__ import annotations
 
+from typing import Any
+
+import msgpack
 import pytest
 from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+from agent_utilities.security.brain_context import ActorContext, use_actor
+from agent_utilities.models.company_brain import ActorType
+from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
 
 from camunda_mcp.kg_ingest import (
     ingest_entities,
@@ -20,31 +26,92 @@ from camunda_mcp.kg_ingest import (
 )
 
 
-class _FakeTxn:
-    def __init__(self):
-        self.nodes = {}
-        self.edges = []
-        self.committed = False
+@pytest.fixture(autouse=True)
+def _governed_session():
+    actor = ActorContext(
+        actor_id="subject:opaque:synthetic",
+        actor_type=ActorType.AUTOMATED_SERVICE,
+        roles=(),
+        tenant_id="tenant:opaque:synthetic",
+        authenticated=True,
+    )
+    session = GraphSession(
+        actor=actor,
+        tenant=actor.tenant_id,
+        scopes=frozenset({"kg:write"}),
+        graph="graph:opaque:synthetic",
+        policy_version="policy:opaque:synthetic",
+        audience="epistemic-graph",
+    )
+    with use_actor(actor), use_session(session):
+        yield
 
-    def begin(self, graph=None):
-        self.graph = graph
-        return "txn-1"
 
-    def add_node(self, txn, node_id, props):
-        self.nodes[node_id] = props
+class _FakeNodes:
+    def __init__(self) -> None:
+        self.values: dict[str, dict[str, Any]] = {}
 
-    def add_edge(self, txn, src, dst, props):
-        self.edges.append((src, dst, props))
+    def properties(self, node_id: str) -> dict[str, Any] | None:
+        return self.values.get(node_id)
 
-    def commit(self, txn):
-        self.committed = True
-        return True
+    def list(self) -> list[tuple[str, dict[str, Any]]]:
+        return list(self.values.items())
 
+
+class _FakeChanges:
+    def __init__(self, nodes: _FakeNodes) -> None:
+        self.nodes = nodes
+        self.edges: list[tuple[str, str, dict[str, Any]]] = []
+        self.applied: list[dict[str, Any]] = []
+        self.records: dict[str, dict[str, Any]] = {}
+        self.versions: dict[str, dict[str, Any]] = {}
+
+    def get(self, envelope_id: str) -> dict[str, Any] | None:
+        return self.records.get(envelope_id)
+
+    def content_version(self, object_id: str) -> dict[str, Any] | None:
+        return self.versions.get(object_id)
+
+    def cursor(self, _source: str, _partition: str = "") -> None:
+        return None
+
+    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
+        self.applied.append(envelope)
+        mutation = envelope["mutation"]
+        for operation in mutation["operations"]:
+            method = operation["method"]
+            params = method["params"]
+            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
+            if method["method"] == "AddNode":
+                self.nodes.values[params["node_id"]] = properties
+            elif method["method"] == "AddEdge":
+                self.edges.append(
+                    (params["source_id"], params["target_id"], properties)
+                )
+        version = envelope["content_version"]
+        self.versions[version["object_id"]] = version
+        self.records[envelope["envelope_id"]] = envelope
+        return {
+            "batch_id": mutation["batch_id"],
+            "replayed": False,
+            "projection_pending": False,
+        }
+
+
+class _FakeRdf:
+    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
+        return {"conforms": True, "results": []}
 
 
 class _FakeClient:
-    def __init__(self):
-        self.txn = _FakeTxn()
+    def __init__(self) -> None:
+        self.nodes = _FakeNodes()
+        self.changes = _FakeChanges(self.nodes)
+        self.rdf = _FakeRdf()
+
+    @staticmethod
+    def supports(operation: str) -> bool:
+        return operation == "ApplyChangeEnvelope"
 
 
 def test_ingest_entities_writes_nodes_and_edges():
@@ -56,15 +123,14 @@ def test_ingest_entities_writes_nodes_and_edges():
         ],
         [{"source": "a", "target": "b", "relationship": "deployedIn"}],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert c.txn.committed is True
-    assert set(c.txn.nodes) == {"a", "b"}
+    assert len(c.changes.applied) == 1
+    assert set(c.nodes.values) == {"a", "b"}
     # provenance is stamped
-    assert c.txn.nodes["a"]["source"] == "camunda-mcp"
-    assert c.txn.nodes["a"]["domain"] == "camunda"
-    assert c.txn.edges == [("a", "b", {"relationship": "deployedIn"})]
+    assert c.nodes.values["a"]["source"] == "camunda-mcp"
+    assert c.nodes.values["a"]["domain"] == "camunda"
+    assert c.changes.edges == [("a", "b", {"relationship": "deployedIn"})]
 
 
 def test_ingest_process_definitions_maps_process_and_deployment():
@@ -81,16 +147,15 @@ def test_ingest_process_definitions_maps_process_and_deployment():
             }
         ],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 2, "edges": 1}
-    proc = c.txn.nodes["camunda:process:invoice:1:abc"]
+    proc = c.nodes.values["camunda:process:invoice:1:abc"]
     assert proc["node_type"] == "BusinessProcess"
     assert proc["processDefinitionKey"] == "invoice"
     assert proc["bpmnVersion"] == 1
     assert proc["externalToolId"] == "invoice:1:abc"
-    assert c.txn.nodes["camunda:deployment:dep-9"]["node_type"] == "Deployment"
-    assert c.txn.edges == [
+    assert c.nodes.values["camunda:deployment:dep-9"]["node_type"] == "Deployment"
+    assert c.changes.edges == [
         (
             "camunda:process:invoice:1:abc",
             "camunda:deployment:dep-9",
@@ -111,13 +176,12 @@ def test_ingest_process_instances_links_definition():
             }
         ],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 1}
-    inst = c.txn.nodes["camunda:instance:pi-1"]
+    inst = c.nodes.values["camunda:instance:pi-1"]
     assert inst["node_type"] == "ProcessInstance"
     assert inst["businessKey"] == "INV-42"
-    assert c.txn.edges == [
+    assert c.changes.edges == [
         (
             "camunda:instance:pi-1",
             "camunda:process:invoice:1:abc",
@@ -139,25 +203,25 @@ def test_ingest_tasks_maps_task_instance_and_assignee():
             }
         ],
         client=c,
-        graph="__commons__",
     )
     # 2 nodes (task + person), 2 edges (partOfInstance + assignedTo)
     assert res == {"nodes": 2, "edges": 2}
-    task = c.txn.nodes["camunda:task:task-1"]
+    task = c.nodes.values["camunda:task:task-1"]
     assert task["node_type"] == "Task"
-    assert task["assignee"] == "jdoe"
+    # native_ingest's governed PII scrubber redacts assignee-shaped values.
+    assert task["assignee"] == "[REDACTED_PERSON]"
     assert task["activityId"] == "approve"
-    assert c.txn.nodes["camunda:person:jdoe"]["node_type"] == "Person"
+    assert c.nodes.values["camunda:person:jdoe"]["node_type"] == "Person"
     assert (
         "camunda:task:task-1",
         "camunda:instance:pi-1",
         {"relationship": "partOfInstance"},
-    ) in c.txn.edges
+    ) in c.changes.edges
     assert (
         "camunda:task:task-1",
         "camunda:person:jdoe",
         {"relationship": "assignedTo"},
-    ) in c.txn.edges
+    ) in c.changes.edges
 
 
 def test_ingest_rejects_legacy_structural_fields():
