@@ -1,7 +1,6 @@
 {
   "api_version": "graphos.io/v1",
   "artifacts": {
-    "a2a.json": "3ce901f24bd068cc07307d8bb6bb712f0717242ffb39fca5b8eb3d85a80893b8",
     "camunda_mcp/connectors/mcp_source_presets.json": "ab5416f955e95147c5f9e2aff963dc7e0075216cc09f8e9cffd3f5b5909c64ec",
     "camunda_mcp/connectors/tool_schema_fingerprints.json": "f1ad2a2b711168e5119ff19bb0998e48959ec186a8ec95f0faa3961673d415c0",
     "camunda_mcp/ontology/camunda.ttl": "4a222127c51669053cef0172ee34efef71b58edeab799cb6a978b4cef8802a7e",
@@ -9,7 +8,7 @@
     "camunda_mcp/ontology/mappings/source.yaml": "40b70c27643ad5b3b5fb2253fdee128fcbf0e3a7f8cef100ce9adcf406f67644",
     "camunda_mcp/ontology/migrations/manifest.json": "591239e58372dc3ec701c5f36691ae3b3269e44aeaa544cfa934e42b0ca34332",
     "camunda_mcp/ontology/shapes/connector.shacl.ttl": "d0ece34393e6c341a14d6ee70c2a71a6df776125fc0a7dfb7e362753adc6bc9d",
-    "connector_manifest.yml": "47b86670d8e57014be577b73a1bc95f82ddf9cafa00cede21eebfe8e2f2727a0"
+    "connector_manifest.yml": "352b250d47affaf4c673eab614f2be5bb6615ed20e3de92a0b128b2dabf13a03"
   },
   "checks": {
     "declared_tool_schema": "passed",
@@ -19,19 +18,19 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.1.0,<3",
+    "agent_utilities": ">=2.4.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.23.0,<3"
+    "epistemic_graph": ">=2.26.0,<3"
   },
   "connector": "camunda-mcp",
   "kind": "ConnectorSourceAttestation",
   "live_certified": false,
   "mode": "offline-source",
   "schema_version": "2",
-  "signature": "kYqkQR9JPVTz1VRyNiVYG-fh0BAJ5xVXNdUAzF8zYVwKZ3KM1ahW23LbWum8kwpc2HKrYe_eFQmm4LZnwK3ZAg",
-  "signature_algorithm": "ed25519",
-  "signer": "ontology-manifest-generator",
-  "signing_public_key": "QkigdPNpcUU7x7NcSkwCsUXIQpaFncMQbYSoiSgI2SY",
+  "signature": null,
+  "signature_algorithm": "none",
+  "signer": "UNSIGNED-PREVIEW",
+  "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-07-31T04:00:00Z"
+  "validated_at": "2026-08-21T04:30:39Z"
 }
