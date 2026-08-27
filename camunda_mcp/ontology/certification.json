@@ -8,7 +8,7 @@
     "camunda_mcp/ontology/mappings/source.yaml": "40b70c27643ad5b3b5fb2253fdee128fcbf0e3a7f8cef100ce9adcf406f67644",
     "camunda_mcp/ontology/migrations/manifest.json": "591239e58372dc3ec701c5f36691ae3b3269e44aeaa544cfa934e42b0ca34332",
     "camunda_mcp/ontology/shapes/connector.shacl.ttl": "d0ece34393e6c341a14d6ee70c2a71a6df776125fc0a7dfb7e362753adc6bc9d",
-    "connector_manifest.yml": "352b250d47affaf4c673eab614f2be5bb6615ed20e3de92a0b128b2dabf13a03"
+    "connector_manifest.yml": "f8b13c8688d73e8633ef54db2ad6d40670b59cbf1f8526a72dd600c3a1533673"
   },
   "checks": {
     "declared_tool_schema": "passed",
@@ -18,9 +18,9 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.4.0,<3",
+    "agent_utilities": ">=2.5.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.26.0,<3"
+    "epistemic_graph": ">=2.27.0,<3"
   },
   "connector": "camunda-mcp",
   "kind": "ConnectorSourceAttestation",
@@ -32,5 +32,5 @@
   "signer": "UNSIGNED-PREVIEW",
   "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-08-21T04:30:39Z"
+  "validated_at": "2026-08-26T13:42:55Z"
 }
