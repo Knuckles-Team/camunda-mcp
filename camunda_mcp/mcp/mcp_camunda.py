@@ -19,15 +19,26 @@ def _p(params_json: str) -> dict[str, Any]:
     return json.loads(params_json) if params_json else {}
 
 
+def _dict_records(items: list) -> list[dict[str, Any]]:
+    return [r for r in items if isinstance(r, dict)]
+
+
+def _nested_list_field(result: dict) -> list | None:
+    for key in ("items", "results", "data"):
+        val = result.get(key)
+        if isinstance(val, list):
+            return val
+    return None
+
+
 def _as_records(result: Any) -> list[dict[str, Any]]:
     """Coerce a Camunda list response into a list of record dicts."""
     if isinstance(result, list):
-        return [r for r in result if isinstance(r, dict)]
+        return _dict_records(result)
     if isinstance(result, dict):
-        for key in ("items", "results", "data"):
-            val = result.get(key)
-            if isinstance(val, list):
-                return [r for r in val if isinstance(r, dict)]
+        nested = _nested_list_field(result)
+        if nested is not None:
+            return _dict_records(nested)
     return []
 
 
@@ -44,6 +55,154 @@ def _autoingest(kind: str, result: Any) -> None:
         kg_ingest.ingest_process_instances(records)
     elif kind == "tasks":
         kg_ingest.ingest_tasks(records)
+
+
+def _process_definition_v8(c8: Any, action: str, params: dict) -> Any:
+    if action == "list":
+        res = c8.search_process_definitions(params.get("body", params) or {})
+        _autoingest("definitions", res)
+        return res
+    raise ValueError(f"Unknown v8 process action: {action!r}.")
+
+
+def _process_definition_v7(c7: Any, action: str, params: dict) -> Any:
+    if action == "list":
+        res = c7.list_process_definitions(params or None)
+        _autoingest("definitions", res)
+        return res
+    if action == "get":
+        return c7.get_process_definition(params.get("id"), params.get("key"))
+    if action == "xml":
+        return c7.get_process_definition_xml(params.get("id"), params.get("key"))
+    if action == "start":
+        return c7.start_process_instance(
+            params.get("id"), params.get("key"), params.get("body")
+        )
+    if action == "statistics":
+        return c7.get_process_definition_statistics(params or None)
+    if action == "suspend":
+        return c7.suspend_process_definition(
+            params.get("id"),
+            params.get("key"),
+            params.get("suspended", True),
+            params.get("include_instances", True),
+        )
+    raise ValueError(f"Unknown v7 process action: {action!r}.")
+
+
+def _process_instance_v8(c8: Any, action: str, params: dict) -> Any:
+    if action == "list":
+        res = c8.search_process_instances(params.get("body", params) or {})
+        _autoingest("instances", res)
+        return res
+    if action == "get":
+        return c8.get_process_instance(params["key"])
+    if action == "statistics":
+        return c8.get_process_instance_statistics(params["key"])
+    if action == "cancel":
+        return c8.cancel_process_instance(params["key"])
+    raise ValueError(f"Unknown v8 instance action: {action!r}.")
+
+
+def _process_instance_v7(c7: Any, action: str, params: dict) -> Any:
+    iid = cast(str, params.get("instance_id"))
+    if action == "list":
+        res = c7.list_process_instances(params or None)
+        _autoingest("instances", res)
+        return res
+    if action == "get":
+        return c7.get_process_instance(iid)
+    if action == "delete":
+        return c7.delete_process_instance(iid, params.get("params"))
+    if action == "variables":
+        return c7.get_process_instance_variables(iid)
+    if action == "set_variables":
+        return c7.modify_process_instance_variables(iid, params["body"])
+    if action == "suspend":
+        return c7.suspend_process_instance(iid, params.get("suspended", True))
+    raise ValueError(f"Unknown v7 instance action: {action!r}.")
+
+
+def _task_v8_mutation(c8: Any, tid: str, action: str, params: dict) -> Any:
+    if action == "assign":
+        return c8.assign_task(
+            tid, params.get("body") or {k: v for k, v in params.items() if k != "task_id"}
+        )
+    if action == "unassign":
+        return c8.unassign_task(tid)
+    if action == "complete":
+        return c8.complete_task(tid, params.get("variables"))
+    if action == "variables":
+        return c8.get_task_variables(tid, params.get("body"))
+    raise ValueError(f"Unknown v8 task action: {action!r}.")
+
+
+def _task_v8(c8: Any, action: str, params: dict) -> Any:
+    tid = cast(str, params.get("task_id"))
+    if action == "list":
+        res = c8.search_tasks(params.get("body", {}))
+        _autoingest("tasks", res)
+        return res
+    if action == "get":
+        return c8.get_task(tid)
+    return _task_v8_mutation(c8, tid, action, params)
+
+
+def _task_v7_mutation(c7: Any, tid: str, action: str, params: dict) -> Any:
+    if action == "claim":
+        return c7.claim_task(tid, params["user_id"])
+    if action == "unclaim":
+        return c7.unclaim_task(tid)
+    if action == "assign":
+        return c7.set_task_assignee(tid, params["user_id"])
+    if action == "complete":
+        return c7.complete_task(tid, params.get("variables"))
+    if action == "variables":
+        return c7.get_task_variables(tid)
+    if action == "set_variables":
+        return c7.set_task_variables(tid, params["body"])
+    raise ValueError(f"Unknown v7 task action: {action!r}.")
+
+
+def _task_v7(c7: Any, action: str, params: dict) -> Any:
+    tid = cast(str, params.get("task_id"))
+    if action == "list":
+        res = c7.list_tasks(params or None)
+        _autoingest("tasks", res)
+        return res
+    if action == "get":
+        return c7.get_task(tid)
+    return _task_v7_mutation(c7, tid, action, params)
+
+
+def _job_v8(c8: Any, action: str, params: dict) -> Any:
+    if action == "activate":
+        return c8.activate_jobs(params.get("body", params))
+    if action == "complete":
+        return c8.complete_job(params["job_key"], params.get("variables"))
+    if action == "fail":
+        return c8.fail_job(params["job_key"], params.get("body", {}))
+    if action == "update":
+        return c8.update_job(params["job_key"], params.get("body", {}))
+    if action == "resolve_incident":
+        return c8.resolve_incident(params["incident_key"])
+    raise ValueError(f"Unknown v8 job action: {action!r}.")
+
+
+def _job_v7(c7: Any, action: str, params: dict) -> Any:
+    if action == "list_jobs":
+        return c7.list_jobs(params or None)
+    if action == "execute_job":
+        return c7.execute_job(params["job_id"])
+    if action == "set_retries":
+        return c7.set_job_retries(params["job_id"], params["retries"])
+    if action == "list_incidents":
+        return c7.list_incidents(params or None)
+    if action == "get_incident":
+        return c7.get_incident(params["incident_id"])
+    if action == "resolve_incident":
+        return c7.resolve_incident(params["incident_id"])
+    raise ValueError(f"Unknown v7 job action: {action!r}.")
 
 
 def register_camunda_tools(mcp: FastMCP) -> None:
@@ -72,33 +231,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            c8 = api.v8
-            if action == "list":
-                res = c8.search_process_definitions(p.get("body", p) or {})
-                _autoingest("definitions", res)
-                return res
-            raise ValueError(f"Unknown v8 process action: {action!r}.")
-        c7 = api.v7
-        if action == "list":
-            res = c7.list_process_definitions(p or None)
-            _autoingest("definitions", res)
-            return res
-        if action == "get":
-            return c7.get_process_definition(p.get("id"), p.get("key"))
-        if action == "xml":
-            return c7.get_process_definition_xml(p.get("id"), p.get("key"))
-        if action == "start":
-            return c7.start_process_instance(p.get("id"), p.get("key"), p.get("body"))
-        if action == "statistics":
-            return c7.get_process_definition_statistics(p or None)
-        if action == "suspend":
-            return c7.suspend_process_definition(
-                p.get("id"),
-                p.get("key"),
-                p.get("suspended", True),
-                p.get("include_instances", True),
-            )
-        raise ValueError(f"Unknown v7 process action: {action!r}.")
+            return _process_definition_v8(api.v8, action, p)
+        return _process_definition_v7(api.v7, action, p)
 
     @mcp.tool(tags={"process"})
     async def camunda_instance(
@@ -122,35 +256,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            c8 = api.v8
-            if action == "list":
-                res = c8.search_process_instances(p.get("body", p) or {})
-                _autoingest("instances", res)
-                return res
-            if action == "get":
-                return c8.get_process_instance(p["key"])
-            if action == "statistics":
-                return c8.get_process_instance_statistics(p["key"])
-            if action == "cancel":
-                return c8.cancel_process_instance(p["key"])
-            raise ValueError(f"Unknown v8 instance action: {action!r}.")
-        c7 = api.v7
-        iid = cast(str, p.get("instance_id"))
-        if action == "list":
-            res = c7.list_process_instances(p or None)
-            _autoingest("instances", res)
-            return res
-        if action == "get":
-            return c7.get_process_instance(iid)
-        if action == "delete":
-            return c7.delete_process_instance(iid, p.get("params"))
-        if action == "variables":
-            return c7.get_process_instance_variables(iid)
-        if action == "set_variables":
-            return c7.modify_process_instance_variables(iid, p["body"])
-        if action == "suspend":
-            return c7.suspend_process_instance(iid, p.get("suspended", True))
-        raise ValueError(f"Unknown v7 instance action: {action!r}.")
+            return _process_instance_v8(api.v8, action, p)
+        return _process_instance_v7(api.v7, action, p)
 
     @mcp.tool(tags={"task"})
     async def camunda_task(
@@ -175,46 +282,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            c8 = api.v8
-            tid = cast(str, p.get("task_id"))
-            if action == "list":
-                res = c8.search_tasks(p.get("body", {}))
-                _autoingest("tasks", res)
-                return res
-            if action == "get":
-                return c8.get_task(tid)
-            if action == "assign":
-                return c8.assign_task(
-                    tid, p.get("body") or {k: v for k, v in p.items() if k != "task_id"}
-                )
-            if action == "unassign":
-                return c8.unassign_task(tid)
-            if action == "complete":
-                return c8.complete_task(tid, p.get("variables"))
-            if action == "variables":
-                return c8.get_task_variables(tid, p.get("body"))
-            raise ValueError(f"Unknown v8 task action: {action!r}.")
-        c7 = api.v7
-        tid = cast(str, p.get("task_id"))
-        if action == "list":
-            res = c7.list_tasks(p or None)
-            _autoingest("tasks", res)
-            return res
-        if action == "get":
-            return c7.get_task(tid)
-        if action == "claim":
-            return c7.claim_task(tid, p["user_id"])
-        if action == "unclaim":
-            return c7.unclaim_task(tid)
-        if action == "assign":
-            return c7.set_task_assignee(tid, p["user_id"])
-        if action == "complete":
-            return c7.complete_task(tid, p.get("variables"))
-        if action == "variables":
-            return c7.get_task_variables(tid)
-        if action == "set_variables":
-            return c7.set_task_variables(tid, p["body"])
-        raise ValueError(f"Unknown v7 task action: {action!r}.")
+            return _task_v8(api.v8, action, p)
+        return _task_v7(api.v7, action, p)
 
     @mcp.tool(tags={"deployment"})
     async def camunda_deploy(
@@ -339,32 +408,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            c8 = api.v8
-            if action == "activate":
-                return c8.activate_jobs(p.get("body", p))
-            if action == "complete":
-                return c8.complete_job(p["job_key"], p.get("variables"))
-            if action == "fail":
-                return c8.fail_job(p["job_key"], p.get("body", {}))
-            if action == "update":
-                return c8.update_job(p["job_key"], p.get("body", {}))
-            if action == "resolve_incident":
-                return c8.resolve_incident(p["incident_key"])
-            raise ValueError(f"Unknown v8 job action: {action!r}.")
-        c7 = api.v7
-        if action == "list_jobs":
-            return c7.list_jobs(p or None)
-        if action == "execute_job":
-            return c7.execute_job(p["job_id"])
-        if action == "set_retries":
-            return c7.set_job_retries(p["job_id"], p["retries"])
-        if action == "list_incidents":
-            return c7.list_incidents(p or None)
-        if action == "get_incident":
-            return c7.get_incident(p["incident_id"])
-        if action == "resolve_incident":
-            return c7.resolve_incident(p["incident_id"])
-        raise ValueError(f"Unknown v7 job action: {action!r}.")
+            return _job_v8(api.v8, action, p)
+        return _job_v7(api.v7, action, p)
 
     @mcp.tool(tags={"history"})
     async def camunda_history(

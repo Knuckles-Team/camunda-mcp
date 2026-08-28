@@ -65,17 +65,14 @@ class Camunda8Api(ApiClientBase):
     # ------------------------------------------------------------------ #
     # OAuth
     # ------------------------------------------------------------------ #
-    def _get_token(self) -> str | None:
-        """Return a cached bearer token, fetching a new one if needed.
+    def _oauth_configured(self) -> bool:
+        return bool(self.client_id and self.client_secret and self.oauth_url)
 
-        Returns ``None`` when OAuth is not configured (no-auth deployment).
-        """
-        if not (self.client_id and self.client_secret and self.oauth_url):
-            return None
-        if self._token and time.time() < self._token_expiry - 30:
-            return self._token
+    def _cached_token_valid(self) -> bool:
+        return bool(self._token) and time.time() < self._token_expiry - 30
 
-        payload = self.request(
+    def _request_oauth_token(self) -> Any:
+        return self.request(
             "POST",
             self.oauth_url,
             data={
@@ -87,6 +84,9 @@ class Camunda8Api(ApiClientBase):
             content_type="application/x-www-form-urlencoded",
             accept="application/json",
         )
+
+    @staticmethod
+    def _validated_oauth_token(payload: Any) -> tuple[str, int]:
         if not isinstance(payload, dict):
             raise RuntimeError("Camunda OAuth response was invalid")
         token = payload.get("access_token")
@@ -96,6 +96,20 @@ class Camunda8Api(ApiClientBase):
             expires_in = int(payload.get("expires_in", 300))
         except (TypeError, ValueError) as exc:
             raise RuntimeError("Camunda OAuth token lifetime was invalid") from exc
+        return token, expires_in
+
+    def _get_token(self) -> str | None:
+        """Return a cached bearer token, fetching a new one if needed.
+
+        Returns ``None`` when OAuth is not configured (no-auth deployment).
+        """
+        if not self._oauth_configured():
+            return None
+        if self._cached_token_valid():
+            return self._token
+
+        payload = self._request_oauth_token()
+        token, expires_in = self._validated_oauth_token(payload)
         self._token = token
         self._token_expiry = time.time() + min(max(expires_in, 1), 604_800)
         return self._token
