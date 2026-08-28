@@ -86,6 +86,74 @@ class ApiClientBase:
         if url:
             self._allowed_origins.add(self._origin(url))
 
+    def _resolve_target_url(self, endpoint: str) -> str:
+        if urlsplit(endpoint).scheme:
+            url = self._validated_url(endpoint)
+        else:
+            url = urljoin(self.base_url, endpoint.lstrip("/"))
+        if self._origin(url) not in self._allowed_origins:
+            raise ValueError("Camunda request origin was not configured")
+        return url
+
+    @staticmethod
+    def _build_request_headers(
+        content_type: str | None,
+        accept: str | None,
+        headers: dict[str, str] | None,
+    ) -> dict[str, str]:
+        req_headers: dict[str, str] = {}
+        if content_type:
+            req_headers["Content-Type"] = content_type
+        if accept:
+            req_headers["Accept"] = accept
+        if headers:
+            req_headers.update(headers)
+        return req_headers
+
+    def _check_declared_length(self, response: requests.Response) -> None:
+        declared_length = response.headers.get("Content-Length")
+        if not declared_length:
+            return
+        try:
+            if int(declared_length) > self.max_response_bytes:
+                raise RuntimeError("Camunda response exceeded its size limit")
+        except ValueError as exc:
+            raise RuntimeError("Camunda response length was invalid") from exc
+
+    def _read_bounded_body(self, response: requests.Response) -> bytearray:
+        self._check_declared_length(response)
+        body = bytearray()
+        for chunk in response.iter_content(chunk_size=64 * 1024):
+            body.extend(chunk)
+            if len(body) > self.max_response_bytes:
+                raise RuntimeError("Camunda response exceeded its size limit")
+        return body
+
+    @staticmethod
+    def _decode_body(body: bytearray, response: requests.Response) -> Any:
+        ctype = response.headers.get("Content-Type", "").lower()
+        if "json" in ctype:
+            try:
+                return jsonlib.loads(body.decode(response.encoding or "utf-8"))
+            except (UnicodeDecodeError, jsonlib.JSONDecodeError) as exc:
+                raise RuntimeError("Camunda returned invalid JSON") from exc
+        return {
+            "status": "success",
+            "text": body.decode(response.encoding or "utf-8", errors="replace"),
+        }
+
+    def _parse_response(self, response: requests.Response) -> Any:
+        self.last_etag = response.headers.get("ETag")
+        if response.status_code >= 300:
+            raise RuntimeError(f"Camunda API returned HTTP {response.status_code}")
+        if response.status_code == 204:
+            return {"status": "success"}
+
+        body = self._read_bounded_body(response)
+        if not body.strip():
+            return {"status": "success"}
+        return self._decode_body(body, response)
+
     def request(
         self,
         method: str,
@@ -103,20 +171,8 @@ class ApiClientBase:
         Returns a dict when the response is JSON, otherwise
         ``{"status": "success", "text": <body>}``. Raises on HTTP >= 400.
         """
-        if urlsplit(endpoint).scheme:
-            url = self._validated_url(endpoint)
-        else:
-            url = urljoin(self.base_url, endpoint.lstrip("/"))
-        if self._origin(url) not in self._allowed_origins:
-            raise ValueError("Camunda request origin was not configured")
-
-        req_headers: dict[str, str] = {}
-        if content_type:
-            req_headers["Content-Type"] = content_type
-        if accept:
-            req_headers["Accept"] = accept
-        if headers:
-            req_headers.update(headers)
+        url = self._resolve_target_url(endpoint)
+        req_headers = self._build_request_headers(content_type, accept, headers)
 
         response = self._session.request(
             method=method,
@@ -131,37 +187,6 @@ class ApiClientBase:
             stream=True,
         )
         try:
-            self.last_etag = response.headers.get("ETag")
-            if response.status_code >= 300:
-                raise RuntimeError(f"Camunda API returned HTTP {response.status_code}")
-            if response.status_code == 204:
-                return {"status": "success"}
-
-            declared_length = response.headers.get("Content-Length")
-            if declared_length:
-                try:
-                    if int(declared_length) > self.max_response_bytes:
-                        raise RuntimeError("Camunda response exceeded its size limit")
-                except ValueError as exc:
-                    raise RuntimeError("Camunda response length was invalid") from exc
-
-            body = bytearray()
-            for chunk in response.iter_content(chunk_size=64 * 1024):
-                body.extend(chunk)
-                if len(body) > self.max_response_bytes:
-                    raise RuntimeError("Camunda response exceeded its size limit")
-            if not body.strip():
-                return {"status": "success"}
-
-            ctype = response.headers.get("Content-Type", "").lower()
-            if "json" in ctype:
-                try:
-                    return jsonlib.loads(body.decode(response.encoding or "utf-8"))
-                except (UnicodeDecodeError, jsonlib.JSONDecodeError) as exc:
-                    raise RuntimeError("Camunda returned invalid JSON") from exc
-            return {
-                "status": "success",
-                "text": body.decode(response.encoding or "utf-8", errors="replace"),
-            }
+            return self._parse_response(response)
         finally:
             response.close()
