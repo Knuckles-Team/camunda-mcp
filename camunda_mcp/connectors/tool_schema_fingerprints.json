@@ -1,8 +1,8 @@
 {
-  "algorithm": "agent-utilities:mcp-tool-schema-compat:v1",
+  "algorithm": "agent-connector-sdk:mcp-tool-contract-compat:v2",
   "connector": "camunda-mcp",
   "schema_version": "1",
   "tools": {
-    "camunda_process": "8c9e157ea2927d13823adc88470fef2a46f969fda551371fcdf7e2ab2fc5fa87"
+    "camunda_process": "960eae7dd9d4bed399d748542b0e7094b7935acedfb8c3f2807a0035768749d5"
   }
 }

@@ -7,7 +7,7 @@ corresponding method, and returns the result. All API surface lives in
 """
 
 import json
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from fastmcp import FastMCP
 from pydantic import Field
@@ -126,7 +126,8 @@ def _process_instance_v7(c7: Any, action: str, params: dict) -> Any:
 def _task_v8_mutation(c8: Any, tid: str, action: str, params: dict) -> Any:
     if action == "assign":
         return c8.assign_task(
-            tid, params.get("body") or {k: v for k, v in params.items() if k != "task_id"}
+            tid,
+            params.get("body") or {k: v for k, v in params.items() if k != "task_id"},
         )
     if action == "unassign":
         return c8.unassign_task(tid)
@@ -210,7 +211,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
 
     @mcp.tool(tags={"process"})
     async def camunda_process(
-        action: str = Field(
+        action: Literal["get", "list", "start", "statistics", "suspend", "xml"] = Field(
             description=(
                 "Process definition action. v7: 'list', 'get', 'xml', 'start', "
                 "'statistics', 'suspend'. v8: 'list' (Operate search)."

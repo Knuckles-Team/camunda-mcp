@@ -196,7 +196,7 @@ sync:
   updated_field: version
   pagination: null
   doc_type: business_process
-  tool_schema_sha256: 8c9e157ea2927d13823adc88470fef2a46f969fda551371fcdf7e2ab2fc5fa87
+  tool_schema_sha256: 960eae7dd9d4bed399d748542b0e7094b7935acedfb8c3f2807a0035768749d5
   raw:
     server: camunda-mcp
     tool: camunda_process
