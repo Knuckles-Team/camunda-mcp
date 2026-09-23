@@ -209,7 +209,18 @@ def _job_v7(c7: Any, action: str, params: dict) -> Any:
 def register_camunda_tools(mcp: FastMCP) -> None:
     """Register Camunda 7 and Camunda 8 process automation tools."""
 
-    @mcp.tool(tags={"process"})
+    @mcp.tool(
+        tags={"process"},
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {"modalities_in": ["text"], "modalities_out": ["text"]}
+        },
+    )
     async def camunda_process(
         action: Literal["get", "list", "start", "statistics", "suspend", "xml"] = Field(
             description=(
