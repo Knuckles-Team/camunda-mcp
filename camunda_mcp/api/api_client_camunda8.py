@@ -20,7 +20,7 @@ without authentication).
 import time
 from typing import Any
 
-from agent_utilities.core.transport_security import ResolvedTLSProfile
+from agent_connector_sdk.tls.profile import ResolvedTLSProfile
 
 from camunda_mcp.api.api_client_base import ApiClientBase
 
@@ -164,9 +164,7 @@ class Camunda8Api(ApiClientBase):
         ``body`` is ``{"processDefinitionKey": ..., "variables": {...}}`` or
         ``{"processDefinitionId": <bpmnProcessId>, "variables": {...}}``.
         """
-        return self._call(
-            "POST", f"{self.zeebe_url}/v2/process-instances", json=body
-        )
+        return self._call("POST", f"{self.zeebe_url}/v2/process-instances", json=body)
 
     def create_process_instance_with_result(self, body: dict[str, Any]) -> Any:
         """Create a process instance and await its result."""
@@ -196,9 +194,7 @@ class Camunda8Api(ApiClientBase):
 
     def broadcast_signal(self, body: dict[str, Any]) -> Any:
         """Broadcast a signal (``{"signalName": ..., "variables": {...}}``)."""
-        return self._call(
-            "POST", f"{self.zeebe_url}/v2/signals/broadcast", json=body
-        )
+        return self._call("POST", f"{self.zeebe_url}/v2/signals/broadcast", json=body)
 
     def activate_jobs(self, body: dict[str, Any]) -> Any:
         """Activate jobs for a worker.
@@ -228,9 +224,7 @@ class Camunda8Api(ApiClientBase):
 
         ``body`` is ``{"changeset": {"retries": ..., "timeout": ...}}``.
         """
-        return self._call(
-            "PATCH", f"{self.zeebe_url}/v2/jobs/{job_key}", json=body
-        )
+        return self._call("PATCH", f"{self.zeebe_url}/v2/jobs/{job_key}", json=body)
 
     def resolve_incident(self, incident_key: str) -> Any:
         """Resolve an incident (Zeebe REST)."""
@@ -261,9 +255,7 @@ class Camunda8Api(ApiClientBase):
 
     def get_process_instance(self, key: str) -> Any:
         """Get a single process instance by key (Operate)."""
-        return self._call(
-            "GET", f"{self.operate_url}/v1/process-instances/{key}"
-        )
+        return self._call("GET", f"{self.operate_url}/v1/process-instances/{key}")
 
     def get_process_instance_statistics(self, key: str) -> Any:
         """Get flow-node statistics for a process instance (Operate)."""
@@ -333,7 +325,9 @@ class Camunda8Api(ApiClientBase):
             json={"variables": variables or []},
         )
 
-    def get_task_variables(self, task_id: str, body: dict[str, Any] | None = None) -> Any:
+    def get_task_variables(
+        self, task_id: str, body: dict[str, Any] | None = None
+    ) -> Any:
         """Search the variables of a task (Tasklist)."""
         return self._call(
             "POST",

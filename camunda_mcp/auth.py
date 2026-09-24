@@ -1,8 +1,8 @@
 """Identity credentials loader for the Camunda client facade."""
 
-from agent_utilities.base_utilities import get_logger
-from agent_utilities.core.config import setting
-from agent_utilities.core.transport_security import resolve_configured_tls_profile
+from agent_connector_sdk.config import setting
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
+from agent_connector_sdk.utilities import get_logger
 
 from camunda_mcp.api_client import Api
 
@@ -28,7 +28,7 @@ def get_client() -> Api:
         ``CAMUNDA_TLS_PROFILE`` or ``CAMUNDA_TLS_PROFILE_REF`` trust selector.
     """
     platform = setting("CAMUNDA_PLATFORM", "7")
-    tls_profile = resolve_configured_tls_profile(
+    tls_profile = resolve_tls_profile(
         "camunda",
         profile_name=setting("CAMUNDA_TLS_PROFILE", None),
         profile_ref=setting("CAMUNDA_TLS_PROFILE_REF", None),
