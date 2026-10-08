@@ -31,7 +31,7 @@ agent-utilities ecosystem.
 
 `camunda-mcp` wraps the Camunda process automation APIs with thin, deterministic MCP
 tools, targeting both platforms from a single server: the **Camunda 7** Engine REST
-API and the **Camunda 8** Zeebe / Operate / Tasklist REST APIs. It additionally ships
+API and the **Camunda 8** Zeebe / Operate / Tasklist REST APIs. It also ships
 an **A2A agent server** that exposes the same capability through a Pydantic-AI graph
 agent for agent-to-agent orchestration.
 
@@ -144,7 +144,7 @@ _15 package + 24 inherited variable(s). Auto-generated from `.env.example` + the
 Every variable the server reads, grouped by purpose. Credentials left blank leave the
 corresponding platform inactive — the connector remains inactive when credentials are
 absent. A starter [`.env.example`](.env.example) ships with the repository; copy it to
-`.env` and populate the values for the platform you use.
+`.env` and populate the values for the platform the operator use.
 
 ### Connection & Credentials
 | Var | Default | Meaning |
@@ -198,12 +198,12 @@ See the [Available MCP Tools](#available-mcp-tools) table above for the authorit
 
 ## Installation
 
-Pick the extra that matches what you want to run:
+Pick the extra that matches what the operator want to run:
 
 | Extra | Installs | Use when |
 |-------|----------|----------|
-| `camunda-mcp[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | You only run the **MCP server** (smallest install / image) |
-| `camunda-mcp[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | You run the **integrated agent** |
+| `camunda-mcp[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
+| `camunda-mcp[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | The operator run the **integrated agent** |
 | `camunda-mcp[all]` | Everything (`mcp` + `agent`) | Development / both surfaces |
 
 ```bash
@@ -248,7 +248,7 @@ agent (`immutable agent digest`) with a co-located `:mcp` sidecar.
 
 Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
 Agent Utilities core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
-the server connector-focused; `[agent]` additionally enables model orchestration. Local
+the server connector-focused; `[agent]` also enables model orchestration. Local
 deployments can use the bundled engine. For production or shared state, run
 **epistemic-graph as a dedicated database service** and configure the runtime to use it.
 Deployment recipes (single-node + Raft HA), connection configuration, and architecture

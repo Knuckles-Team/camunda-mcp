@@ -105,7 +105,7 @@ curl -s http://localhost:8000/health        # {"status":"OK"}
 ## Configuration (environment)
 
 `camunda-mcp` is configured entirely from the environment. The **required** set
-depends on which platform you target (`CAMUNDA_PLATFORM`):
+depends on which platform the operator target (`CAMUNDA_PLATFORM`):
 
 | Var | Default | Meaning |
 |---|---|---|
@@ -131,7 +131,7 @@ the corresponding platform inactive — the server **remains inactive when crede
 are absent**. A starter
 [`.env.example`](https://github.com/Knuckles-Team/camunda-mcp/blob/main/.env.example)
 ships with the repository; copy it to `.env` and fill in the values for the platform
-you use.
+the operator use.
 
 ## Docker Compose
 
@@ -208,7 +208,7 @@ services:
 
 ## Behind a Caddy reverse proxy
 
-Expose the HTTP server on a hostname with automatic TLS. Add to your `Caddyfile`:
+Expose the HTTP server on a hostname with automatic TLS. Add to the operator's `Caddyfile`:
 
 ```caddy
 # Internal (self-signed) — homelab .example.invalid zone
@@ -252,7 +252,7 @@ this as a tool.
 
 ## Register with an MCP client
 
-Add to your client's `mcp_config.json` (multiplexer nickname `camun`):
+Add to the operator's client's `mcp_config.json` (multiplexer nickname `camun`):
 
 ```json
 {

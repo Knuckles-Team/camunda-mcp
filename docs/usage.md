@@ -1,7 +1,7 @@
 # Usage — API / CLI / MCP
 
 `camunda-mcp` exposes the same capability three ways: as **MCP tools** an agent calls,
-as a **Python API** (`Api`) you import, and as a **CLI**. The full Camunda 7 / Camunda
+as a **Python API** (`Api`) the operator import, and as a **CLI**. The full Camunda 7 / Camunda
 8 surface is described in [Overview](overview.md).
 
 ## As an MCP server
@@ -49,7 +49,7 @@ tasks = api.v7.list_tasks()                # open user tasks
 results = api.v8.search_process_definitions({})
 ```
 
-You can also construct the facade directly:
+The operator can also construct the facade directly:
 
 ```python
 from camunda_mcp.api_client import Api
