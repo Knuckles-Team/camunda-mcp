@@ -42,7 +42,7 @@ def _as_records(result: Any) -> list[dict[str, Any]]:
     return []
 
 
-def _autoingest(kind: str, result: Any) -> None:
+async def _autoingest(kind: str, result: Any) -> None:
     """Authoritatively ingest a non-empty list result into the native KG."""
     from camunda_mcp import kg_ingest
 
@@ -50,25 +50,25 @@ def _autoingest(kind: str, result: Any) -> None:
     if not records:
         return
     if kind == "definitions":
-        kg_ingest.ingest_process_definitions(records)
+        await kg_ingest.ingest_process_definitions(records)
     elif kind == "instances":
-        kg_ingest.ingest_process_instances(records)
+        await kg_ingest.ingest_process_instances(records)
     elif kind == "tasks":
-        kg_ingest.ingest_tasks(records)
+        await kg_ingest.ingest_tasks(records)
 
 
-def _process_definition_v8(c8: Any, action: str, params: dict) -> Any:
+async def _process_definition_v8(c8: Any, action: str, params: dict) -> Any:
     if action == "list":
         res = c8.search_process_definitions(params.get("body", params) or {})
-        _autoingest("definitions", res)
+        await _autoingest("definitions", res)
         return res
     raise ValueError(f"Unknown v8 process action: {action!r}.")
 
 
-def _process_definition_v7(c7: Any, action: str, params: dict) -> Any:
+async def _process_definition_v7(c7: Any, action: str, params: dict) -> Any:
     if action == "list":
         res = c7.list_process_definitions(params or None)
-        _autoingest("definitions", res)
+        await _autoingest("definitions", res)
         return res
     if action == "get":
         return c7.get_process_definition(params.get("id"), params.get("key"))
@@ -90,10 +90,10 @@ def _process_definition_v7(c7: Any, action: str, params: dict) -> Any:
     raise ValueError(f"Unknown v7 process action: {action!r}.")
 
 
-def _process_instance_v8(c8: Any, action: str, params: dict) -> Any:
+async def _process_instance_v8(c8: Any, action: str, params: dict) -> Any:
     if action == "list":
         res = c8.search_process_instances(params.get("body", params) or {})
-        _autoingest("instances", res)
+        await _autoingest("instances", res)
         return res
     if action == "get":
         return c8.get_process_instance(params["key"])
@@ -104,11 +104,11 @@ def _process_instance_v8(c8: Any, action: str, params: dict) -> Any:
     raise ValueError(f"Unknown v8 instance action: {action!r}.")
 
 
-def _process_instance_v7(c7: Any, action: str, params: dict) -> Any:
+async def _process_instance_v7(c7: Any, action: str, params: dict) -> Any:
     iid = cast(str, params.get("instance_id"))
     if action == "list":
         res = c7.list_process_instances(params or None)
-        _autoingest("instances", res)
+        await _autoingest("instances", res)
         return res
     if action == "get":
         return c7.get_process_instance(iid)
@@ -137,11 +137,11 @@ def _task_v8_mutation(c8: Any, tid: str, action: str, params: dict) -> Any:
     raise ValueError(f"Unknown v8 task action: {action!r}.")
 
 
-def _task_v8(c8: Any, action: str, params: dict) -> Any:
+async def _task_v8(c8: Any, action: str, params: dict) -> Any:
     tid = cast(str, params.get("task_id"))
     if action == "list":
         res = c8.search_tasks(params.get("body", {}))
-        _autoingest("tasks", res)
+        await _autoingest("tasks", res)
         return res
     if action == "get":
         return c8.get_task(tid)
@@ -164,11 +164,11 @@ def _task_v7_mutation(c7: Any, tid: str, action: str, params: dict) -> Any:
     raise ValueError(f"Unknown v7 task action: {action!r}.")
 
 
-def _task_v7(c7: Any, action: str, params: dict) -> Any:
+async def _task_v7(c7: Any, action: str, params: dict) -> Any:
     tid = cast(str, params.get("task_id"))
     if action == "list":
         res = c7.list_tasks(params or None)
-        _autoingest("tasks", res)
+        await _autoingest("tasks", res)
         return res
     if action == "get":
         return c7.get_task(tid)
@@ -231,8 +231,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            return _process_definition_v8(api.v8, action, p)
-        return _process_definition_v7(api.v7, action, p)
+            return await _process_definition_v8(api.v8, action, p)
+        return await _process_definition_v7(api.v7, action, p)
 
     @mcp.tool(tags={"process"})
     async def camunda_instance(
@@ -256,8 +256,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            return _process_instance_v8(api.v8, action, p)
-        return _process_instance_v7(api.v7, action, p)
+            return await _process_instance_v8(api.v8, action, p)
+        return await _process_instance_v7(api.v7, action, p)
 
     @mcp.tool(tags={"task"})
     async def camunda_task(
@@ -282,8 +282,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         api = get_client()
         p = _p(params_json)
         if str(platform) in ("8", "c8"):
-            return _task_v8(api.v8, action, p)
-        return _task_v7(api.v7, action, p)
+            return await _task_v8(api.v8, action, p)
+        return await _task_v7(api.v7, action, p)
 
     @mcp.tool(tags={"deployment"})
     async def camunda_deploy(
@@ -534,8 +534,8 @@ def register_camunda_tools(mcp: FastMCP) -> None:
         return {
             "listed_definitions": len(defs),
             "listed_instances": len(insts),
-            "ingested_definitions": kg_ingest.ingest_process_definitions(defs),
+            "ingested_definitions": await kg_ingest.ingest_process_definitions(defs),
             "ingested_instances": (
-                kg_ingest.ingest_process_instances(insts) if insts else None
+                await kg_ingest.ingest_process_instances(insts) if insts else None
             ),
         }
