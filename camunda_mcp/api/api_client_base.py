@@ -6,10 +6,8 @@ from typing import Any
 from urllib.parse import urljoin, urlsplit
 
 import requests
-from agent_utilities.core.transport_security import (
-    ResolvedTLSProfile,
-    resolve_configured_tls_profile,
-)
+from agent_connector_sdk.tls.profile import ResolvedTLSProfile
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_MAX_RESPONSE_BYTES = 8 * 1024 * 1024
@@ -48,7 +46,7 @@ class ApiClientBase:
 
         self._allowed_origins = {self._origin(self.base_url)}
         self._session = requests.Session()
-        self.tls_profile = tls_profile or resolve_configured_tls_profile("camunda")
+        self.tls_profile = tls_profile or resolve_tls_profile("camunda")
         self.tls_profile.configure_requests_session(self._session)
 
         if token:

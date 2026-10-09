@@ -1,73 +1,121 @@
-"""Native epistemic-graph ingestion for Camunda records (typed graph nodes).
+"""Epistemic-graph ingestion for Camunda records (typed graph nodes).
 
-CONCEPT:AU-KG.ingest.enterprise-source-extractor. camunda-mcp natively pushes its
-process-automation data into the ONE epistemic-graph knowledge graph as **typed OWL
-nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:Task``, ``:Deployment``,
-``:Incident`` …) + links, matching the classes federated by ``camunda_mcp.ontology``.
+CONCEPT:AU-KG.ingest.enterprise-source-extractor. camunda-mcp pushes its
+process-automation data into the ONE epistemic-graph knowledge graph as **typed
+OWL nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:Task``,
+``:Deployment``, ``:Incident`` …) + links, matching the classes federated by
+``camunda_mcp.ontology``.
 
-The write path is the required
-``agent_utilities.knowledge_graph.memory.native_ingest`` authority. Node ids follow
-``camunda:<class>:<extId>``; each ``node_type`` matches a class in
-``camunda_mcp/ontology/camunda.ttl``.
+The write path is ``agent_connector_sdk.ingest`` -- the generated ``SourceIngest``
+client, not a local ingestion helper. Node ids follow ``camunda:<class>:<extId>``;
+each ``node_type`` matches a class in ``camunda_mcp/ontology/camunda.ttl``.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_documents as _native_ingest_documents,
-)
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_entities as _native_ingest_entities,
+from agent_connector_sdk.ingest import (
+    ChangeSet,
+    Document,
+    Entity,
+    IngestBinding,
+    IngestError,
+    KnowledgeIngest,
+    Relationship,
+    current_ingest,
 )
 
-_SOURCE = "camunda-mcp"
-_DOMAIN = "camunda"
+_BINDING = IngestBinding(connector="camunda-mcp", stream="camunda")
+
+_ENTITY_RESERVED_KEYS = frozenset({"id", "node_type"})
+_RELATIONSHIP_RESERVED_KEYS = frozenset({"source", "target", "relationship"})
+
+
+def _to_entity(record: dict[str, Any]) -> Entity:
+    return Entity(
+        id=record.get("id"),
+        node_type=record.get("node_type"),
+        properties={
+            key: value
+            for key, value in record.items()
+            if key not in _ENTITY_RESERVED_KEYS
+        },
+    )
+
+
+def _to_relationship(record: dict[str, Any]) -> Relationship:
+    properties = {
+        key: value
+        for key, value in record.items()
+        if key not in _RELATIONSHIP_RESERVED_KEYS
+    }
+    return Relationship(
+        source=record["source"],
+        target=record["target"],
+        relationship=record["relationship"],
+        properties=properties or None,
+    )
+
+
 # --- public thin wrappers --------------------------------------------------- #
-def ingest_entities(
+async def ingest_entities(
     entities: list[dict[str, Any]],
     relationships: list[dict[str, Any]] | None = None,
     *,
-    source: str = _SOURCE,
-    domain: str = _DOMAIN,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Write typed OWL nodes (+ edges) into epistemic-graph.
 
-    Validation and engine failures are surfaced as ``NativeIngestError``.
+    A malformed change set or a refused commit raises ``IngestError``.
     """
-    return _native_ingest_entities(
-        entities,
-        relationships,
-        source=source,
-        domain=domain,
-        client=client,
-        graph=graph,
+    if not entities:
+        raise IngestError("ingest_entities needs at least one entity")
+    change_set = ChangeSet(
+        entities=tuple(_to_entity(entity) for entity in entities),
+        relationships=tuple(
+            _to_relationship(relationship) for relationship in relationships or ()
+        ),
     )
+    service = ingest or current_ingest()
+    receipt = await service.submit(_BINDING, change_set)
+    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
 
 
-def ingest_documents(
+async def ingest_documents(
     documents: list[dict[str, Any]],
     *,
-    source: str = _SOURCE,
-    domain: str = _DOMAIN,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Write text records (e.g. BPMN XML) as ``:Document`` nodes for semantic search."""
-    return _native_ingest_documents(
-        documents, source=source, domain=domain, client=client, graph=graph
+    if not documents:
+        raise IngestError("ingest_documents needs at least one document")
+    change_set = ChangeSet(
+        documents=tuple(
+            Document(
+                id=doc["id"],
+                text=doc["text"],
+                title=doc.get("title"),
+                source_uri=doc.get("source_uri"),
+                properties={
+                    key: value
+                    for key, value in doc.items()
+                    if key not in {"id", "text", "title", "source_uri"}
+                },
+            )
+            for doc in documents
+        )
     )
+    service = ingest or current_ingest()
+    receipt = await service.submit(_BINDING, change_set)
+    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
 
 
 # --- domain mappers (records -> typed entity/relationship dicts) ------------ #
-def ingest_process_definitions(
+async def ingest_process_definitions(
     definitions: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Camunda process-definition records → ``:BusinessProcess`` (+ ``:Deployment``).
 
@@ -110,14 +158,13 @@ def ingest_process_definitions(
                     "relationship": "deployedIn",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_process_instances(
+async def ingest_process_instances(
     instances: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map process-instance records → ``:ProcessInstance`` (+ ``:instanceOf`` link)."""
     entities: list[dict[str, Any]] = []
@@ -147,14 +194,13 @@ def ingest_process_instances(
                     "relationship": "instanceOf",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_tasks(
+async def ingest_tasks(
     tasks: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map user-task records → ``:Task`` (+ ``:partOfInstance`` / ``:assignedTo``)."""
     entities: list[dict[str, Any]] = []
@@ -201,4 +247,4 @@ def ingest_tasks(
                     "relationship": "assignedTo",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)

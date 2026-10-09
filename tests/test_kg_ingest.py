@@ -1,22 +1,22 @@
-"""Native epistemic-graph typed-node ingestion — Wire-First coverage.
+"""Epistemic-graph typed-node ingestion — Wire-First coverage.
 
 Exercises the real ``ingest_entities`` / ``ingest_process_definitions`` /
-``ingest_process_instances`` / ``ingest_tasks`` seam with a fake engine client (no
-engine required), asserting the txn add_node/commit + edge calls and the Camunda
-record → :BusinessProcess / :ProcessInstance / :Task mappings.
+``ingest_process_instances`` / ``ingest_tasks`` seam against a fake
+``agent_connector_sdk.ingest`` transport (no engine required). The real SDK
+request builder (``agent_connector_sdk.ingest.request.build_request``) still
+runs, so a malformed change set is still caught by the SDK's own contract, not
+re-derived here; only the final network commit is faked.
 CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 """
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
-import msgpack
 import pytest
-from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
-from agent_utilities.security.brain_context import ActorContext, use_actor
-from agent_utilities.security.actor_identity import ActorType
-from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
+from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
+from epistemic_graph.generated.source_ingestion import SourceIngestionRequest
 
 from camunda_mcp.kg_ingest import (
     ingest_entities,
@@ -26,116 +26,59 @@ from camunda_mcp.kg_ingest import (
 )
 
 
-@pytest.fixture(autouse=True)
-def _governed_session():
-    actor = ActorContext(
-        actor_id="subject:opaque:synthetic",
-        actor_type=ActorType.AUTOMATED_SERVICE,
-        roles=(),
-        tenant_id="tenant:opaque:synthetic",
-        authenticated=True,
-    )
-    session = GraphSession(
-        actor=actor,
-        tenant=actor.tenant_id,
-        scopes=frozenset({"kg:write"}),
-        graph="graph:opaque:synthetic",
-        policy_version="policy:opaque:synthetic",
-        audience="epistemic-graph",
-    )
-    with use_actor(actor), use_session(session):
-        yield
+class _FakeTransport:
+    """Records every submitted request; no epistemic-graph engine required."""
 
-
-class _FakeNodes:
     def __init__(self) -> None:
-        self.values: dict[str, dict[str, Any]] = {}
+        self.requests: list[SourceIngestionRequest] = []
 
-    def properties(self, node_id: str) -> dict[str, Any] | None:
-        return self.values.get(node_id)
+    async def source_status(self, _connector: str, _stream: str) -> Any:
+        return SimpleNamespace(accepted_checkpoint=None)
 
-    def list(self) -> list[tuple[str, dict[str, Any]]]:
-        return list(self.values.items())
+    async def submit(self, request: SourceIngestionRequest) -> Any:
+        self.requests.append(request)
+        return SimpleNamespace(
+            affected_count=len(request.records),
+            relationship_count=len(request.relationships),
+        )
 
-
-class _FakeChanges:
-    def __init__(self, nodes: _FakeNodes) -> None:
-        self.nodes = nodes
-        self.edges: list[tuple[str, str, dict[str, Any]]] = []
-        self.applied: list[dict[str, Any]] = []
-        self.records: dict[str, dict[str, Any]] = {}
-        self.versions: dict[str, dict[str, Any]] = {}
-
-    def get(self, envelope_id: str) -> dict[str, Any] | None:
-        return self.records.get(envelope_id)
-
-    def content_version(self, object_id: str) -> dict[str, Any] | None:
-        return self.versions.get(object_id)
-
-    def cursor(self, _source: str, _partition: str = "") -> None:
-        return None
-
-    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
-        self.applied.append(envelope)
-        mutation = envelope["mutation"]
-        for operation in mutation["operations"]:
-            method = operation["method"]
-            params = method["params"]
-            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
-            if method["method"] == "AddNode":
-                self.nodes.values[params["node_id"]] = properties
-            elif method["method"] == "AddEdge":
-                self.edges.append(
-                    (params["source_id"], params["target_id"], properties)
-                )
-        version = envelope["content_version"]
-        self.versions[version["object_id"]] = version
-        self.records[envelope["envelope_id"]] = envelope
-        return {
-            "batch_id": mutation["batch_id"],
-            "replayed": False,
-            "projection_pending": False,
-        }
+    async def store_blob(self, _data: bytes) -> str:
+        raise AssertionError("camunda-mcp topology ingestion carries no media")
 
 
-class _FakeRdf:
-    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
-        return {"conforms": True, "results": []}
+@pytest.fixture
+def ingest() -> tuple[KnowledgeIngest, _FakeTransport]:
+    transport = _FakeTransport()
+    return KnowledgeIngest(transport, loop=None), transport
 
 
-class _FakeClient:
-    def __init__(self) -> None:
-        self.nodes = _FakeNodes()
-        self.changes = _FakeChanges(self.nodes)
-        self.rdf = _FakeRdf()
-
-    @staticmethod
-    def supports(operation: str) -> bool:
-        return operation == "ApplyChangeEnvelope"
-
-
-def test_ingest_entities_writes_nodes_and_edges():
-    c = _FakeClient()
-    res = ingest_entities(
+@pytest.mark.asyncio
+async def test_ingest_entities_writes_nodes_and_edges(ingest):
+    service, transport = ingest
+    res = await ingest_entities(
         [
             {"id": "a", "node_type": "BusinessProcess", "name": "p"},
             {"id": "b", "node_type": "Deployment"},
         ],
         [{"source": "a", "target": "b", "relationship": "deployedIn"}],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert len(c.changes.applied) == 1
-    assert set(c.nodes.values) == {"a", "b"}
-    # provenance is stamped
-    assert c.nodes.values["a"]["source"] == "camunda-mcp"
-    assert c.nodes.values["a"]["domain"] == "camunda"
-    assert c.changes.edges == [("a", "b", {"relationship": "deployedIn"})]
+    assert len(transport.requests) == 1
+    request = transport.requests[0]
+    record_ids = {record.record_id for record in request.records}
+    assert record_ids == {"a", "b"}
+    a_record = next(r for r in request.records if r.record_id == "a")
+    assert a_record.payload["name"] == "p"
+    assert request.relationships[0].relation_reference.endswith(
+        "resources/BusinessProcess/relations/deployedIn"
+    )
 
 
-def test_ingest_process_definitions_maps_process_and_deployment():
-    c = _FakeClient()
-    res = ingest_process_definitions(
+@pytest.mark.asyncio
+async def test_ingest_process_definitions_maps_process_and_deployment(ingest):
+    service, transport = ingest
+    res = await ingest_process_definitions(
         [
             {
                 "id": "invoice:1:abc",
@@ -146,27 +89,28 @@ def test_ingest_process_definitions_maps_process_and_deployment():
                 "deploymentId": "dep-9",
             }
         ],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 2, "edges": 1}
-    proc = c.nodes.values["camunda:process:invoice:1:abc"]
-    assert proc["node_type"] == "BusinessProcess"
-    assert proc["processDefinitionKey"] == "invoice"
-    assert proc["bpmnVersion"] == 1
-    assert proc["externalToolId"] == "invoice:1:abc"
-    assert c.nodes.values["camunda:deployment:dep-9"]["node_type"] == "Deployment"
-    assert c.changes.edges == [
-        (
-            "camunda:process:invoice:1:abc",
-            "camunda:deployment:dep-9",
-            {"relationship": "deployedIn"},
-        )
-    ]
+    request = transport.requests[0]
+    proc = next(
+        r for r in request.records if r.record_id == "camunda:process:invoice:1:abc"
+    )
+    assert proc.payload["processDefinitionKey"] == "invoice"
+    assert proc.payload["bpmnVersion"] == 1
+    assert proc.payload["externalToolId"] == "invoice:1:abc"
+    assert any(
+        r.record_id == "camunda:deployment:dep-9" for r in request.records
+    )
+    assert request.relationships[0].relation_reference.endswith(
+        "resources/BusinessProcess/relations/deployedIn"
+    )
 
 
-def test_ingest_process_instances_links_definition():
-    c = _FakeClient()
-    res = ingest_process_instances(
+@pytest.mark.asyncio
+async def test_ingest_process_instances_links_definition(ingest):
+    service, transport = ingest
+    res = await ingest_process_instances(
         [
             {
                 "id": "pi-1",
@@ -175,24 +119,21 @@ def test_ingest_process_instances_links_definition():
                 "suspended": False,
             }
         ],
-        client=c,
+        ingest=service,
     )
     assert res == {"nodes": 1, "edges": 1}
-    inst = c.nodes.values["camunda:instance:pi-1"]
-    assert inst["node_type"] == "ProcessInstance"
-    assert inst["businessKey"] == "INV-42"
-    assert c.changes.edges == [
-        (
-            "camunda:instance:pi-1",
-            "camunda:process:invoice:1:abc",
-            {"relationship": "instanceOf"},
-        )
-    ]
+    request = transport.requests[0]
+    inst = next(r for r in request.records if r.record_id == "camunda:instance:pi-1")
+    assert inst.payload["businessKey"] == "INV-42"
+    assert request.relationships[0].relation_reference.endswith(
+        "resources/ProcessInstance/relations/instanceOf"
+    )
 
 
-def test_ingest_tasks_maps_task_instance_and_assignee():
-    c = _FakeClient()
-    res = ingest_tasks(
+@pytest.mark.asyncio
+async def test_ingest_tasks_maps_task_instance_and_assignee(ingest):
+    service, transport = ingest
+    res = await ingest_tasks(
         [
             {
                 "id": "task-1",
@@ -202,32 +143,30 @@ def test_ingest_tasks_maps_task_instance_and_assignee():
                 "processInstanceId": "pi-1",
             }
         ],
-        client=c,
+        ingest=service,
     )
     # 2 nodes (task + person), 2 edges (partOfInstance + assignedTo)
     assert res == {"nodes": 2, "edges": 2}
-    task = c.nodes.values["camunda:task:task-1"]
-    assert task["node_type"] == "Task"
-    # native_ingest's governed PII scrubber redacts assignee-shaped values.
-    assert task["assignee"] == "[REDACTED_PERSON]"
-    assert task["activityId"] == "approve"
-    assert c.nodes.values["camunda:person:jdoe"]["node_type"] == "Person"
-    assert (
-        "camunda:task:task-1",
-        "camunda:instance:pi-1",
-        {"relationship": "partOfInstance"},
-    ) in c.changes.edges
-    assert (
-        "camunda:task:task-1",
-        "camunda:person:jdoe",
-        {"relationship": "assignedTo"},
-    ) in c.changes.edges
+    request = transport.requests[0]
+    task = next(r for r in request.records if r.record_id == "camunda:task:task-1")
+    # the SDK's PersistencePrivacyGuard redacts assignee-shaped values.
+    assert task.payload["assignee"] == "[REDACTED_PERSON]"
+    assert task.payload["activityId"] == "approve"
+    assert any(r.record_id == "camunda:person:jdoe" for r in request.records)
+    relation_refs = {r.relation_reference for r in request.relationships}
+    assert any(ref.endswith("relations/partOfInstance") for ref in relation_refs)
+    assert any(ref.endswith("relations/assignedTo") for ref in relation_refs)
 
 
-def test_ingest_rejects_legacy_structural_fields():
-    with pytest.raises(NativeIngestError, match="canonical node_type"):
-        ingest_entities([{"id": "legacy", "type": "Legacy"}], client=_FakeClient())
+@pytest.mark.asyncio
+async def test_ingest_rejects_missing_node_type(ingest):
+    service, _ = ingest
+    with pytest.raises(IngestError):
+        await ingest_entities([{"id": "legacy"}], ingest=service)
 
-def test_ingest_empty_is_rejected():
-    with pytest.raises(NativeIngestError, match="at least one entity"):
-        ingest_entities([], client=_FakeClient())
+
+@pytest.mark.asyncio
+async def test_ingest_empty_is_rejected(ingest):
+    service, _ = ingest
+    with pytest.raises(IngestError, match="at least one entity"):
+        await ingest_entities([], ingest=service)
