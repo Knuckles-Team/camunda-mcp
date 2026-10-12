@@ -55,33 +55,23 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 
 <!-- MCP-TOOLS-TABLE:START -->
 
-#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+#### Intent tools
 
-| MCP Tool | Toggle Env Var | Description |
-|----------|----------------|-------------|
-| `camunda_deploy` | `CAMUNDATOOL` | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
-| `camunda_deployment` | `CAMUNDATOOL` | Manage Camunda 7 deployments (list/get/delete). |
-| `camunda_external_task` | `CAMUNDATOOL` | Camunda 7 external task worker operations. |
-| `camunda_history` | `CAMUNDATOOL` | Query Camunda 7 historic data. |
-| `camunda_instance` | `CAMUNDATOOL` | Work with process instances on Camunda 7 or Camunda 8. |
-| `camunda_job` | `CAMUNDATOOL` | Manage jobs and incidents on Camunda 7 or Camunda 8. |
-| `camunda_message` | `CAMUNDATOOL` | Correlate/publish a message or broadcast a signal. |
-| `camunda_ops` | `CAMUNDATOOL` | Search Camunda 8 Operate / Tasklist surfaces. |
-| `camunda_process` | `CAMUNDATOOL` | Work with process definitions on Camunda 7 or Camunda 8. |
-| `camunda_task` | `CAMUNDATOOL` | Work with user tasks on Camunda 7 or Camunda 8 (Tasklist). |
+| MCP Tool | Kind | Description |
+|----------|------|-------------|
+| `camunda_deploy` | intent | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
+| `camunda_deployment` | intent | Manage Camunda 7 deployments (list/get/delete). |
+| `camunda_external_task` | intent | Camunda 7 external task worker operations. |
+| `camunda_history` | intent | Query Camunda 7 historic data. |
+| `camunda_ingest_processes` | intent | Natively ingest Camunda processes into epistemic-graph as typed nodes. |
+| `camunda_instance` | intent | Work with process instances on Camunda 7 or Camunda 8. |
+| `camunda_job` | intent | Manage jobs and incidents on Camunda 7 or Camunda 8. |
+| `camunda_message` | intent | Correlate/publish a message or broadcast a signal. |
+| `camunda_ops` | intent | Search Camunda 8 Operate / Tasklist surfaces. |
+| `camunda_process` | intent | Work with process definitions on Camunda 7 or Camunda 8. |
+| `camunda_task` | intent | Work with user tasks on Camunda 7 or Camunda 8 (Tasklist). |
 
-#### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
-
-<details>
-<summary>1 per-operation tools — one per public API method (click to expand)</summary>
-
-| MCP Tool | Toggle Env Var | Description |
-|----------|----------------|-------------|
-| `camunda_client` | `APITOOL` | Return the platform client (defaults to the configured platform). |
-
-</details>
-
-_10 action-routed tool(s) (default) · 1 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
+_11 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 ## Environment Variables
@@ -107,6 +97,8 @@ _10 action-routed tool(s) (default) · 1 verbose 1:1 tool(s). Each is enabled un
 | `CAMUNDA8_OAUTH_URL` | `https://login.cloud.camunda.io/oauth/token` |  |
 | `CAMUNDA8_AUDIENCE` | `zeebe.camunda.io` |  |
 | `CAMUNDATOOL` | `True` | Toggle registration of the Camunda tool group |
+| `CAMUNDA_TIMEOUT_SECONDS` | `30.0` | Outbound HTTP timeout in seconds (matches the runtime default) |
+| `CAMUNDA_MAX_RESPONSE_BYTES` | `8388608` | Maximum response body size in bytes (8 MiB, matches the runtime default) |
 
 #### Inherited agent-utilities variables (apply to every connector)
 
@@ -115,7 +107,6 @@ _10 action-routed tool(s) (default) · 1 verbose 1:1 tool(s). Each is enabled un
 | `TRANSPORT` | `stdio` | MCP transport: `stdio` \| `streamable-http` \| `sse` |
 | `HOST` | `127.0.0.1` | Loopback bind host (set an authenticated ingress explicitly) |
 | `PORT` | `8000` | Bind port (HTTP transports) |
-| `MCP_TOOL_MODE` | `intent` | Tool surface: `intent` \| `condensed` \| `verbose` \| `both` |
 | `MCP_ENABLED_TOOLS` | — | Comma-separated tool allow-list |
 | `MCP_DISABLED_TOOLS` | — | Comma-separated tool deny-list |
 | `MCP_ENABLED_TAGS` | — | Comma-separated tag allow-list |
@@ -133,11 +124,11 @@ _10 action-routed tool(s) (default) · 1 verbose 1:1 tool(s). Each is enabled un
 | `DEBUG` | `False` | Verbose logging |
 | `PYTHONUNBUFFERED` | `1` | Unbuffered stdout (recommended in containers) |
 | `MCP_URL` | `http://localhost:8000/mcp` | URL of the MCP server the agent connects to |
-| `PROVIDER` | `openai` | LLM provider for the agent |
-| `MODEL_ID` | `gpt-4o` | Model id for the agent |
+| `PROVIDER` | — | Operator-configured LLM provider for the agent |
+| `MODEL_ID` | — | Operator-configured model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_15 package + 24 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+_17 package + 23 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 

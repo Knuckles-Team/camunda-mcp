@@ -7,7 +7,6 @@
         "camunda-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "intent",
         "CAMUNDA7_PASSWORD": "changeme",
         "CAMUNDA7_TOKEN": "changeme",
         "CAMUNDA7_URL": "http://localhost:8080/engine-rest",
@@ -20,7 +19,9 @@
         "CAMUNDA8_TASKLIST_URL": "http://localhost:8082",
         "CAMUNDA8_ZEEBE_REST_URL": "http://localhost:8080",
         "CAMUNDATOOL": "True",
-        "CAMUNDA_PLATFORM": "7"
+        "CAMUNDA_MAX_RESPONSE_BYTES": "8388608",
+        "CAMUNDA_PLATFORM": "7",
+        "CAMUNDA_TIMEOUT_SECONDS": "30.0"
       }
     }
   }
