@@ -22,8 +22,8 @@ The base install is intentionally minimal. Install the extra for what the operat
 
 | Extra | Install | Pulls in |
 |---|---|---|
-| `mcp` | `pip install "camunda-mcp[mcp]"` | FastMCP MCP-server runtime (`agent-utilities[mcp]`) |
-| `agent` | `pip install "camunda-mcp[agent]"` | Pydantic-AI agent + Logfire tracing (`agent-utilities[agent-runtime,logfire]`) |
+| `mcp` | `pip install "camunda-mcp[mcp]"` | FastMCP MCP-server runtime (`agent-connector-sdk`) |
+| `agent` | `pip install "camunda-mcp[agent]"` | Pydantic-AI agent + Logfire tracing (`agent-connector-sdk`) |
 | `all` | `pip install "camunda-mcp[all]"` | Everything above |
 | `test` | `pip install "camunda-mcp[test]"` | `pytest`, `pytest-asyncio`, `pytest-cov`, `pytest-xdist` |
 

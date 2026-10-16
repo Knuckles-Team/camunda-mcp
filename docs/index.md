@@ -1,7 +1,7 @@
 # camunda-mcp
 
 Camunda (7 & 8) process automation **API + MCP Server + A2A Agent** for the
-agent-utilities ecosystem — a typed, deterministic tool surface over the Camunda 7
+agent-connector-sdk ecosystem — a typed, deterministic tool surface over the Camunda 7
 Engine REST API and the Camunda 8 Zeebe / Operate / Tasklist REST APIs.
 
 !!! info "Official documentation"
