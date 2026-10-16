@@ -9,7 +9,6 @@ __all__: list[str] = []
 
 CORE_MODULES = ["camunda_mcp.api_client"]
 OPTIONAL_MODULES = {
-    "camunda_mcp.agent_server": "agent",
     "camunda_mcp.mcp_server": "mcp",
 }
 
