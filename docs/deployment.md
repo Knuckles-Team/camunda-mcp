@@ -63,12 +63,10 @@ Store the real remote URL, outbound identity reference, and TLS-profile referenc
 <!-- END GENERATED: deployment-options -->
 
 This page covers running `camunda-mcp` as long-lived servers: the transports, the
-A2A agent server, a Docker Compose stack, putting it behind a Caddy reverse proxy,
 and giving it a DNS name with Technitium. To provision the **Camunda platform** it
 connects to, see [Backing Platform](platform.md).
 
 > `camunda-mcp` ships both an **MCP server** (console script `camunda-mcp`) and an
-> **A2A agent server** (console script `camunda-agent`). The MCP server is a typed,
 > deterministic tool surface a policy router or agent calls; the agent server wraps
 > that surface in a Pydantic-AI graph agent for agent-to-agent orchestration.
 
@@ -183,13 +181,11 @@ camunda-agent --host 0.0.0.0 --port 8001
 ```
 
 The repository ships
-[`docker/agent.compose.yml`](https://github.com/Knuckles-Team/camunda-mcp/blob/main/docker/agent.compose.yml).
 A representative agent stack publishes the agent on `:8001` and points it at the MCP
 server:
 
 ```yaml
 services:
-  camunda-agent:
     image: example/camunda-mcp@sha256:<digest>
     container_name: camunda-agent
     hostname: camunda-agent
