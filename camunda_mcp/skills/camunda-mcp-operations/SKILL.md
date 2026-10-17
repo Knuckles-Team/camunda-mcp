@@ -2,12 +2,12 @@
 name: camunda-mcp-operations
 skill_type: skill
 description: >-
-  Operate camunda-mcp through its governed MCP and GraphOS capabilities, including camunda incident recovery, camunda process orchestration, camunda task operations. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
+  Operate camunda-mcp through its governed MCP and Arbora capabilities, including camunda incident recovery, camunda process orchestration, camunda task operations. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
 ---
 
 # Camunda Mcp Operations
 
-Use the provider's governed MCP tools through GraphOS delegation.
+Use the provider's governed MCP tools through Arbora delegation.
 
 ## Workflow
 
