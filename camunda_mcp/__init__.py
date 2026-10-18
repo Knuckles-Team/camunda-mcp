@@ -9,7 +9,6 @@ __all__: list[str] = []
 
 CORE_MODULES = ["camunda_mcp.api_client"]
 OPTIONAL_MODULES = {
-    "camunda_mcp.agent_server": "agent",
     "camunda_mcp.mcp_server": "mcp",
 }
 
@@ -47,8 +46,6 @@ def _availability_flag(name: str) -> bool | None:
     """Resolve a well-known ``_*_AVAILABLE`` flag, or ``None`` if ``name`` isn't one."""
     if name == "_MCP_AVAILABLE":
         return _optional_module_available("mcp_server")
-    if name == "_AGENT_AVAILABLE":
-        return _optional_module_available("agent_server")
     return None
 
 

@@ -1,7 +1,7 @@
 # camunda-mcp
 
 Camunda (7 & 8) process automation **API + MCP Server + A2A Agent** for the
-agent-utilities ecosystem — a typed, deterministic tool surface over the Camunda 7
+agent-connector-sdk ecosystem — a typed, deterministic tool surface over the Camunda 7
 Engine REST API and the Camunda 8 Zeebe / Operate / Tasklist REST APIs.
 
 !!! info "Official documentation"
@@ -26,7 +26,6 @@ tools, supporting both platforms from a single server. It provides:
   `camunda_task`, `camunda_deploy`, `camunda_message`, `camunda_external_task`,
   `camunda_job`, `camunda_history`, `camunda_deployment`, and `camunda_ops`, each
   taking a `platform` argument (`7` or `8`).
-- **An A2A agent server** — the `camunda-agent` console script exposes the same
   capability through a Pydantic-AI graph agent for agent-to-agent orchestration.
 
 ## Explore the documentation

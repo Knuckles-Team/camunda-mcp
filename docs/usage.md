@@ -78,7 +78,6 @@ The package installs two console scripts:
 
 ```bash
 camunda-mcp --help                 # the MCP server
-camunda-agent --help               # the A2A agent server
 ```
 
 Run the MCP server over an HTTP transport:
