@@ -187,8 +187,8 @@ schema_mappings:
 sync:
 - preset: camunda-process-definitions
   server: camunda-mcp
-  tool: camunda_process
-  action: list
+  tool: camunda7_list_process_definitions
+  action: null
   records_path: ''
   id_field: id
   title_field: name
@@ -196,13 +196,10 @@ sync:
   updated_field: version
   pagination: null
   doc_type: business_process
-  tool_schema_sha256: 8c9e157ea2927d13823adc88470fef2a46f969fda551371fcdf7e2ab2fc5fa87
+  tool_schema_sha256: 84a5362e8a1d55e18305769203bcd2e62a3327e4e518c3b69437bd920f3ba627
   raw:
     server: camunda-mcp
-    tool: camunda_process
-    action: list
-    params:
-      platform: '7'
+    tool: camunda7_list_process_definitions
     records_path: ''
     id_field: id
     title_field: name

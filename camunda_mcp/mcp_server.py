@@ -10,7 +10,8 @@ from fastmcp.utilities.logging import get_logger
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from camunda_mcp.api_client import Api
+from camunda_mcp.api.api_client_camunda7 import Camunda7Api
+from camunda_mcp.api.api_client_camunda8 import Camunda8Api
 from camunda_mcp.auth import get_client
 from camunda_mcp.mcp.mcp_camunda import register_camunda_tools  # noqa: F401
 
@@ -36,10 +37,20 @@ def get_mcp_instance() -> tuple[Any, ...]:
 
     register_tool_surface(
         mcp,
-        client_cls=Api,
-        get_client=get_client,
         service="camunda-mcp",
         tools_module=sys.modules[__name__],
+        verbose_targets=[
+            {
+                "client_cls": Camunda7Api,
+                "get_client": lambda: get_client().v7,
+                "prefix": "camunda7",
+            },
+            {
+                "client_cls": Camunda8Api,
+                "get_client": lambda: get_client().v8,
+                "prefix": "camunda8",
+            },
+        ],
     )
 
     for mw in middlewares:
