@@ -15,7 +15,7 @@ from camunda_mcp.api.api_client_camunda8 import Camunda8Api
 from camunda_mcp.auth import get_client
 from camunda_mcp.mcp.mcp_camunda import register_camunda_tools  # noqa: F401
 
-__version__ = "0.2.0"
+from camunda_mcp import __version__  # single source: package __init__
 logger = get_logger(name="camunda_mcp")
 
 
