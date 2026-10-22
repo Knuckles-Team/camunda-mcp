@@ -1,6 +1,6 @@
 # Camunda Task Operations
 
-Human user-task lifecycle on Camunda 7 (Engine REST) and Camunda 8 (Tasklist) via the camunda-mcp MCP server — list/filter the task inbox, claim/unclaim, assign, read/set task variables, and complete tasks with the domain-typed camunda_task tool. Use when the agent must work an approval queue, assign work to a user, or complete a user task with output variables. Do NOT use for deploying or starting processes (use camunda-process-orchestration) or for external-task workers, jobs, and incidents (use camunda-incident-recovery).
+Human user-task lifecycle on Camunda 7 (Engine REST) and Camunda 8 (Tasklist) via the camunda-mcp MCP server — list/filter the task inbox, claim/unclaim, assign, read/set task variables, and complete tasks with the per-operation camunda7_*/camunda8_* task tools. Use when the agent must work an approval queue, assign work to a user, or complete a user task with output variables. Do NOT use for deploying or starting processes (use camunda-process-orchestration) or for external-task workers, jobs, and incidents (use camunda-incident-recovery).
 
 # Camunda Task Operations
 
@@ -24,42 +24,46 @@ this tool over raw calls; it maps to `:Task` nodes assigned to a `:Person`.
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`camunda-mcp`** MCP server. Same
 `CAMUNDA7_*` / `CAMUNDA8_*` variables as `camunda-process-orchestration`; for v8 the
-Tasklist surface needs `CAMUNDA8_TASKLIST_URL` (+ client-credentials). `MCP_TOOL_MODE`
-selects the condensed vs. verbose surface.
+Tasklist surface needs `CAMUNDA8_TASKLIST_URL` (+ client-credentials).
 
 ## Tools & actions
-| Tool | Platform | Actions |
-|------|----------|---------|
-| `camunda_task` | v7 | `list`, `get`, `claim`, `unclaim`, `assign`, `complete`, `variables`, `set_variables` |
-| `camunda_task` | v8 | `list`, `get`, `assign`, `unassign`, `complete`, `variables` |
+| Tool | Platform | Operation |
+|------|----------|-----------|
+| `camunda7_list_tasks`, `camunda7_get_task` | v7 | list / read tasks |
+| `camunda7_claim_task`, `camunda7_unclaim_task`, `camunda7_set_task_assignee` | v7 | claim, unclaim, assign |
+| `camunda7_complete_task` | v7 | complete with typed variables |
+| `camunda7_get_task_variables`, `camunda7_set_task_variables` | v7 | read / modify task variables |
+| `camunda8_search_tasks`, `camunda8_get_task` | v8 | search / read tasks |
+| `camunda8_assign_task`, `camunda8_unassign_task`, `camunda8_complete_task` | v8 | assign, unassign, complete |
+| `camunda8_get_task_variables` | v8 | read task variables |
 
-### Key parameters (`params_json`)
+### Key parameters
 - `task_id` — required for everything except `list`.
-- `user_id` — required for v7 `claim` / `assign`.
+- `user_id` — required for v7 `claim_task` / `set_task_assignee` (`userId` for the latter's body).
 - `variables` — object (v7) or list `[{"name":..,"value":..}]` (v8) for `complete`.
-- v7 `list` accepts engine task-filter fields (`assignee`, `candidateGroup`,
+- v7 `list_tasks` accepts engine task-filter fields (`assignee`, `candidateGroup`,
   `processDefinitionKey`, `processInstanceId`, `sortBy`, `maxResults`).
 
-## Recipes (`params_json`)
-List the inbox for one assignee (v7):
+## Recipes (arguments)
+List the inbox for one assignee (`camunda7_list_tasks`):
 ```json
-{"assignee":"jdoe","sortBy":"created","sortOrder":"desc","maxResults":25}
+{"params":{"assignee":"jdoe","sortBy":"created","sortOrder":"desc","maxResults":25}}
 ```
-Claim a task (v7 action `claim`):
+Claim a task (`camunda7_claim_task`):
 ```json
 {"task_id":"<task_id>","user_id":"jdoe"}
 ```
-Complete a task with output variables (v7 action `complete`):
+Complete a task with output variables (`camunda7_complete_task`):
 ```json
 {"task_id":"<task_id>","variables":{"approved":{"value":true,"type":"Boolean"}}}
 ```
-Complete a Camunda 8 task (platform `8`, action `complete`):
+Complete a Camunda 8 task (`camunda8_complete_task`):
 ```json
 {"task_id":"<task_id>","variables":[{"name":"approved","value":true}]}
 ```
 
 ## Gotchas
-- `params_json` is a **string** of JSON — serialize it.
+- Query filters are a `params` object; request bodies are a `body` object.
 - v7 vs v8 differ: v7 `complete` variables are a **typed object**
   (`{"value":..,"type":..}`); v8 wants a **list** of `{"name":..,"value":..}`.
 - Claiming a task that is already assigned fails on v7 — `unclaim` first, or use

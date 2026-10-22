@@ -33,7 +33,7 @@ process-shaped records.
 ## When NOT to use
 - Human user-task lifecycle (claim/assign/complete) → `camunda-task-operations`.
 - Failed jobs, retries, and incidents → `camunda-incident-recovery`.
-- External-task worker fetch/complete → the `camunda_external_task` tool directly.
+- External-task worker fetch/complete → the `camunda7_fetch_and_lock` / `camunda7_complete_external_task` tools directly.
 
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`camunda-mcp`** MCP server.
@@ -47,34 +47,37 @@ Connect via the `mcp-client` skill against the **`camunda-mcp`** MCP server.
 | `CAMUNDA8_OPERATE_URL` / `CAMUNDA8_CLIENT_ID` / `CAMUNDA8_CLIENT_SECRET` / `CAMUNDA8_OAUTH_URL` | for v8 | Operate + client-credentials |
 | `CAMUNDA_SSL_VERIFY` | optional | TLS verification toggle |
 
-`MCP_TOOL_MODE` (`condensed`|`verbose`|`both`) selects the condensed action-based
-surface (used below) vs. one-to-one verbose tools.
-
 ## Tools & actions
-Each tool takes an `action`, a `platform` (`7`/`8`), and a `params_json` **JSON string**.
+One tool per API operation, named `camunda7_<operation>` (Engine REST) or
+`camunda8_<operation>` (Zeebe/Operate REST); arguments are the operation's typed
+parameters (query filters as a `params` object, request bodies as `body`).
 
-| Tool | Actions |
+| Tool | Purpose |
 |------|---------|
-| `camunda_process` | v7: `list`, `get`, `xml`, `start`, `statistics`, `suspend`; v8: `list` |
-| `camunda_instance` | v7: `list`, `get`, `delete`, `variables`, `set_variables`, `suspend`; v8: `list`, `get`, `statistics`, `cancel` |
+| `camunda7_list_process_definitions`, `camunda7_get_process_definition`, `camunda7_get_process_definition_xml`, `camunda7_get_process_definition_statistics`, `camunda7_suspend_process_definition` | v7 process definitions |
+| `camunda7_start_process_instance` | v7: start an instance (by `id` or `key`, with `body`) |
+| `camunda7_list_process_instances`, `camunda7_get_process_instance`, `camunda7_delete_process_instance`, `camunda7_suspend_process_instance` | v7 instances |
+| `camunda7_get_process_instance_variables`, `camunda7_modify_process_instance_variables` | v7 instance variables |
+| `camunda7_list_deployments`, `camunda7_get_deployment`, `camunda7_delete_deployment` | v7 deployments |
+| `camunda8_search_process_definitions`, `camunda8_search_process_instances`, `camunda8_get_process_instance`, `camunda8_get_process_instance_statistics` | v8 definitions and instances |
+| `camunda8_create_process_instance`, `camunda8_create_process_instance_with_result`, `camunda8_cancel_process_instance` | v8: start and cancel |
 | `camunda_deploy` | (takes `resource_name` + `resource_content`) deploy BPMN/DMN/form |
-| `camunda_deployment` | v7: `list`, `get`, `delete` |
 | `camunda_ingest_processes` | native KG ingest of definitions (+instances) |
 
-## Recipes (`params_json`)
-List the latest version of each definition (v7):
+## Recipes (arguments)
+List the latest version of each definition (`camunda7_list_process_definitions`):
 ```json
-{"latestVersion": true}
+{"params":{"latestVersion": true}}
 ```
-Start an instance by key with variables + business key (v7 `camunda_process` action `start`):
+Start an instance by key with variables + business key (`camunda7_start_process_instance`):
 ```json
 {"key":"invoice","body":{"businessKey":"INV-42","variables":{"amount":{"value":1200,"type":"Double"}}}}
 ```
-Fetch the BPMN XML of a definition (v7 action `xml`):
+Fetch the BPMN XML of a definition (`camunda7_get_process_definition_xml`):
 ```json
 {"key":"invoice"}
 ```
-Cancel a running Camunda 8 instance (`camunda_instance` action `cancel`, platform `8`):
+Cancel a running Camunda 8 instance (`camunda8_cancel_process_instance`):
 ```json
 {"key":"2251799813685249"}
 ```
@@ -82,8 +85,8 @@ Deploy a BPMN file (`camunda_deploy`): pass `resource_name="invoice.bpmn"` and t
 XML as `resource_content`; v7 also takes `{"deployment_name":"invoice"}` in `params_json`.
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
-- v7 `get`/`xml`/`start` accept **either** `{"id":..}` (a specific version) **or**
+- Query filters are a `params` object; request bodies are a `body` object.
+- v7 `get_process_definition`, `get_process_definition_xml` and `start_process_instance` accept **either** `{"id":..}` (a specific version) **or**
   `{"key":..}` (the latest version) — id wins if both are given.
 - Camunda 7 process-definition **ids** look like `invoice:1:abc-def` (`key:version:deployId`);
   the stable cross-version handle is the `key`.

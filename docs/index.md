@@ -22,10 +22,8 @@ tools, supporting both platforms from a single server. It provides:
   REST client (`Camunda7Api`) and the Camunda 8 Zeebe / Operate / Tasklist client
   (`Camunda8Api`), each constructed lazily so a server configured for one platform
   never needs the other's URLs or credentials.
-- **Action-dispatch MCP tools** — `camunda_process`, `camunda_instance`,
-  `camunda_task`, `camunda_deploy`, `camunda_message`, `camunda_external_task`,
-  `camunda_job`, `camunda_history`, `camunda_deployment`, and `camunda_ops`, each
-  taking a `platform` argument (`7` or `8`).
+- **MCP tools** — one tool per API operation, `camunda7_<operation>` (39) and
+  `camunda8_<operation>` (24), plus `camunda_deploy` and `camunda_ingest_processes`.
   capability through a Pydantic-AI graph agent for agent-to-agent orchestration.
 
 ## Explore the documentation
