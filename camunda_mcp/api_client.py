@@ -14,7 +14,7 @@ from typing import Any
 from camunda_mcp.api.api_client_camunda7 import Camunda7Api
 from camunda_mcp.api.api_client_camunda8 import Camunda8Api
 
-__version__ = "0.2.0"
+from camunda_mcp import __version__  # single source: package __init__
 
 
 class Api:
