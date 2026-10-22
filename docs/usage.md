@@ -6,29 +6,27 @@ as a **Python API** (`Api`) the operator import, and as a **CLI**. The full Camu
 
 ## As an MCP server
 
-Once [deployed](deployment.md), the server registers ten action-dispatch tools. Each
-tool takes a `platform` argument (`7` or `8`) and a `params_json` payload, so a single
-server can target either deployment.
+Once [deployed](deployment.md), the server registers 65 tools: one per API operation,
+named `camunda7_<operation>` (39, Camunda 7 Engine REST) or `camunda8_<operation>`
+(24, Camunda 8 Zeebe / Operate / Tasklist REST), plus `camunda_deploy` and
+`camunda_ingest_processes`. Operation tools take the operation's typed arguments, so a
+single server can target either deployment.
 
 | Tool | Purpose |
 |---|---|
-| `camunda_process` | Process definitions: list, get, BPMN XML, start, statistics, suspend |
-| `camunda_instance` | Process instances: list, get, delete, variables |
-| `camunda_task` | User tasks: list, get, claim, complete |
+| `camunda7_list_process_definitions` | Camunda 7 process definitions: list (also get, BPMN XML, statistics, suspend) |
+| `camunda7_start_process_instance` | Start an instance of a Camunda 7 definition |
+| `camunda7_list_tasks` | Camunda 7 user tasks: list (also get, claim, complete) |
+| `camunda8_search_tasks` | Camunda 8 user tasks: search (also get, assign, complete) |
 | `camunda_deploy` | Create deployments (BPMN / DMN resources) |
-| `camunda_message` | Correlate and deliver messages |
-| `camunda_external_task` | Fetch, lock, and complete external tasks |
-| `camunda_job` | Jobs and incidents |
-| `camunda_history` | Historical process and activity data |
-| `camunda_deployment` | Inspect and manage deployments |
-| `camunda_ops` | Camunda 8 Operate search operations |
+| `camunda_ingest_processes` | Ingest process definitions and instances into the knowledge graph |
 
 Example agent prompts that map onto these tools:
 
-- *"List the latest process definitions on Camunda 7"* → `camunda_process`
-- *"Start the `invoice` process with these variables"* → `camunda_process`
-- *"Show the open user tasks and claim the first one"* → `camunda_task`
-- *"Correlate the `payment-received` message"* → `camunda_message`
+- *"List the latest process definitions on Camunda 7"* → `camunda7_list_process_definitions`
+- *"Start the `invoice` process with these variables"* → `camunda7_start_process_instance`
+- *"Show the open user tasks and claim the first one"* → `camunda7_list_tasks`, `camunda7_claim_task`
+- *"Correlate the `payment-received` message"* → `camunda7_correlate_message`
 
 ## As a Python API
 

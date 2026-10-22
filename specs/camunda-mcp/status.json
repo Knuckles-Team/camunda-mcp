@@ -4,12 +4,28 @@
   "owner_repo": "camunda-mcp",
   "delivery_state": "SPECIFIED",
   "requirement_ids": [
-    "CONN-CAMUNDA-MCP-R001"
+    "CONN-CAMUNDA-MCP-R001",
+    "CONN-CAMUNDA-MCP-R002",
+    "CONN-CAMUNDA-MCP-R003"
   ],
   "requirements": [
     {
       "id": "CONN-CAMUNDA-MCP-R001",
       "title": "Connector reports its released version",
+      "delivery_state": "SPECIFIED",
+      "landed_in": [],
+      "verified_by": []
+    },
+    {
+      "id": "CONN-CAMUNDA-MCP-R002",
+      "title": "One tool per API operation",
+      "delivery_state": "SPECIFIED",
+      "landed_in": [],
+      "verified_by": []
+    },
+    {
+      "id": "CONN-CAMUNDA-MCP-R003",
+      "title": "No condensed action facades",
       "delivery_state": "SPECIFIED",
       "landed_in": [],
       "verified_by": []

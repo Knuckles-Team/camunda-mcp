@@ -40,11 +40,11 @@ agent for agent-to-agent orchestration.
   REST client (`Camunda7Api`) and the Camunda 8 Zeebe / Operate / Tasklist client
   (`Camunda8Api`), each constructed lazily so a server configured for one platform
   never needs the other's URLs or credentials.
-- **Action-dispatch MCP tools** (`camunda-mcp` console script): `camunda_process`,
-  `camunda_instance`, `camunda_task`, `camunda_deploy`, `camunda_message`,
-  `camunda_external_task`, `camunda_job`, `camunda_history`, `camunda_deployment`,
-  and `camunda_ops`. Each takes a `platform` argument (`7` or `8`). See
-  [`docs/overview.md`](docs/overview.md) for the full surface.
+- **MCP tools** (`camunda-mcp` console script): one tool per API operation, named
+  `camunda7_<operation>` (39 Camunda 7 Engine REST operations) and
+  `camunda8_<operation>` (24 Camunda 8 operations), plus `camunda_deploy` and
+  `camunda_ingest_processes`: 65 in all. See [`docs/overview.md`](docs/overview.md)
+  for the full surface.
   [`a2a.json`](a2a.json)) wrapping the tool surface in a Pydantic-AI graph agent.
 
 ## Available MCP Tools
@@ -58,18 +58,9 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 | MCP Tool | Kind | Description |
 |----------|------|-------------|
 | `camunda_deploy` | intent | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
-| `camunda_deployment` | intent | Manage Camunda 7 deployments (list/get/delete). |
-| `camunda_external_task` | intent | Camunda 7 external task worker operations. |
-| `camunda_history` | intent | Query Camunda 7 historic data. |
 | `camunda_ingest_processes` | intent | Natively ingest Camunda processes into epistemic-graph as typed nodes. |
-| `camunda_instance` | intent | Work with process instances on Camunda 7 or Camunda 8. |
-| `camunda_job` | intent | Manage jobs and incidents on Camunda 7 or Camunda 8. |
-| `camunda_message` | intent | Correlate/publish a message or broadcast a signal. |
-| `camunda_ops` | intent | Search Camunda 8 Operate / Tasklist surfaces. |
-| `camunda_process` | intent | Work with process definitions on Camunda 7 or Camunda 8. |
-| `camunda_task` | intent | Work with user tasks on Camunda 7 or Camunda 8 (Tasklist). |
 
-_11 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
+_2 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 ## Environment Variables
