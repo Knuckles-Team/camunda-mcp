@@ -1,14 +1,11 @@
 {
   "api_version": "arbora.io/v1",
   "artifacts": {
-    "camunda_mcp/connectors/mcp_source_presets.json": "f4c26938a309cef742d9c47bcf5bdc2caccca8be3c510330b12e15e63166e4d2",
-    "camunda_mcp/connectors/tool_schema_fingerprints.json": "046e3e2dfe7c18795e0add566c50c1f3977fe0d0cf14379eec340cc31de661cc",
     "camunda_mcp/ontology/camunda.ttl": "4a222127c51669053cef0172ee34efef71b58edeab799cb6a978b4cef8802a7e",
     "camunda_mcp/ontology/fixtures/records.json": "09041f1e0035d29edf66968c99736c5e905a67b7a1ea07b1a380d624f50fb2c3",
     "camunda_mcp/ontology/mappings/source.yaml": "40b70c27643ad5b3b5fb2253fdee128fcbf0e3a7f8cef100ce9adcf406f67644",
     "camunda_mcp/ontology/migrations/manifest.json": "591239e58372dc3ec701c5f36691ae3b3269e44aeaa544cfa934e42b0ca34332",
-    "camunda_mcp/ontology/shapes/connector.shacl.ttl": "d0ece34393e6c341a14d6ee70c2a71a6df776125fc0a7dfb7e362753adc6bc9d",
-    "connector_manifest.yml": "05b9a75b9c686291591ce614d3624760830b6b20cfccf1b8fb59134df3672613"
+    "camunda_mcp/ontology/shapes/connector.shacl.ttl": "d0ece34393e6c341a14d6ee70c2a71a6df776125fc0a7dfb7e362753adc6bc9d"
   },
   "checks": {
     "declared_tool_schema": "passed",

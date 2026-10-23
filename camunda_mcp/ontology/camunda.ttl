@@ -15,9 +15,8 @@
 
 # --- classes (owl:Class) ---
 
-:BusinessProcess a owl:Class ;
-    rdfs:label "Business Process" ;
-    rdfs:comment "A deployed BPMN process definition — the reusable template that instances run against (camunda_process). Identified by its process definition key/id." .
+:BusinessProcess a owl:Class .
+
 
 :ProcessInstance a owl:Class ;
     rdfs:label "Process Instance" ;
@@ -35,13 +34,11 @@
     rdfs:label "Deployment" ;
     rdfs:comment "A deployed bundle of BPMN/DMN/form resources (camunda_deploy / camunda_deployment)." .
 
-:Incident a owl:Class ;
-    rdfs:label "Incident" ;
-    rdfs:comment "A runtime failure blocking a process instance (camunda_job list_incidents / Operate incidents)." .
+:Incident a owl:Class .
 
-:Job a owl:Class ;
-    rdfs:label "Job" ;
-    rdfs:comment "An asynchronous unit of work the engine executes (timers, async continuations, service jobs) (camunda_job)." .
+
+:Job a owl:Class .
+
 
 :ExternalTask a owl:Class ;
     rdfs:label "External Task" ;
@@ -141,5 +138,7 @@
     running instances, flow-node steps, user tasks, deployments, incidents, jobs and
     external tasks, with their execution relationships across Camunda 7 (Engine REST)
     and Camunda 8 (Zeebe/Operate/Tasklist) — federated into the agent-connector-sdk
-    knowledge-graph hub via the enterprise layer.""" ;
-    owl:imports <http://knuckles.team/kg/enterprise> .
+    knowledge-graph hub via the enterprise layer.""" .
+
+# ontology-codemod R4
+<http://knuckles.team/kg#Deployment> rdfs:subClassOf <http://knuckles.team/kg#RunEvent> .
