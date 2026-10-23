@@ -71,7 +71,7 @@ async def test_ingest_entities_writes_nodes_and_edges(ingest):
     a_record = next(r for r in request.records if r.record_id == "a")
     assert a_record.payload["name"] == "p"
     assert request.relationships[0].relation_reference.endswith(
-        "resources/BusinessProcess/relations/deployedIn"
+        "relations/BusinessProcess/deployedIn"
     )
 
 
@@ -103,7 +103,7 @@ async def test_ingest_process_definitions_maps_process_and_deployment(ingest):
         r.record_id == "camunda:deployment:dep-9" for r in request.records
     )
     assert request.relationships[0].relation_reference.endswith(
-        "resources/BusinessProcess/relations/deployedIn"
+        "relations/BusinessProcess/deployedIn"
     )
 
 
@@ -126,7 +126,7 @@ async def test_ingest_process_instances_links_definition(ingest):
     inst = next(r for r in request.records if r.record_id == "camunda:instance:pi-1")
     assert inst.payload["businessKey"] == "INV-42"
     assert request.relationships[0].relation_reference.endswith(
-        "resources/ProcessInstance/relations/instanceOf"
+        "relations/ProcessInstance/instanceOf"
     )
 
 
@@ -154,8 +154,8 @@ async def test_ingest_tasks_maps_task_instance_and_assignee(ingest):
     assert task.payload["activityId"] == "approve"
     assert any(r.record_id == "camunda:person:jdoe" for r in request.records)
     relation_refs = {r.relation_reference for r in request.relationships}
-    assert any(ref.endswith("relations/partOfInstance") for ref in relation_refs)
-    assert any(ref.endswith("relations/assignedTo") for ref in relation_refs)
+    assert any(ref.endswith("/partOfInstance") for ref in relation_refs)
+    assert any(ref.endswith("/assignedTo") for ref in relation_refs)
 
 
 @pytest.mark.asyncio
