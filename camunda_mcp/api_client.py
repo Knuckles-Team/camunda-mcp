@@ -9,12 +9,13 @@ Both are constructed lazily so a server configured for only one platform never
 needs the other's URLs/credentials.
 """
 
+from importlib.metadata import version as _v
 from typing import Any
 
 from camunda_mcp.api.api_client_camunda7 import Camunda7Api
 from camunda_mcp.api.api_client_camunda8 import Camunda8Api
 
-from camunda_mcp import __version__  # single source: package __init__
+__version__ = _v("camunda-mcp")
 
 
 class Api:

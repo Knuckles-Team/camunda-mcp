@@ -1,10 +1,10 @@
 import asyncio
 
-from camunda_mcp.mcp_server import get_mcp_instance
+from agent_connector_sdk.connector import build_server
 
 
 def _tools() -> dict:
-    mcp, _args, _mw = get_mcp_instance()
+    _, mcp = build_server("camunda_mcp", command_args=[])
     return {t.name: t for t in asyncio.run(mcp.list_tools())}
 
 

@@ -23,8 +23,6 @@
 Camunda (7 & 8) process automation **API + MCP Server + A2A Agent** for the
 agent-connector-sdk ecosystem.
 
-*Version: 0.5.0*
-
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning the Camunda platform are maintained in the
 > [official documentation](https://knuckles-team.github.io/camunda-mcp/).
