@@ -4,7 +4,6 @@ import importlib
 import inspect
 from typing import Any
 
-__version__ = "2.6.4"
 __all__: list[str] = []
 
 CORE_MODULES = ["camunda_mcp.api_client"]
@@ -75,3 +74,27 @@ def __getattr__(name: str) -> Any:
 
 def __dir__() -> list[str]:
     return sorted(list(globals().keys()) + __all__)
+
+
+from agent_connector_sdk.connector import Connector
+
+from camunda_mcp.api.api_client_camunda7 import Camunda7Api
+from camunda_mcp.api.api_client_camunda8 import Camunda8Api
+from camunda_mcp.auth import get_client
+
+connector = Connector(
+    tools="camunda_mcp.mcp_server",
+    instructions="Camunda MCP Server - process automation for Camunda 7 (Engine REST) and Camunda 8 (Zeebe/Operate/Tasklist REST): process definitions, instances, user tasks, deployments, messaging, jobs and incidents.",
+    verbose_targets=(
+        {
+            "client_cls": Camunda7Api,
+            "get_client": lambda: get_client().v7,
+            "prefix": "camunda7",
+        },
+        {
+            "client_cls": Camunda8Api,
+            "get_client": lambda: get_client().v8,
+            "prefix": "camunda8",
+        },
+    ),
+)

@@ -7,9 +7,6 @@ Served live as ``connector://resources``. Regenerate by editing the declarations
 from __future__ import annotations
 
 from agent_connector_sdk.ingest.live_declaration import source_meta
-from agent_connector_sdk.ingest.sources import IngestSourceDeclaration, IngestSourceSpec
-
-CONNECTOR = "camunda-mcp"
 
 SOURCES = (
     source_meta(
@@ -29,122 +26,56 @@ SOURCES = (
     ),
 )
 
+SCHEMA_VERSION = 2
+
+FIELD_SETS = {
+    "fields_1": {
+        "activityId": "xsd:string",
+        "assignee": "xsd:string",
+        "bpmnVersion": "xsd:integer",
+        "businessKey": "xsd:string",
+        "incidentType": "xsd:string",
+        "processDefinitionKey": "xsd:string",
+        "processState": "xsd:string",
+        "suspended": "xsd:boolean",
+    },
+}
+
 SCHEMA_MAPPINGS = {
     "BusinessProcess": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
     "Deployment": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": None,
     },
     "ExternalTask": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
     "Incident": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Incident",
     },
     "Job": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
     "ProcessInstance": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
     "ProcessStep": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
     "ProcessVariable": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
     "Task": {
-        "fields": {
-            "activityId": "xsd:string",
-            "assignee": "xsd:string",
-            "bpmnVersion": "xsd:integer",
-            "businessKey": "xsd:string",
-            "incidentType": "xsd:string",
-            "processDefinitionKey": "xsd:string",
-            "processState": "xsd:string",
-            "suspended": "xsd:boolean",
-        },
+        "field_sets": ["fields_1"],
         "ontology_class": "Action",
     },
 }
@@ -196,20 +127,3 @@ RESOURCES = (
         "name": "Task",
     },
 )
-
-
-def declaration() -> IngestSourceDeclaration:
-    """The declaration the server assembles from this module."""
-    specs = []
-    for item in SOURCES:
-        for entry in item["connector_sources"]:
-            body = {k: v for k, v in entry.items() if k not in ("tool", "mapping")}
-            specs.append(IngestSourceSpec.model_validate({**body, "tools": (entry["tool"],)}))
-    return IngestSourceDeclaration.model_validate(
-        {
-            "connector": CONNECTOR,
-            "sources": specs,
-            "schema_mappings": SCHEMA_MAPPINGS,
-            "resources": RESOURCES,
-        }
-    )
