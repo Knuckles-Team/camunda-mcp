@@ -91,3 +91,24 @@ def test_alternate_docs_job_keeps_validation_without_publication():
         "gh-deploy" not in path.read_text()
         for path in (ROOT / ".github/workflows").glob("*.yml")
     )
+
+
+def test_development_skill_is_source_backed():
+    skill = (ROOT / "camunda_mcp/skills/camunda-mcp-development/SKILL.md").read_text()
+
+    for fragment in (
+        "Rapid delivery: the 5-minute contract",
+        "camunda_mcp/__init__.py",
+        "camunda_mcp/mcp/mcp_camunda.py",
+        "camunda_mcp/api/api_client_camunda7.py",
+        "camunda_mcp/api/api_client_camunda8.py",
+        "CAMUNDA7_URL",
+        "CAMUNDA8_ZEEBE_REST_URL",
+        "tests/test_tool_surface.py",
+        "agent_connector_sdk.cli:serve",
+        "spec_dashboard_enabled",
+    ):
+        assert fragment in skill
+
+    assert "camunda-agent" not in skill
+    assert 'CAMUNDA7_TOKEN="' not in skill
