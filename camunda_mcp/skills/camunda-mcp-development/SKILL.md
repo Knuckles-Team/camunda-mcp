@@ -42,10 +42,10 @@ Pipelines hooks remain external boundaries.
   `CAMUNDA_TLS_PROFILE` or `CAMUNDA_TLS_PROFILE_REF`. Preserve SDK setting
   lookup, OAuth/basic/bearer behavior, and TLS verification; never embed a
   credential or weaken verification.
-- `camunda_mcp/connector_sources.py`, `camunda_mcp/ontology/`,
-  `camunda_mcp/prompts/`, and `camunda_mcp/skills/` are packaged connector
-  content. `pyproject.toml` includes these trees through package data; inspect
-  a built wheel when changing packaged content.
+- `camunda_mcp/connector_sources.py`, `camunda_mcp/ontology/`, and
+  `camunda_mcp/skills/` are packaged connector content. `pyproject.toml`
+  includes these trees through package data; inspect a built wheel when
+  changing packaged content.
 - The declared console script is `camunda-mcp = agent_connector_sdk.cli:serve`
   and the connector entry point is `camunda-mcp = camunda_mcp:connector`.
   Do not invent a second server or agent entry point.
