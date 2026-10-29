@@ -33,7 +33,9 @@ class _FakeTransport:
         self.requests: list[SourceIngestionRequest] = []
 
     async def source_status(self, _connector: str, _stream: str) -> Any:
-        return SimpleNamespace(accepted_checkpoint=None)
+        return SimpleNamespace(
+            connector=_connector, stream=_stream, accepted_checkpoint=None
+        )
 
     async def submit(self, request: SourceIngestionRequest) -> Any:
         self.requests.append(request)
@@ -99,9 +101,7 @@ async def test_ingest_process_definitions_maps_process_and_deployment(ingest):
     assert proc.payload["processDefinitionKey"] == "invoice"
     assert proc.payload["bpmnVersion"] == 1
     assert proc.payload["externalToolId"] == "invoice:1:abc"
-    assert any(
-        r.record_id == "camunda:deployment:dep-9" for r in request.records
-    )
+    assert any(r.record_id == "camunda:deployment:dep-9" for r in request.records)
     assert request.relationships[0].relation_reference.endswith(
         "relations/BusinessProcess/deployedIn"
     )
