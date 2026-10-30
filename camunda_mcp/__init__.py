@@ -76,7 +76,7 @@ def __dir__() -> list[str]:
     return sorted(list(globals().keys()) + __all__)
 
 
-from agent_connector_sdk.connector import Connector
+from scion_sdk.connector import Connector
 
 from camunda_mcp.api.api_client_camunda7 import Camunda7Api
 from camunda_mcp.api.api_client_camunda8 import Camunda8Api

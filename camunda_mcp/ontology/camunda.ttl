@@ -137,7 +137,7 @@
     rdfs:comment """Camunda business-process-automation model — process definitions,
     running instances, flow-node steps, user tasks, deployments, incidents, jobs and
     external tasks, with their execution relationships across Camunda 7 (Engine REST)
-    and Camunda 8 (Zeebe/Operate/Tasklist) — federated into the agent-connector-sdk
+    and Camunda 8 (Zeebe/Operate/Tasklist) — federated into the scion-sdk
     knowledge-graph hub via the enterprise layer.""" .
 
 # ontology-codemod R4

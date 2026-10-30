@@ -1,6 +1,6 @@
 import asyncio
 
-from agent_connector_sdk.connector import build_server
+from scion_sdk.connector import build_server
 
 
 def _tools() -> dict:

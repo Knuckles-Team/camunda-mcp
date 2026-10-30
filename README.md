@@ -21,7 +21,7 @@
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/camunda-mcp)
 
 Camunda (7 & 8) process automation **API + MCP Server + A2A Agent** for the
-agent-connector-sdk ecosystem.
+scion-sdk ecosystem.
 
 > **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
 > interfaces, and guidance for provisioning the Camunda platform are maintained in the
@@ -87,7 +87,7 @@ _2 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operatio
 | `CAMUNDA_TIMEOUT_SECONDS` | `30.0` | Outbound HTTP timeout in seconds (matches the runtime default) |
 | `CAMUNDA_MAX_RESPONSE_BYTES` | `8388608` | Maximum response body size in bytes (8 MiB, matches the runtime default) |
 
-#### Inherited agent-connector-sdk variables (apply to every connector)
+#### Inherited scion-sdk variables (apply to every connector)
 
 | Variable | Example | Description |
 |----------|---------|-------------|
@@ -115,7 +115,7 @@ _2 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operatio
 | `MODEL_ID` | — | Operator-configured model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_17 package + 23 inherited variable(s). Auto-generated from `.env.example` + the shared agent-connector-sdk set — do not edit._
+_17 package + 23 inherited variable(s). Auto-generated from `.env.example` + the shared scion-sdk set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 
@@ -180,7 +180,7 @@ Pick the extra that matches what the operator want to run:
 
 | Extra | Installs | Use when |
 |-------|----------|----------|
-| `camunda-mcp[mcp]` | Connector-focused MCP server (`agent-connector-sdk` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
+| `camunda-mcp[mcp]` | Connector-focused MCP server (`scion-sdk` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
 | `camunda-mcp[all]` | Everything (`mcp` + `agent`) | Development / both surfaces |
 
 ```bash
@@ -219,7 +219,7 @@ agent (`immutable agent digest`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
-Agent Connector SDK core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
+Scion SDK core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
 deployments can use the bundled engine. For production or shared state, run
 **epistemic-graph as a dedicated database service** and configure the runtime to use it.
 Deployment recipes (single-node + Raft HA), connection configuration, and architecture

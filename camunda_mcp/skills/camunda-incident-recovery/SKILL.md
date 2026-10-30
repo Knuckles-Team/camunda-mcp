@@ -13,7 +13,7 @@ description: >-
 license: MIT
 tags: [camunda, incident, jobs, external-task, operate, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Camunda Incident Recovery

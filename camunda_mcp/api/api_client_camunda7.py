@@ -26,11 +26,7 @@ class Camunda7Api(ApiClientBase):
         self, id: str | None = None, key: str | None = None
     ) -> Any:
         """Get a process definition by id, or the latest version by key."""
-        endpoint = (
-            f"process-definition/{id}"
-            if id
-            else f"process-definition/key/{key}"
-        )
+        endpoint = f"process-definition/{id}" if id else f"process-definition/key/{key}"
         return self.request("GET", endpoint, accept="application/json")
 
     def get_process_definition_xml(
@@ -88,9 +84,7 @@ class Camunda7Api(ApiClientBase):
             if id
             else f"process-definition/key/{key}/suspended"
         )
-        return self.request(
-            "PUT", endpoint, json=body, content_type="application/json"
-        )
+        return self.request("PUT", endpoint, json=body, content_type="application/json")
 
     # ------------------------------------------------------------------ #
     # Process instances
@@ -111,9 +105,7 @@ class Camunda7Api(ApiClientBase):
         self, instance_id: str, params: dict[str, Any] | None = None
     ) -> Any:
         """Delete (cancel) a running process instance."""
-        return self.request(
-            "DELETE", f"process-instance/{instance_id}", params=params
-        )
+        return self.request("DELETE", f"process-instance/{instance_id}", params=params)
 
     def get_process_instance_variables(self, instance_id: str) -> Any:
         """Get all variables of a process instance."""
@@ -137,9 +129,7 @@ class Camunda7Api(ApiClientBase):
             content_type="application/json",
         )
 
-    def suspend_process_instance(
-        self, instance_id: str, suspended: bool = True
-    ) -> Any:
+    def suspend_process_instance(self, instance_id: str, suspended: bool = True) -> Any:
         """Suspend or activate a single process instance."""
         return self.request(
             "PUT",
@@ -303,9 +293,7 @@ class Camunda7Api(ApiClientBase):
             content_type="application/json",
         )
 
-    def handle_external_task_failure(
-        self, task_id: str, body: dict[str, Any]
-    ) -> Any:
+    def handle_external_task_failure(self, task_id: str, body: dict[str, Any]) -> Any:
         """Report a failure for an external task (``workerId``, ``errorMessage``)."""
         return self.request(
             "POST",
@@ -348,15 +336,11 @@ class Camunda7Api(ApiClientBase):
     # ------------------------------------------------------------------ #
     def list_incidents(self, params: dict[str, Any] | None = None) -> Any:
         """List incidents, optionally filtered."""
-        return self.request(
-            "GET", "incident", params=params, accept="application/json"
-        )
+        return self.request("GET", "incident", params=params, accept="application/json")
 
     def get_incident(self, incident_id: str) -> Any:
         """Get a single incident by id."""
-        return self.request(
-            "GET", f"incident/{incident_id}", accept="application/json"
-        )
+        return self.request("GET", f"incident/{incident_id}", accept="application/json")
 
     def resolve_incident(self, incident_id: str) -> Any:
         """Resolve (delete) an incident."""
