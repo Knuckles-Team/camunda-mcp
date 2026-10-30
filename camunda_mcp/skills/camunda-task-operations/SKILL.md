@@ -12,7 +12,7 @@ description: >-
 license: MIT
 tags: [camunda, user-task, tasklist, workflow, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Camunda Task Operations

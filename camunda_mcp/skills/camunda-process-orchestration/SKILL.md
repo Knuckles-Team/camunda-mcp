@@ -13,7 +13,7 @@ description: >-
 license: MIT
 tags: [camunda, bpmn, process, workflow, zeebe, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Camunda Process Orchestration
@@ -98,4 +98,4 @@ XML as `resource_content`; v7 also takes `{"deployment_name":"invoice"}` in `par
 - `camunda-task-operations` — the human user-task half of the same processes.
 - `camunda-incident-recovery` — jobs/incidents blocking these instances.
 - `camunda_ingest_processes` natively mirrors definitions/instances into the KG
-  (`:BusinessProcess` / `:ProcessInstance`, `agent-connector-sdk-source-integration`).
+  (`:BusinessProcess` / `:ProcessInstance`, `scion-sdk-source-integration`).

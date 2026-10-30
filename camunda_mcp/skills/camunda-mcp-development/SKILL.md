@@ -46,7 +46,7 @@ Pipelines hooks remain external boundaries.
   `camunda_mcp/skills/` are packaged connector content. `pyproject.toml`
   includes these trees through package data; inspect a built wheel when
   changing packaged content.
-- The declared console script is `camunda-mcp = agent_connector_sdk.cli:serve`
+- The declared console script is `camunda-mcp = scion_sdk.cli:serve`
   and the connector entry point is `camunda-mcp = camunda_mcp:connector`.
   Do not invent a second server or agent entry point.
 

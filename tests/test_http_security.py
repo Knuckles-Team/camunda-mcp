@@ -8,7 +8,7 @@ from camunda_mcp.api.api_client_base import ApiClientBase
 class _Response:
     def __init__(
         self,
-        body: bytes = b'{}',
+        body: bytes = b"{}",
         *,
         status: int = 200,
         headers: dict[str, str] | None = None,

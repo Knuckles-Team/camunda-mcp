@@ -68,7 +68,7 @@ def test_development_skill_is_source_backed():
         "CAMUNDA7_URL",
         "CAMUNDA8_ZEEBE_REST_URL",
         "tests/test_tool_surface.py",
-        "agent_connector_sdk.cli:serve",
+        "scion_sdk.cli:serve",
         "spec_dashboard_enabled",
     ):
         assert fragment in skill

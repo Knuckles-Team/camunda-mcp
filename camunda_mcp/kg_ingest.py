@@ -6,7 +6,7 @@ OWL nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:Task``,
 ``:Deployment``, ``:Incident`` …) + links, matching the classes federated by
 ``camunda_mcp.ontology``.
 
-The write path is ``agent_connector_sdk.ingest`` -- the generated ``SourceIngest``
+The write path is ``scion_sdk.ingest`` -- the generated ``SourceIngest``
 client, not a local ingestion helper. Node ids follow ``camunda:<class>:<extId>``;
 each ``node_type`` matches a class in ``camunda_mcp/ontology/camunda.ttl``.
 """
@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agent_connector_sdk.ingest import (
+from scion_sdk.ingest import (
     ChangeSet,
     Document,
     Entity,
