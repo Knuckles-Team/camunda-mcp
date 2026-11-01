@@ -1,5 +1,9 @@
-# CONN-CAMUNDA-MCP — Delivery tasks
+# CONN-CAMUNDA-MCP — Implementation tasks
 
-- [ ] `CONN-CAMUNDA-MCP-R002` — Register only the per-operation tools plus `camunda_deploy` and `camunda_ingest_processes`; test the count of 65.
-- [ ] `CONN-CAMUNDA-MCP-R003` — Remove the action-routing `camunda_*` tools; test that no tool carries the `split-action` tag.
-- [x] `CONN-CAMUNDA-MCP-R001` — Track `__version__` in the bump configuration and test it against `pyproject.toml`.
+Governing spec: [spec.md](spec.md). Design: [plan.md](plan.md). Rows: [requirements.md](requirements.md).
+
+Each task line reads `- [ ] T001 [P] [US1] <ID>-R012.4 description`. Order is producer first.
+
+- [x] T001 [US1] CONN-CAMUNDA-MCP-R001 Connector reports its released version.
+- [ ] T002 [US1] CONN-CAMUNDA-MCP-R002 One tool per API operation.
+- [ ] T003 [US1] CONN-CAMUNDA-MCP-R003 No condensed action facades.
