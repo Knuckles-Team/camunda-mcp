@@ -56,7 +56,7 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 | MCP Tool | Kind | Description |
 |----------|------|-------------|
 | `camunda_deploy` | intent | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
-| `camunda_ingest_processes` | intent | Natively ingest Camunda processes into epistemic-graph as typed nodes. |
+| `camunda_ingest_processes` | intent | Natively ingest Camunda processes into medulla as typed nodes. |
 
 _2 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
@@ -180,7 +180,7 @@ Pick the extra that matches what the operator want to run:
 
 | Extra | Installs | Use when |
 |-------|----------|----------|
-| `camunda-mcp[mcp]` | Connector-focused MCP server (`scion-sdk` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
+| `camunda-mcp[mcp]` | Connector-focused MCP server (`scion-sdk` — FastMCP/FastAPI + `medulla`) | The operator only run the **MCP server** (smallest install / image) |
 | `camunda-mcp[all]` | Everything (`mcp` + `agent`) | Development / both surfaces |
 
 ```bash
@@ -209,7 +209,7 @@ One multi-stage `docker/Dockerfile` builds the MCP-only image (`--target mcp`):
 
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
-| `example/camunda-mcp:mcp` | `--target mcp` | `camunda-mcp[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `camunda-mcp` |
+| `example/camunda-mcp:mcp` | `--target mcp` | `camunda-mcp[mcp]` — **connector-focused**, includes `medulla`; no model-orchestration stack | `camunda-mcp` |
 
 ```bash
 docker build --target mcp   -t example/camunda-mcp:mcp    docker/   # connector-focused MCP server
@@ -217,14 +217,14 @@ docker build --target mcp   -t example/camunda-mcp:mcp    docker/   # connector-
 
 agent (`immutable agent digest`) with a co-located `:mcp` sidecar.
 
-### Knowledge-graph database (`epistemic-graph`)
+### Knowledge-graph database (`medulla`)
 
-Scion SDK core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
+Scion SDK core dependency (`medulla`). The `[mcp]` extra keeps
 deployments can use the bundled engine. For production or shared state, run
-**epistemic-graph as a dedicated database service** and configure the runtime to use it.
+**medulla as a dedicated database service** and configure the runtime to use it.
 Deployment recipes (single-node + Raft HA), connection configuration, and architecture
 diagrams are documented in the
-[epistemic-graph deployment guide](https://knuckles-team.github.io/epistemic-graph/deployment/).
+[medulla deployment guide](https://knuckles-team.github.io/medulla/deployment/).
 
 ## MCP config
 

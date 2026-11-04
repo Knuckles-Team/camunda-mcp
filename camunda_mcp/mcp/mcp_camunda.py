@@ -94,7 +94,7 @@ def register_camunda_tools(mcp: FastMCP) -> None:
             description="Also list running instances and ingest them (+:instanceOf).",
         ),
     ) -> Any:
-        """Natively ingest Camunda processes into epistemic-graph as typed nodes.
+        """Natively ingest Camunda processes into medulla as typed nodes.
 
         Lists process definitions (and optionally running instances) via the real
         client and pushes them as ``:BusinessProcess`` / ``:ProcessInstance`` nodes
