@@ -1,7 +1,7 @@
 """Epistemic-graph ingestion for Camunda records (typed graph nodes).
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. camunda-mcp pushes its
-process-automation data into the ONE epistemic-graph knowledge graph as **typed
+process-automation data into the ONE medulla knowledge graph as **typed
 OWL nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:Task``,
 ``:Deployment``, ``:Incident`` …) + links, matching the classes federated by
 ``camunda_mcp.ontology``.
@@ -65,7 +65,7 @@ async def ingest_entities(
     *,
     ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Write typed OWL nodes (+ edges) into epistemic-graph.
+    """Write typed OWL nodes (+ edges) into medulla.
 
     A malformed change set or a refused commit raises ``IngestError``.
     """
