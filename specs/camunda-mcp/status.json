@@ -12,15 +12,19 @@
     {
       "id": "CONN-CAMUNDA-MCP-R001",
       "title": "Connector reports its released version",
-      "delivery_state": "SPECIFIED",
-      "landed_in": [],
+      "delivery_state": "LANDED",
+      "landed_in": [
+        "97b12245e80e"
+      ],
       "verified_by": []
     },
     {
       "id": "CONN-CAMUNDA-MCP-R002",
       "title": "One tool per API operation",
-      "delivery_state": "SPECIFIED",
-      "landed_in": [],
+      "delivery_state": "LANDED",
+      "landed_in": [
+        "97b12245e80e"
+      ],
       "verified_by": []
     },
     {
