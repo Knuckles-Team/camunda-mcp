@@ -10,9 +10,10 @@
 | CONTRACT-T1 | Compare served tools with contract steps and links | Every tool is called by a step and named by a link; step parameters exist on the tool |
 | PROMPT-T1 | Read every packaged prompt | Each is a full agent definition naming served tools, packaged skills and declared locations |
 | ONTO-T1 | Walk the `rdfs:subClassOf` chain of every class in `camunda.ttl` | Each reaches a core class; no `owl:imports` |
-| LIFE-T1 | Apply every state and event pair to the instance and task tables | Legal pairs reach their state; every other pair raises `IllegalTransition` (`CONN-CAMUNDA-MCP-R009.1`, `R009.4`) |
+| LIFE-T1 | Apply every state and event pair to the instance and task tables | Legal pairs reach their state; every other pair raises `IllegalTransition` (`CONN-CAMUNDA-MCP-R009.1`, `R009.4`); one parametrised id per edge, plus the complement as refusals asserting machine, from-state and event |
 | LIFE-T2 | Map recorded generation 7 and generation 8 instances | One machine, one state each; an unknown value is refused (`CONN-CAMUNDA-MCP-R009.2`) |
 | LIFE-T3 | Call cancel, suspend, activate, claim, unclaim and complete from every state | Only legal calls write; a refusal sends no request (`CONN-CAMUNDA-MCP-R009.3`, `R009.5`, `R009.7`) |
+| LIFE-T4 | Complete a human task and an automated task with and without a resolvable identity | Human tasks complete as the signed-in user, automated tasks as the Arbora agent account, no identity is refused with `NoActingIdentity` (`CONN-CAMUNDA-MCP-R009.8`) |
 
 Proof: `tests/test_version.py::test_reported_version_matches_the_released_package` (`CONN-CAMUNDA-MCP-R001`).
 
@@ -38,3 +39,4 @@ Proof: `tests/test_ontology.py` (`CONN-CAMUNDA-MCP-R007`).
 - `CONN-CAMUNDA-MCP-R009.5`: planned proof `tests/test_lifecycle_machines.py::test_complete_needs_claimed_by_the_same_assignee`. Expected: Only a Claimed task completes, and only by its assignee.
 - `CONN-CAMUNDA-MCP-R009.6`: planned proof `tests/test_lifecycle_machines.py::test_ingested_nodes_carry_lifecycle_state_only`. Expected: Nodes carry one state field.
 - `CONN-CAMUNDA-MCP-R009.7`: planned proof `tests/test_lifecycle_machines.py::test_instance_and_task_machines_refuse_before_any_engine_call`. Expected: Zero write requests on refusal.
+- `CONN-CAMUNDA-MCP-R009.8`: planned proof `tests/test_lifecycle_machines.py::test_human_task_completes_as_the_signed_in_user`. Expected: The identity follows the task kind and an unresolved identity is refused.
