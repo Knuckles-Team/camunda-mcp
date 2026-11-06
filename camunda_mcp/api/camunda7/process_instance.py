@@ -612,7 +612,7 @@ class Camunda7ProcessInstance(ApiClientBase):
         `processDefinitionId` # Activate/Suspend Process Instance By Process
         Definition Key * `suspend` * `processDefinitionKey` *
         `processDefinitionTenantId` * `processDefinitionWithoutTenantId` #
-        Activate/Suspend Process Instance In Group * `suspend` * `proces...
+        Activate/Suspend Process Instance In Group * `suspend` * `process...
 
         PUT /process-instance/suspended
         """

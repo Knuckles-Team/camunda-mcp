@@ -17,7 +17,7 @@ class Camunda7TaskVariable(ApiClientBase):
 
         Removes a variable that is visible to a task. A variable is visible to a
         task if it is a local task variable or declared in a parent scope of the
-        task. See documentation on visiblity of variables.
+        task. See documentation on visibility of variables.
 
         DELETE /task/{id}/variables/{varName}
         """
@@ -39,7 +39,7 @@ class Camunda7TaskVariable(ApiClientBase):
         Retrieves a variable from the context of a given task. The variable must be
         visible from the task. It is visible from the task if it is a local task
         variable or declared in a parent scope of the task. See documentation on
-        visiblity of variables.
+        visibility of variables.
 
         GET /task/{id}/variables/{varName}
         """
@@ -62,7 +62,7 @@ class Camunda7TaskVariable(ApiClientBase):
         Retrieves a binary variable from the context of a given task. Applicable for
         byte array and file variables. The variable must be visible from the task.
         It is visible from the task if it is a local task variable or declared in a
-        parent scope of the task. See documentation on visiblity of variables.
+        parent scope of the task. See documentation on visibility of variables.
 
         GET /task/{id}/variables/{varName}/data
         """
@@ -82,7 +82,7 @@ class Camunda7TaskVariable(ApiClientBase):
 
         Retrieves all variables visible from the task. A variable is visible from
         the task if it is a local task variable or declared in a parent scope of the
-        task. See documentation on visiblity of variables.
+        task. See documentation on visibility of variables.
 
         GET /task/{id}/variables
         """
@@ -107,7 +107,7 @@ class Camunda7TaskVariable(ApiClientBase):
         deletions. So, if a variable is updated AND deleted, the deletion overrides
         the update. A variable is visible from the task if it is a local task
         variable or declared in a parent scope of the task. See documentation on
-        visiblity of variables. Request body: an object with modifications,
+        visibility of variables. Request body: an object with modifications,
         deletions.
 
         POST /task/{id}/variables
@@ -158,7 +158,7 @@ class Camunda7TaskVariable(ApiClientBase):
         Sets the serialized value for a binary variable or the binary value for a
         file variable visible from the task. A variable is visible from the task if
         it is a local task variable or declared in a parent scope of the task. See
-        documentation on visiblity of variables.
+        documentation on visibility of variables.
 
         POST /task/{id}/variables/{varName}/data
         """

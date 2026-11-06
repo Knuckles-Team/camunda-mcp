@@ -21,7 +21,7 @@ def _parents(body: str) -> list[str]:
 
 
 def test_every_class_reaches_a_core_class():
-    for name, body in BLOCKS.items():
+    for name in BLOCKS:
         seen, todo = set(), [name]
         reached = False
         while todo:

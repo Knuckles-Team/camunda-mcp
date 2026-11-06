@@ -337,7 +337,7 @@ class Camunda7ProcessDefinition(ApiClientBase):
         Retrieves the diagram of a process definition. If the process definition's
         deployment contains an image resource with the same file name as the process
         definition, the deployed image will be returned by the Get Diagram endpoint.
-        Example: `someProcess.bpmn` and `someProcess.png`. Supported file extentions
+        Example: `someProcess.bpmn` and `someProcess.png`. Supported file extensions
         for the image are: `svg`, `png`, `jpg`, and `gif`.
 
         GET /process-definition/{id}/diagram
@@ -379,7 +379,7 @@ class Camunda7ProcessDefinition(ApiClientBase):
         tenant. If the process definition's deployment contains an image resource
         with the same file name as the process definition, the deployed image will
         be returned by the Get Diagram endpoint. Example: `someProcess.bpmn` and
-        `someProcess.png`. Supported file extentions for the image are: `svg`,
+        `someProcess.png`. Supported file extensions for the image are: `svg`,
         `png`, `jpg`, and `gif`.
 
         GET /process-definition/key/{key}/tenant-id/{tenant-id}/diagram

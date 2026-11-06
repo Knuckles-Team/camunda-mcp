@@ -16,7 +16,7 @@ class Camunda7Identity(ApiClientBase):
         """Validate Password.
 
         A password policy consists of a list of rules that new passwords must follow
-        to be policy compliant. A password can be checked for compliancy via this
+        to be policy compliant. A password can be checked for compliance via this
         end point. More information on password policies in Operaton can be found in
         the password policy user guide and in the security instructions. Request
         body: an object with password, profile.
