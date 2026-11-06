@@ -43,6 +43,7 @@ The engine reads this system's documents through the connector and sends governe
 - **FR-001**: Default content. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001`.
 - **FR-002**: Declare access contracts for the competency reads of camunda-mcp. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002`.
 - **FR-003**: Process and decision definition documents as federated pack sources. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003`.
+- **FR-004**: The instance and user task machines are described in the ontology (rollup). Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.1`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.2`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.3`.
 
 ## Success Criteria
 
@@ -60,3 +61,4 @@ The engine reads this system's documents through the connector and sends governe
 |---|---|---|---|---|
 | FR-001 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001` | [plan.md](plan.md) | T-001 | [test-spec.md](test-spec.md) |
 | FR-002 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002` | [plan.md](plan.md) | T-002 | [test-spec.md](test-spec.md) |
+| FR-004 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.1`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.2`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.3` | [plan.md](plan.md) | T-004 | [test-spec.md](test-spec.md) |

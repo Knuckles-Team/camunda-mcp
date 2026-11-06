@@ -53,6 +53,24 @@ The rows are delivered in place; the design is the caller chain below.
 
 `CamundaDeploySink` executes a released governed change set: one deployment per change set, named by the model id, with duplicate filtering so a re-release creates no new version. A change set that is not released, or a payload whose digest differs, refuses before any API call. The interactive deploy business task stays as it is.
 
+### Instance and user task machines (CONN-CAMUNDA-MCP-R009)
+
+The engine reports instance state as a string and a suspension flag, and the two engine generations use different words. `camunda_mcp/lifecycle.py` maps both onto one `InstanceState` and decides every move in `instance_transition`.
+
+| From | Event | To |
+|---|---|---|
+| Created | Start | Active |
+| Active | Suspend | Suspended |
+| Suspended | Activate | Active |
+| Active | RaiseIncident | Incident (sub-state of Active) |
+| Incident | ResolveIncident | Active |
+| Incident | Suspend | Suspended |
+| Active, Incident | Complete | Completed |
+| Active, Suspended, Incident | Cancel | Canceled |
+| Active, Suspended, Incident | Terminate | Terminated |
+
+The user task machine has Created, Claimed (with the assignee), Completed, Canceled and Deleted. Complete needs Claimed by the acting user. The guards run inside the existing generated tools through one `guarded` wrapper, so the tool surface of `CONN-CAMUNDA-MCP-R002` does not change.
+
 ## Phase 2: Task approach
 
 `tasks.md` holds one task line per row, producer first.
@@ -70,7 +88,12 @@ The repository pre-commit hooks apply: `ruff-format`, `connector-standard`, `sec
 1. `CONN-CAMUNDA-MCP-R001`: the installed `camunda-mcp` distribution metadata (`pyproject.toml` line 7) -> `__version__ = _v("camunda-mcp")` in `camunda_mcp/api_client.py:18`, imported by the code that builds `Api`; `camunda_mcp/__init__.py` defines no `__version__`.
 2. `CONN-CAMUNDA-MCP-R002`: the `camunda-mcp` console script (`scion_sdk.cli:serve`) loads `camunda_mcp:connector` (`camunda_mcp/__init__.py:85`); its `verbose_targets` prefixes `camunda7` and `camunda8` yield one tool per client method, and `camunda_mcp/mcp/mcp_camunda.py` registers `camunda_deploy` (line 50) and `camunda_ingest_processes` (line 83).
 3. `CONN-CAMUNDA-MCP-R003`: the `camunda-mcp` console script (`scion_sdk.cli:serve`) -> `camunda_mcp:connector` (`camunda_mcp/__init__.py:85`) -> SDK `build_server` -> the tools in `camunda_mcp/mcp/mcp_camunda.py` and the generated `camunda7_*` and `camunda8_*` tools.
+4. `CONN-CAMUNDA-MCP-R009`: the `camunda-mcp` console script (`scion_sdk.cli:serve`) loads `camunda_mcp:connector` (`camunda_mcp/__init__.py:85`) -> SDK `build_server` -> the generated tools -> `Api` (`camunda_mcp/api_client.py:21`) applies `guarded` -> `instance_transition` or `task_transition` in `camunda_mcp/lifecycle.py` -> the engine call.
 
 ## Cross-repo seams
 
 none
+
+### Amendments
+
+- 2026-11-06: lifecycle state machines (organization constitution Article XXXI). Row `CONN-CAMUNDA-MCP-R009` and children R009.1 to R009.7 add guards to the existing instance and user task tools. The ontology half is `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004`.
