@@ -3,11 +3,12 @@
 `camunda-mcp` wraps the Camunda process automation APIs with thin MCP tools,
 supporting both platforms:
 
-- **Camunda 7** — the Engine REST API (`/engine-rest`): process definitions,
-  process instances, user tasks, deployments, history, external tasks,
-  messaging, incidents and jobs.
+- **Camunda 7 / Operaton** — the whole engine REST API (`/engine-rest`), one tool
+  per operation: deployments, process and decision definitions, instances,
+  executions, user tasks, variables, external tasks, jobs, incidents, messages,
+  signals, history, batches, migration, identity, authorization and tenants.
 - **Camunda 8** — the Zeebe REST API (`/v2`), Operate REST API and Tasklist
   REST API, with optional OAuth `client_credentials` authentication.
 
-Tools accept a `platform` argument (`7` or `8`) so a single server can target
-either deployment.
+Camunda 7 tools are named `camunda7_*` and Camunda 8 tools `camunda8_*`, so a
+single server can target either deployment.

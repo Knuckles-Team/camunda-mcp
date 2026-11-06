@@ -4,14 +4,14 @@ ontology_source: camunda
 sync:
 - preset: camunda-process-definitions
   server: camunda-mcp
-  tool: camunda7_list_process_definitions
+  tool: camunda7_get_process_definitions
   records_path: ''
   id_field: id
   title_field: name
   text_field: key
   updated_field: version
   doc_type: business_process
-  tool_schema_sha256: 84a5362e8a1d55e18305769203bcd2e62a3327e4e518c3b69437bd920f3ba627
+  tool_schema_sha256: a0e3400573d4ac6a85d1f1e185c9624d67ccdd2c266881a1049bc56f8c2b70c6
 governance:
   default_acl: quarantine
   identity: opaque-reference

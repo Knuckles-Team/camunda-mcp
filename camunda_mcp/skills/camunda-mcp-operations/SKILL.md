@@ -2,32 +2,54 @@
 name: camunda-mcp-operations
 skill_type: skill
 description: >-
-  Operate camunda-mcp through its governed MCP and Arbora capabilities, including camunda incident recovery, camunda process orchestration, camunda task operations. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
+  Operate any camunda-mcp tool: the full Operaton / Camunda 7 engine REST surface
+  (one camunda7_<operation> tool per REST operation, grouped by area), the Camunda 8
+  REST tools and the knowledge-graph ingest. Use to find the right tool for an
+  engine operation that the task skills do not cover (identity, authorizations,
+  tenants, filters, batches, migration, history cleanup, metrics) or to mirror
+  processes into the knowledge graph. For the business workflows prefer
+  camunda-deploy-business-process, camunda-run-and-monitor-instance,
+  camunda-work-human-task-queue and camunda-incident-recovery.
+license: MIT
+tags: [camunda, operaton, engine-rest, catalog, knowledge-graph]
+metadata:
+  author: Knuckles-Team
+  version: '1.0.0'
 ---
+# camunda-mcp operations
 
-# Camunda Mcp Operations
+Every engine REST operation is its own typed tool named `camunda7_<operation id in
+snake case>`; [the catalog](references/catalog.md) lists them by REST area with
+verb and path. Each tool's description carries the upstream summary, the request
+body fields and the `VERB /path` it calls.
 
-Use the provider's governed MCP tools through Arbora delegation.
+## Conventions
 
-## Workflow
+- Path parameters are required arguments (`id`, `key`, `var_name`, `tenant_id`).
+- Query filters are typed optional arguments in snake case (`latestVersion` ->
+  `latest_version`, `processInstanceId` -> `process_instance_id`). List filters
+  ending in `_in` take a comma-separated string. Booleans are sent as the engine
+  expects.
+- A JSON request body is the `body` argument, exactly as the engine REST API
+  documents it. Variables are typed: `{"name": {"value": ..., "type": "String"}}`.
+- Most lists have a `*_count` tool and a `query_*` tool (POST, filters in the body).
+- Paging: `first_result`, `max_results`; ordering: `sort_by`, `sort_order`.
+- Destructive tools (DELETE) ask the caller to confirm; a client that cannot
+  answer passes `confirm=true` after the approval was given.
+- A failed call returns the engine's own error type and message.
 
-1. Establish the verified GraphSession and tenant before discovery or retrieval.
-2. Discover the current condensed tool surface; never assume a stale tool name or schema.
-3. Prefer read-only inspection first. For changes, present impact and use the provider's
-   dry-run or preview mode when available.
-4. Execute mutations as fenced WorkItems so retries remain idempotent and auditable.
-5. Ingest source data only through the signed connector preset and ChangeEnvelope path.
-6. Verify the durable result and its trace/evidence before reporting completion.
+## Knowledge graph
 
-## Safety contract
+`camunda_ingest_processes(platform="7", params_json="{}", include_instances=true)`
+mirrors process definitions and running instances into the knowledge graph as
+`:BusinessProcess` / `:ProcessInstance` nodes. The ontology
+(`ontology://camunda-mcp/camunda.ttl`) models BPMN constructs for workflow-graph
+generation; `ontology://camunda-mcp/contracts.ttl` holds the tool-use contracts,
+links, data locations and business roles.
 
-- Never persist credentials, endpoints, raw personal identifiers, hostnames, or local paths.
-- Resolve TLS trust and verification from environment/configuration; never hardcode bypasses.
-- Treat unknown ACL, tenant, schema, or tool-contract state as a hard failure.
-- Require explicit approval for destructive, externally visible, or irreversible actions.
-- Keep runtime traces policy-scoped and privacy-sanitized.
+## Guardrails
 
-## Specialized workflows
-
-Read [the workflow catalog](references/catalog.md) only when the request needs a
-provider-specific procedure, parameter map, script, or reference asset.
+- Never change identity, authorization, tenant or history-cleanup settings
+  without approval.
+- Never delete or modify business data you did not create; test objects are named
+  `zz-validation-<date>`.

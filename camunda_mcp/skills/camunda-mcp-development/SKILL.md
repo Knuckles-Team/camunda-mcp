@@ -26,14 +26,21 @@ Pipelines hooks remain external boundaries.
   Camunda 8 client classes, `get_client`, and `camunda_mcp.mcp_server` as the
   tool module. Preserve this connector identity and its verbose tool prefixes.
 - `camunda_mcp/mcp_server.py` exposes `register_camunda_tools`, while
-  `camunda_mcp/mcp/mcp_camunda.py` owns the two connector-specific tools:
-  `camunda_deploy` and `camunda_ingest_processes`. The SDK supplies the
-  `camunda7_*` and `camunda8_*` one-operation tools; do not reintroduce a
-  condensed or duplicate action facade.
-- `camunda_mcp/api/api_client_camunda7.py` owns the Camunda 7 Engine REST
-  surface and `camunda_mcp/api/api_client_camunda8.py` owns the Zeebe, Operate,
-  and Tasklist REST surfaces. `camunda_mcp/api/api_client_base.py` centralizes
-  bounded requests, origin checks, redirects, response limits, and TLS setup.
+  `camunda_mcp/mcp/mcp_camunda.py` owns the one connector-specific tool,
+  `camunda_ingest_processes`, and serves `ontology://camunda-mcp/contracts.ttl`.
+  The SDK supplies the `camunda7_*` and `camunda8_*` one-operation tools; do not
+  reintroduce a condensed, platform-routed or duplicate action facade.
+- `camunda_mcp/api/camunda7/` holds the Operaton / Camunda 7 engine REST surface,
+  one module per REST area and one typed method per operation (named from the
+  upstream operation id); `camunda_mcp/api/api_client_camunda7.py` composes them.
+  `camunda_mcp/api/api_client_camunda8.py` owns the Zeebe, Operate and Tasklist
+  REST surfaces. `camunda_mcp/api/api_client_base.py` centralizes bounded
+  requests, query wire values (lowercase booleans, comma-separated lists), origin
+  checks, redirects, response limits, engine error messages and TLS setup.
+- `camunda_mcp/connector_contracts.py` declares the tool-use contracts, prompt,
+  skill and tool links, data locations and business roles; every served tool is
+  called by a contract step and named by a link. `camunda_mcp/prompts/*.json` are
+  complete agent definitions.
 - `camunda_mcp/auth.py` reads `CAMUNDA_PLATFORM`, `CAMUNDA7_URL`,
   `CAMUNDA7_TOKEN`, `CAMUNDA7_USERNAME`, `CAMUNDA7_PASSWORD`,
   `CAMUNDA8_ZEEBE_REST_URL`, `CAMUNDA8_OPERATE_URL`,
