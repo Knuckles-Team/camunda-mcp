@@ -21,3 +21,6 @@ docker/debug.Dockerfile
 docker/*.compose.yml
 camunda_mcp/ontology/shapes/connector.shacl.ttl
 camunda_mcp/ontology/certification.json
+
+# Spec status is computed, never committed.
+specs/**/status.json

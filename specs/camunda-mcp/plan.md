@@ -4,7 +4,7 @@ Governing spec: [spec.md](spec.md). Rows: [requirements.md](requirements.md).
 
 ## Summary
 
-This plan delivers connector identity and release metadata for the connector, reusing the SDK for shared capabilities.
+This plan delivers connector identity and release metadata, the whole Operaton engine REST surface as typed tools, correct wire values, and the business-process content tier (ontology, tool-use contracts, skills, agent prompts), reusing the SDK for shared capabilities.
 
 ## Technical Context
 
@@ -16,7 +16,7 @@ This plan delivers connector identity and release metadata for the connector, re
 - **Project Type**: connector (MCP server)
 - **Performance Goals**: N/A
 - **Constraints**: one tool per API operation; shared capabilities come from the SDK
-- **Scale/Scope**: 3 rows
+- **Scale/Scope**: 7 rows
 
 ## Constitution Check
 
@@ -31,6 +31,14 @@ pyproject.toml  existing
 camunda_mcp/__init__.py  existing
 camunda_mcp/mcp/mcp_camunda.py  existing
 camunda_mcp/mcp_server.py  existing
+camunda_mcp/api/api_client_base.py  existing
+camunda_mcp/api/api_client_camunda7.py  existing
+camunda_mcp/api/camunda7/  new (one module per engine REST area)
+camunda_mcp/connector_contracts.py  new
+camunda_mcp/_surface.py  new
+camunda_mcp/ontology/camunda.ttl  existing
+camunda_mcp/prompts/  new
+camunda_mcp/skills/  existing
 ```
 
 ## Phase 0: Research

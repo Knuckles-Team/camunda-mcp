@@ -10,7 +10,7 @@ from scion_sdk.ingest.live_declaration import source_meta
 
 SOURCES = (
     source_meta(
-        tool="camunda7_list_process_definitions",
+        tool="camunda7_get_process_definitions",
         source_id="camunda-process-definitions",
         record_type="BusinessProcess",
         id_field="id",
@@ -23,6 +23,36 @@ SOURCES = (
         server="camunda-mcp",
         text_field="key",
         title_field="name",
+    ),
+    source_meta(
+        tool="camunda7_get_tasks",
+        source_id="camunda-user-tasks",
+        record_type="CamundaUserTask",
+        id_field="id",
+        cursor_field="created",
+        preset={
+            "doc_type": "user_task",
+            "params_style": "args",
+        },
+        records_path="",
+        server="camunda-mcp",
+        text_field="description",
+        title_field="name",
+    ),
+    source_meta(
+        tool="camunda7_get_incidents",
+        source_id="camunda-incidents",
+        record_type="CamundaIncident",
+        id_field="id",
+        cursor_field="incidentTimestamp",
+        preset={
+            "doc_type": "incident",
+            "params_style": "args",
+        },
+        records_path="",
+        server="camunda-mcp",
+        text_field="incidentMessage",
+        title_field="incidentType",
     ),
 )
 
@@ -44,39 +74,39 @@ FIELD_SETS = {
 SCHEMA_MAPPINGS = {
     "BusinessProcess": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "BusinessProcess",
     },
-    "Deployment": {
+    "CamundaDeployment": {
         "field_sets": ["fields_1"],
-        "ontology_class": None,
+        "ontology_class": "CamundaDeployment",
     },
-    "ExternalTask": {
+    "CamundaExternalTask": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "CamundaExternalTask",
     },
-    "Incident": {
+    "CamundaIncident": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Incident",
+        "ontology_class": "CamundaIncident",
     },
-    "Job": {
+    "CamundaJob": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "CamundaJob",
     },
     "ProcessInstance": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "ProcessInstance",
     },
     "ProcessStep": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "ProcessStep",
     },
     "ProcessVariable": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "ProcessVariable",
     },
-    "Task": {
+    "CamundaUserTask": {
         "field_sets": ["fields_1"],
-        "ontology_class": "Action",
+        "ontology_class": "CamundaUserTask",
     },
 }
 
@@ -88,23 +118,23 @@ RESOURCES = (
     },
     {
         "id_prefix": "deployment",
-        "label": "Deployment",
-        "name": "Deployment",
+        "label": "Camunda Deployment",
+        "name": "CamundaDeployment",
     },
     {
         "id_prefix": "externaltask",
         "label": "External Task",
-        "name": "ExternalTask",
+        "name": "CamundaExternalTask",
     },
     {
         "id_prefix": "incident",
-        "label": "Incident",
-        "name": "Incident",
+        "label": "Camunda Incident",
+        "name": "CamundaIncident",
     },
     {
         "id_prefix": "job",
-        "label": "Job",
-        "name": "Job",
+        "label": "Camunda Job",
+        "name": "CamundaJob",
     },
     {
         "id_prefix": "processinstance",
@@ -124,6 +154,6 @@ RESOURCES = (
     {
         "id_prefix": "task",
         "label": "User Task",
-        "name": "Task",
+        "name": "CamundaUserTask",
     },
 )

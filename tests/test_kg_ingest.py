@@ -60,7 +60,7 @@ async def test_ingest_entities_writes_nodes_and_edges(ingest):
     res = await ingest_entities(
         [
             {"id": "a", "node_type": "BusinessProcess", "name": "p"},
-            {"id": "b", "node_type": "Deployment"},
+            {"id": "b", "node_type": "CamundaDeployment"},
         ],
         [{"source": "a", "target": "b", "relationship": "deployedIn"}],
         ingest=service,

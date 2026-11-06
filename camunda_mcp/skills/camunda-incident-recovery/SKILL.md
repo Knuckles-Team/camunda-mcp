@@ -2,91 +2,68 @@
 name: camunda-incident-recovery
 skill_type: skill
 description: >-
-  Diagnose and recover stuck Camunda processes on Camunda 7 (Engine REST) and
-  Camunda 8 (Operate) via the camunda-mcp MCP server — list jobs and incidents,
-  set job retries, execute jobs, resolve incidents, and drive external-task
-  workers (fetch-and-lock / complete / failure / bpmn_error) with the per-operation
-  camunda7_*/camunda8_* job, incident and external-task tools. Use when a process instance is
-  blocked by a failed job, an incident, or a stalled external task. Do NOT use for
-  starting/deploying processes (use camunda-process-orchestration) or human
-  user-task work (use camunda-task-operations).
+  Diagnose and recover stuck process instances on the Operaton / Camunda 7 engine
+  through camunda-mcp: find incidents, read the failing job's stack trace or the
+  external task's error details, fix the cause, give the job or external task new
+  retries, annotate the incident, and confirm the instance moves on. Use when an
+  instance is blocked by a failed job, a failed external task or an incident. Do
+  NOT use for deploying (camunda-deploy-business-process), starting or monitoring
+  (camunda-run-and-monitor-instance) or human tasks (camunda-work-human-task-queue).
 license: MIT
-tags: [camunda, incident, jobs, external-task, operate, mcp]
+tags: [camunda, operaton, incident, jobs, external-task, recovery]
 metadata:
   author: Knuckles-Team
-  version: '0.1.0'
+  version: '1.0.0'
 ---
-# Camunda Incident Recovery
+# Incident recovery
 
-Domain-typed access to Camunda **jobs**, **incidents**, and **external tasks** —
-the failure and async-execution surface that blocks running instances. Prefer these
-tools over raw calls; incidents map to `:Incident` nodes on a `:ProcessInstance`.
+Contract: `recover-incident`. Data location: `process-runtime`. Incidents are
+`:CamundaIncident` nodes linked to their `:ProcessInstance` by `:hasIncident`.
 
-## When to use
-- List/inspect jobs and incidents; find why an instance is stuck.
-- Bump a failed job's retries (`set_retries`) or force-execute a job.
-- Resolve an incident once its root cause is fixed.
-- Run an external-task worker loop: `fetch_and_lock`, then `complete` / report
-  `failure` (with retries) / throw a `bpmn_error`.
+## 1. Find
 
-## When NOT to use
-- Deploying, starting, suspending processes/instances → `camunda-process-orchestration`.
-- Human user-task claim/assign/complete → `camunda-task-operations`.
+- `camunda7_get_incidents(process_instance_id=...)`, or by type:
+  `incident_type="failedJob"` / `"failedExternalTask"`. Unfiltered lists are large
+  on a busy engine; scope by instance, definition (`process_definition_key_in`) or
+  activity (`activity_id`).
+- Portfolio: `camunda7_get_process_definition_statistics(incidents=true)`.
 
-## Prerequisites & environment
-Connect via the `mcp-client` skill against the **`camunda-mcp`** MCP server. Same
-`CAMUNDA7_*` / `CAMUNDA8_*` variables as the other camunda skills; incident search on
-v8 uses the Operate surface (`CAMUNDA8_OPERATE_URL`).
+Each incident has `incidentType`, `activityId`, `incidentMessage` and
+`configuration` (the failed job id, or the external task id).
 
-## Tools & actions
-| Tool | Platform | Operation |
-|------|----------|-----------|
-| `camunda7_list_jobs`, `camunda7_execute_job`, `camunda7_set_job_retries` | v7 | list jobs, run a job, set retries |
-| `camunda7_list_incidents`, `camunda7_get_incident`, `camunda7_resolve_incident` | v7 | incidents |
-| `camunda7_fetch_and_lock`, `camunda7_complete_external_task`, `camunda7_handle_external_task_failure`, `camunda7_handle_external_task_bpmn_error` | v7 | external-task worker |
-| `camunda8_activate_jobs`, `camunda8_complete_job`, `camunda8_fail_job`, `camunda8_update_job` | v8 | jobs |
-| `camunda8_resolve_incident` | v8 | resolve an incident |
-| `camunda8_search_incidents`, `camunda8_search_flownode_instances`, `camunda8_search_variables` | v8 | Operate search |
+## 2. Read the cause
 
-### Key parameters
-- v7: `job_id`, `retries`, `incident_id`; filter bodies for `list_*`.
-- v8: `job_key`, `incident_key`, `body`.
-- external task: `fetch_and_lock` takes a full request body; others take
-  `{"task_id":..,"body":{...}}`.
+- failedJob: `camunda7_get_stacktrace(id=<configuration>)`;
+  `camunda7_get_job(id=...)` shows retries and due date.
+- failedExternalTask: `camunda7_get_external_task_error_details(id=<configuration>)`;
+  `camunda7_get_external_task(id=...)` shows the worker and topic.
+- Context: `camunda7_get_process_instance_variables(id=<processInstanceId>)`.
 
-## Recipes (arguments)
-Find incidents for a process instance (`camunda7_list_incidents`):
-```json
-{"params":{"processInstanceId":"<instance_id>"}}
-```
-Reset retries on a failed job so it runs again (`camunda7_set_job_retries`):
-```json
-{"job_id":"<job_id>","retries":3}
-```
-Resolve an incident after the fix (`camunda7_resolve_incident`):
-```json
-{"incident_id":"<incident_id>"}
-```
-Fetch-and-lock external tasks for a worker (`camunda7_fetch_and_lock`):
-```json
-{"body":{"workerId":"worker-1","maxTasks":10,"topics":[{"topicName":"charge-card","lockDuration":30000}]}}
-```
-Report an external-task failure with retries (`camunda7_handle_external_task_failure`):
-```json
-{"task_id":"<task_id>","body":{"workerId":"worker-1","errorMessage":"gateway timeout","retries":2,"retryTimeout":60000}}
-```
+## 3. Fix, then retry
 
-## Gotchas
-- Query filters are a `params` object; request bodies are a `body` object.
-- Setting retries back above 0 is what makes a failed job **retryable**; resolving the
-  incident alone does not re-run the job.
-- External-task failure (`camunda7_handle_external_task_failure`) with `retries: 0` creates an **incident** (no more automatic
-  retries) — usually intentional as a dead-letter.
-- v8 uses **keys** (`job_key`, `incident_key`) — large numeric strings, keep as strings.
-- Always scope `camunda7_list_jobs` / `camunda7_list_incidents` by process instance or definition; an
-  unfiltered list on a busy engine is large.
+Fix the cause first (wrong variable: `camunda7_modify_process_instance_variables`;
+a down dependency: wait for it). Then:
 
-## Related
-- `camunda-process-orchestration` / `camunda-task-operations` — the rest of the process
-  lifecycle these failures interrupt.
-- Incidents map to `:Incident` (`:hasIncident` from `:ProcessInstance`) in the KG.
+- failedJob: `camunda7_set_job_retries(id=<job>, body={"retries": 1})`; the job
+  executor runs it again, or run it now with `camunda7_execute_job(id=<job>)`.
+- failedExternalTask: `camunda7_set_external_task_resource_retries(id=<task>,
+  body={"retries": 1})`; the worker fetches it again.
+- Many at once: `camunda7_set_job_retries_async_operation` /
+  `camunda7_set_external_task_retries` with a filter (needs approval).
+
+Raising retries above 0 is what clears the incident; `camunda7_resolve_incident`
+only works for custom incident types and does not re-run anything.
+
+## 4. Record and confirm
+
+- `camunda7_set_incident_annotation(id=<incident>, body={"annotation": "<cause and fix>"})`.
+- Confirm: `camunda7_get_incidents(process_instance_id=...)` is empty and
+  `camunda7_get_activity_instance_tree(id=...)` has moved past the failed activity.
+- History: `camunda7_get_historic_incidents(process_instance_id=...)`.
+
+## Guardrails
+
+- Never cancel an instance, delete a job or skip an activity
+  (`camunda7_modify_process_instance`) to clear an incident without approval.
+- Do not set retries again on a failure whose cause is not fixed; it fails again
+  and raises a new incident.

@@ -39,9 +39,9 @@ agent for agent-to-agent orchestration.
   (`Camunda8Api`), each constructed lazily so a server configured for one platform
   never needs the other's URLs or credentials.
 - **MCP tools** (`camunda-mcp` console script): one tool per API operation, named
-  `camunda7_<operation>` (39 Camunda 7 Engine REST operations) and
-  `camunda8_<operation>` (24 Camunda 8 operations), plus `camunda_deploy` and
-  `camunda_ingest_processes`: 65 in all. See [`docs/overview.md`](docs/overview.md)
+  `camunda7_<operation>` (386: every Operaton / Camunda 7 engine REST operation) and
+  `camunda8_<operation>` (24 Camunda 8 operations), plus `camunda_ingest_processes`:
+  411 in all. See [`docs/overview.md`](docs/overview.md)
   for the full surface.
   [`a2a.json`](a2a.json)) wrapping the tool surface in a Pydantic-AI graph agent.
 
@@ -55,10 +55,9 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 
 | MCP Tool | Kind | Description |
 |----------|------|-------------|
-| `camunda_deploy` | intent | Deploy a BPMN/DMN/form resource to Camunda 7 or Camunda 8. |
 | `camunda_ingest_processes` | intent | Natively ingest Camunda processes into medulla as typed nodes. |
 
-_2 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
+_1 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 ## Environment Variables

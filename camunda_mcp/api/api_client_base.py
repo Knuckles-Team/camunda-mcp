@@ -1,9 +1,10 @@
 """Shared, bounded HTTP client for the Camunda API wrapper."""
 
+import base64
 import json as jsonlib
 import math
 from typing import Any
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 
 import requests
 from scion_sdk.tls.profile import ResolvedTLSProfile
@@ -11,6 +12,23 @@ from scion_sdk.tls.resolve import resolve_tls_profile
 
 DEFAULT_TIMEOUT_SECONDS = 30.0
 DEFAULT_MAX_RESPONSE_BYTES = 8 * 1024 * 1024
+
+
+def resource_files(resources: dict[str, str] | None) -> dict[str, Any]:
+    """Multipart parts of a deployment: one part per file name and text content."""
+    return {
+        name: (name, str(content).encode("utf-8"), "application/octet-stream")
+        for name, content in (resources or {}).items()
+    }
+
+
+def upload_part(
+    field: str, content: str | None, filename: str | None
+) -> dict[str, Any] | None:
+    """One uploaded multipart part (binary variable data, attachment content)."""
+    if content is None:
+        return None
+    return {field: (filename or field, str(content).encode("utf-8"))}
 
 
 class ApiClientBase:
@@ -128,6 +146,30 @@ class ApiClientBase:
         return body
 
     @staticmethod
+    def _wire_value(value: Any) -> Any:
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if isinstance(value, (list, tuple, set)):
+            return ",".join(str(ApiClientBase._wire_value(v)) for v in value)
+        return value
+
+    @classmethod
+    def _wire_params(cls, params: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Query parameters as the engine parses them.
+
+        Java's ``Boolean.parseBoolean`` expects lowercase ``true``/``false`` (Python
+        would send ``True``), list filters (``...In``) are comma-separated, and
+        unset (``None``) parameters are dropped.
+        """
+        if not params:
+            return None
+        return {
+            key: cls._wire_value(value)
+            for key, value in params.items()
+            if value is not None
+        }
+
+    @staticmethod
     def _decode_body(body: bytearray, response: requests.Response) -> Any:
         ctype = response.headers.get("Content-Type", "").lower()
         if "json" in ctype:
@@ -135,15 +177,36 @@ class ApiClientBase:
                 return jsonlib.loads(body.decode(response.encoding or "utf-8"))
             except (UnicodeDecodeError, jsonlib.JSONDecodeError) as exc:
                 raise RuntimeError("Camunda returned invalid JSON") from exc
+        if ctype and not ctype.startswith("text/") and "xml" not in ctype:
+            return {
+                "status": "success",
+                "content_type": ctype,
+                "base64": base64.b64encode(bytes(body)).decode("ascii"),
+            }
         return {
             "status": "success",
             "text": body.decode(response.encoding or "utf-8", errors="replace"),
         }
 
+    def _engine_error(self, response: requests.Response) -> str:
+        """The engine's own ``type: message`` for a failed call, bounded."""
+        try:
+            body = self._read_bounded_body(response)
+            detail = jsonlib.loads(body.decode(response.encoding or "utf-8"))
+        except (RuntimeError, UnicodeDecodeError, ValueError):
+            return ""
+        if not isinstance(detail, dict) or not detail.get("message"):
+            return ""
+        text = f"{detail.get('type') or 'Error'}: {detail['message']}"
+        return ": " + text[:500]
+
     def _parse_response(self, response: requests.Response) -> Any:
         self.last_etag = response.headers.get("ETag")
         if response.status_code >= 300:
-            raise RuntimeError(f"Camunda API returned HTTP {response.status_code}")
+            raise RuntimeError(
+                f"Camunda API returned HTTP {response.status_code}"
+                + self._engine_error(response)
+            )
         if response.status_code == 204:
             return {"status": "success"}
 
@@ -151,6 +214,36 @@ class ApiClientBase:
         if not body.strip():
             return {"status": "success"}
         return self._decode_body(body, response)
+
+    def _call(
+        self,
+        method: str,
+        template: str,
+        *,
+        path: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
+        body: Any = None,
+        form: dict[str, Any] | None = None,
+        files: dict[str, Any] | None = None,
+        accept: str = "application/json",
+    ) -> Any:
+        """One engine REST operation: fill the path, send query, body or form."""
+        endpoint = template
+        for name, value in (path or {}).items():
+            endpoint = endpoint.replace("{" + name + "}", quote(str(value), safe=""))
+        json_body = body
+        if json_body is None and method in ("POST", "PUT") and form is None:
+            json_body = {}
+        return self.request(
+            method,
+            endpoint.lstrip("/"),
+            params=params,
+            json=json_body if form is None and not files else None,
+            data=self._wire_params(form) if form is not None or files else None,
+            files=files or None,
+            content_type="application/json" if form is None and not files else None,
+            accept=accept,
+        )
 
     def request(
         self,
@@ -176,7 +269,7 @@ class ApiClientBase:
             method=method,
             url=url,
             headers=req_headers or None,
-            params=params,
+            params=self._wire_params(params),
             data=data,
             json=json,
             files=files,

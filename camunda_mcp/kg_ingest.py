@@ -2,8 +2,8 @@
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. camunda-mcp pushes its
 process-automation data into the ONE medulla knowledge graph as **typed
-OWL nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:Task``,
-``:Deployment``, ``:Incident`` …) + links, matching the classes federated by
+OWL nodes** (``:BusinessProcess``, ``:ProcessInstance``, ``:CamundaUserTask``,
+``:CamundaDeployment``, ``:CamundaIncident`` …) + links, matching the classes federated by
 ``camunda_mcp.ontology``.
 
 The write path is ``scion_sdk.ingest`` -- the generated ``SourceIngest``
@@ -117,7 +117,7 @@ async def ingest_process_definitions(
     *,
     ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Map Camunda process-definition records → ``:BusinessProcess`` (+ ``:Deployment``).
+    """Map Camunda process-definition records → ``:BusinessProcess`` (+ ``:CamundaDeployment``).
 
     Accepts Camunda 7 Engine-REST ``process-definition`` records (fields ``id``,
     ``key``, ``name``, ``version``, ``deploymentId``, ``suspended`` …). Emits the
@@ -147,7 +147,7 @@ async def ingest_process_definitions(
             entities.append(
                 {
                     "id": f"camunda:deployment:{dep}",
-                    "node_type": "Deployment",
+                    "node_type": "CamundaDeployment",
                     "externalToolId": str(dep),
                 }
             )
@@ -202,7 +202,7 @@ async def ingest_tasks(
     *,
     ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Map user-task records → ``:Task`` (+ ``:partOfInstance`` / ``:assignedTo``)."""
+    """Map user-task records → ``:CamundaUserTask`` (+ ``:partOfInstance`` / ``:assignedTo``)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
     for t in tasks or []:
@@ -212,7 +212,7 @@ async def ingest_tasks(
         entities.append(
             {
                 "id": f"camunda:task:{tid}",
-                "node_type": "Task",
+                "node_type": "CamundaUserTask",
                 "name": t.get("name"),
                 "assignee": t.get("assignee"),
                 "activityId": t.get("taskDefinitionKey"),
