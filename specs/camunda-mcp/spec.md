@@ -52,6 +52,14 @@ The version the `camunda_mcp` package reports at runtime (`camunda_mcp.__version
 6. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-R006` (prompts are agent definitions; task skills) is exercised, **Then** `tests/test_surface_contracts.py::test_prompts_are_complete_agent_definitions`.
 7. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-R007` (bpmn ontology rolls up to core) is exercised, **Then** `tests/test_ontology.py::test_every_class_reaches_a_core_class`.
 
+### User Story 2 - The engine syncs this system as a federated secondary (Priority: P2)
+
+The engine reads this system's documents through the connector and sends governed changes back.
+
+**Acceptance Scenarios**:
+
+1. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-R008` is exercised, **Then** its rollup test passes.
+
 ### Edge Cases
 
 - If `CONN-CAMUNDA-MCP-R001` is not met, its proving test fails: connector reports its released version.
@@ -71,6 +79,7 @@ The version the `camunda_mcp` package reports at runtime (`camunda_mcp.__version
 - **FR-005**: Tool-use contracts, links, data locations and roles. Rows: `CONN-CAMUNDA-MCP-R005`.
 - **FR-006**: Prompts are agent definitions; task skills. Rows: `CONN-CAMUNDA-MCP-R006`.
 - **FR-007**: BPMN ontology rolls up to core. Rows: `CONN-CAMUNDA-MCP-R007`.
+- **FR-008**: Governed deploy sink for released process models. Rows: `CONN-CAMUNDA-MCP-R008`.
 
 ## Success Criteria
 

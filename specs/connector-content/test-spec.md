@@ -8,3 +8,6 @@ Governing spec: [spec.md](spec.md).
 
 ## Rows awaiting bound tests
 - `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002`: planned proof `tests/test_access_contracts.py::test_competency_contracts_certified`. Expected: Each entity has a contract whose operation is the existing tool and whose recording validates against it.. Refusal: A contract naming a column absent from the ontology properties or a missing recording fails certification..
+- `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003`: planned proof `tests/test_access_contracts.py::test_definition_document_contracts_certified`. Expected: Rollup closes when `.1` and `.2` are verified. Root test: `tests/test_access_contracts.py::test_definition_document_contracts_certified`.
+- `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003.1`: planned proof `tests/test_access_contracts.py::test_definition_document_contracts_certified`. Expected: Each entity has a contract whose operation is a served tool.
+- `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003.2`: planned proof `tests/test_access_contracts.py::test_definition_recordings_validate`. Expected: A recording with a column absent from the contract fails certification.

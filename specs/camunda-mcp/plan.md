@@ -49,6 +49,10 @@ No unknowns. Each row names the code it touches.
 
 The rows are delivered in place; the design is the caller chain below.
 
+### Governed deploy sink (R008)
+
+`CamundaDeploySink` executes a released governed change set: one deployment per change set, named by the model id, with duplicate filtering so a re-release creates no new version. A change set that is not released, or a payload whose digest differs, refuses before any API call. The interactive deploy business task stays as it is.
+
 ## Phase 2: Task approach
 
 `tasks.md` holds one task line per row, producer first.
