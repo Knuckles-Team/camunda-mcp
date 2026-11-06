@@ -25,6 +25,14 @@ The `camunda-mcp` server serves its packaged skills, prompts and ontology to any
 1. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001` (default content) is exercised, **Then** `resources/list` includes `skill://` and `ontology://`; `prompts/list` includes each packaged prompt.
 2. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002` (declare access contracts for the competency reads of camunda-mcp) is exercised, **Then** declare access contracts for the competency reads of camunda-mcp.
 
+### User Story 2 - The engine syncs this system as a federated secondary (Priority: P2)
+
+The engine reads this system's documents through the connector and sends governed changes back.
+
+**Acceptance Scenarios**:
+
+1. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003` is exercised, **Then** its rollup test passes.
+
 ### Edge Cases
 
 - If `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001` is not met, its proving test fails: default content.
@@ -34,6 +42,7 @@ The `camunda-mcp` server serves its packaged skills, prompts and ontology to any
 
 - **FR-001**: Default content. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001`.
 - **FR-002**: Declare access contracts for the competency reads of camunda-mcp. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002`.
+- **FR-003**: Process and decision definition documents as federated pack sources. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003`.
 
 ## Success Criteria
 

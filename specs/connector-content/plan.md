@@ -39,6 +39,10 @@ No unknowns. Each row names the code it touches.
 
 The rows are delivered in place; the design is the caller chain below.
 
+### Definition documents as pack sources (R003)
+
+The engine treats Camunda as a federated secondary for process and decision models. The connector serves each definition's BPMN 2.0 or DMN document through an access contract, so arbora's source executor reads it at sync time. The data location and the class roll-up already exist (`CONN-CAMUNDA-MCP-R005`, `CONN-CAMUNDA-MCP-R007`).
+
 ## Phase 2: Task approach
 
 `tasks.md` holds one task line per row, producer first.
