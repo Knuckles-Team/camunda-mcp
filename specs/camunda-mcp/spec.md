@@ -80,7 +80,7 @@ The engine reads this system's documents through the connector and sends governe
 - **FR-006**: Prompts are agent definitions; task skills. Rows: `CONN-CAMUNDA-MCP-R006`.
 - **FR-007**: BPMN ontology rolls up to core. Rows: `CONN-CAMUNDA-MCP-R007`.
 - **FR-008**: Governed deploy sink for released process models. Rows: `CONN-CAMUNDA-MCP-R008`.
-- **FR-009**: Process instance and user task lifecycles are explicit state machines (rollup). Rows: `CONN-CAMUNDA-MCP-R009`, `CONN-CAMUNDA-MCP-R009.1`, `CONN-CAMUNDA-MCP-R009.2`, `CONN-CAMUNDA-MCP-R009.3`, `CONN-CAMUNDA-MCP-R009.4`, `CONN-CAMUNDA-MCP-R009.5`, `CONN-CAMUNDA-MCP-R009.6`, `CONN-CAMUNDA-MCP-R009.7`.
+- **FR-009**: Process instance and user task lifecycles are explicit state machines (rollup). Rows: `CONN-CAMUNDA-MCP-R009`, `CONN-CAMUNDA-MCP-R009.1`, `CONN-CAMUNDA-MCP-R009.2`, `CONN-CAMUNDA-MCP-R009.3`, `CONN-CAMUNDA-MCP-R009.4`, `CONN-CAMUNDA-MCP-R009.5`, `CONN-CAMUNDA-MCP-R009.6`, `CONN-CAMUNDA-MCP-R009.7`, `CONN-CAMUNDA-MCP-R009.8`.
 
 ## Success Criteria
 
@@ -108,4 +108,4 @@ The engine reads this system's documents through the connector and sends governe
 | FR-005 | `CONN-CAMUNDA-MCP-R005` | [plan.md](plan.md) | T-005 | [test-spec.md](test-spec.md) |
 | FR-006 | `CONN-CAMUNDA-MCP-R006` | [plan.md](plan.md) | T-006 | [test-spec.md](test-spec.md) |
 | FR-007 | `CONN-CAMUNDA-MCP-R007` | [plan.md](plan.md) | T-007 | [test-spec.md](test-spec.md) |
-| FR-009 | `CONN-CAMUNDA-MCP-R009`, `CONN-CAMUNDA-MCP-R009.1`, `CONN-CAMUNDA-MCP-R009.2`, `CONN-CAMUNDA-MCP-R009.3`, `CONN-CAMUNDA-MCP-R009.4`, `CONN-CAMUNDA-MCP-R009.5`, `CONN-CAMUNDA-MCP-R009.6`, `CONN-CAMUNDA-MCP-R009.7` | [plan.md](plan.md) | T-009 | [test-spec.md](test-spec.md) |
+| FR-009 | `CONN-CAMUNDA-MCP-R009`, `CONN-CAMUNDA-MCP-R009.1`, `CONN-CAMUNDA-MCP-R009.2`, `CONN-CAMUNDA-MCP-R009.3`, `CONN-CAMUNDA-MCP-R009.4`, `CONN-CAMUNDA-MCP-R009.5`, `CONN-CAMUNDA-MCP-R009.6`, `CONN-CAMUNDA-MCP-R009.7`, `CONN-CAMUNDA-MCP-R009.8` | [plan.md](plan.md) | T-009 | [test-spec.md](test-spec.md) |

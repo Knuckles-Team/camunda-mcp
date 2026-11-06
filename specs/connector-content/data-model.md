@@ -12,7 +12,7 @@ Definition from the row: Entities: entity `process_definition` (class process de
 
 Row title: State, transition and machine classes roll up to the core vocabulary.
 
-Definition from the row: classes ProcessInstanceLifecycle, UserTaskLifecycle (machines); ActiveState, IncidentState, SuspendedState, CompletedState, CanceledState, TerminatedState, CreatedState, ClaimedState, DeletedState (states); one transition class per table row.
+Definition from the row: classes ProcessInstanceLifecycle, UserTaskLifecycle (machines); InstanceCreatedState, InstanceActiveState, InstanceSuspendedState, InstanceIncidentState, InstanceCompletedState, InstanceCanceledState, InstanceTerminatedState, TaskCreatedState, TaskClaimedState, TaskCompletedState, TaskCanceledState, TaskDeletedState (states); one transition class per table row.
 
 ## CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.2
 
