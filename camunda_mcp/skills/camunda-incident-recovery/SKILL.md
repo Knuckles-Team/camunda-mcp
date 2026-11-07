@@ -61,6 +61,20 @@ only works for custom incident types and does not re-run anything.
   `camunda7_get_activity_instance_tree(id=...)` has moved past the failed activity.
 - History: `camunda7_get_historic_incidents(process_instance_id=...)`.
 
+## Lifecycle moves and refusals
+
+Read the state with `camunda7_get_process_instance` (or `camunda7_get_historic_process_instance`)
+and `camunda7_get_tasks` before you act. A process instance is Created, Active,
+Suspended, Incident (a sub-state of Active), Completed, Canceled or Terminated;
+the last three are terminal. Legal moves: suspend from Active or Incident,
+activate from Suspended, cancel or terminate (`camunda7_delete_process_instance`)
+from Active, Suspended or Incident. A user task is Created, Claimed, Completed,
+Canceled or Deleted: claim from Created, unclaim or complete from Claimed, and
+only the assignee completes. An illegal move is refused with `ILLEGAL_TRANSITION`
+before any engine call, carrying the reason: `IllegalEdge`, `TerminalState`,
+`AlreadyClaimed`, `NotClaimed`, `ClaimedByOther`, `NoActingIdentity` or
+`UnknownEngineState`. Read the reason, fix the state, do not retry the same call.
+
 ## Guardrails
 
 - Never cancel an instance, delete a job or skip an activity

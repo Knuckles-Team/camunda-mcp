@@ -3,11 +3,13 @@
 from typing import Any
 
 from camunda_mcp.api.api_client_base import ApiClientBase
+from camunda_mcp.lifecycle import TaskEvent, guarded
 
 
 class Camunda7Task(ApiClientBase):
     """Task: 22 engine REST operation(s)."""
 
+    @guarded("task", 7, TaskEvent.CLAIM)
     def claim(
         self,
         id: str,
@@ -29,6 +31,7 @@ class Camunda7Task(ApiClientBase):
             body=body,
         )
 
+    @guarded("task", 7, TaskEvent.COMPLETE)
     def complete(
         self,
         id: str,
@@ -846,6 +849,7 @@ class Camunda7Task(ApiClientBase):
             body=body,
         )
 
+    @guarded("task", 7, TaskEvent.COMPLETE)
     def submit(
         self,
         id: str,
@@ -869,6 +873,7 @@ class Camunda7Task(ApiClientBase):
             body=body,
         )
 
+    @guarded("task", 7, TaskEvent.UNCLAIM)
     def unclaim(
         self,
         id: str,

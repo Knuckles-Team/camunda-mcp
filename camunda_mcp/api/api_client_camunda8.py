@@ -23,6 +23,7 @@ from typing import Any
 from scion_sdk.tls.profile import ResolvedTLSProfile
 
 from camunda_mcp.api.api_client_base import ApiClientBase
+from camunda_mcp.lifecycle import InstanceEvent, TaskEvent, guarded
 
 
 class Camunda8Api(ApiClientBase):
@@ -174,6 +175,7 @@ class Camunda8Api(ApiClientBase):
             "POST", f"{self.zeebe_url}/v2/process-instances", json=payload
         )
 
+    @guarded("instance", 8, InstanceEvent.CANCEL)
     def cancel_process_instance(self, process_instance_key: str) -> Any:
         """Cancel a running process instance."""
         return self._call(
@@ -312,6 +314,7 @@ class Camunda8Api(ApiClientBase):
             json={},
         )
 
+    @guarded("task", 8, TaskEvent.COMPLETE)
     def complete_task(
         self, task_id: str, variables: list[dict[str, Any]] | None = None
     ) -> Any:

@@ -101,3 +101,26 @@ def test_contracts_render_as_turtle():
     assert "sc:ToolUseContract" in text and "sc:DataLocation" in text
     assert "owl:imports" not in text
     assert inspect.isfunction(contracts_turtle.__wrapped__)
+
+
+def test_lifecycle_guidance_names_legal_moves_and_refusal_reasons(tools):
+    """CONNECTOR-CONTENT-R004.3: the skill and the operator prompt state both machines."""
+    skill = (PACKAGE / "skills" / "camunda-incident-recovery" / "SKILL.md").read_text()
+    prompt = PROMPTS["camunda-process-operator"]["instructions"]["core_directive"]
+    reasons = (
+        "IllegalEdge",
+        "TerminalState",
+        "AlreadyClaimed",
+        "NotClaimed",
+        "ClaimedByOther",
+        "NoActingIdentity",
+        "UnknownEngineState",
+    )
+    for text in (skill, prompt):
+        assert "ILLEGAL_TRANSITION" in text
+        for reason in reasons:
+            assert reason in text, reason
+        for word in ("Suspended", "Incident", "Terminated", "Claimed", "Deleted"):
+            assert word in text, word
+    for tool in re.findall(r"`?(camunda[78]_\w+)", skill + prompt):
+        assert tool in tools, tool

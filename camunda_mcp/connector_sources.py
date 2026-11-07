@@ -66,8 +66,7 @@ FIELD_SETS = {
         "businessKey": "xsd:string",
         "incidentType": "xsd:string",
         "processDefinitionKey": "xsd:string",
-        "processState": "xsd:string",
-        "suspended": "xsd:boolean",
+        "lifecycleState": "xsd:string",
     },
 }
 
