@@ -26,7 +26,11 @@ from scion_sdk.ingest import (
     current_ingest,
 )
 
-from camunda_mcp.lifecycle import instance_state_of, task_state_of
+from camunda_mcp.lifecycle import (
+    definition_state_of,
+    instance_state_of,
+    task_state_of,
+)
 
 _BINDING = IngestBinding(connector="camunda-mcp", stream="camunda")
 
@@ -140,6 +144,11 @@ async def ingest_process_definitions(
                 "bpmnVersion": d.get("version"),
                 "category": d.get("category"),
                 "tenantId": d.get("tenantId"),
+                "lifecycleState": (
+                    definition_state_of(d).value
+                    if isinstance(d.get("suspended"), bool)
+                    else None
+                ),
                 "externalToolId": str(did),
             }
         )

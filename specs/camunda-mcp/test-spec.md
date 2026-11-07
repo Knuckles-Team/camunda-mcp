@@ -39,4 +39,5 @@ Proof: `tests/test_ontology.py` (`CONN-CAMUNDA-MCP-R007`).
 - `CONN-CAMUNDA-MCP-R009.5`: planned proof `tests/test_lifecycle_machines.py::test_complete_needs_claimed_by_the_same_assignee`. Expected: Only a Claimed task completes, and only by its assignee.
 - `CONN-CAMUNDA-MCP-R009.6`: planned proof `tests/test_lifecycle_machines.py::test_ingested_nodes_carry_lifecycle_state_only`. Expected: Nodes carry one state field.
 - `CONN-CAMUNDA-MCP-R009.7`: planned proof `tests/test_lifecycle_machines.py::test_instance_and_task_machines_refuse_before_any_engine_call`. Expected: Zero write requests on refusal.
+- `CONN-CAMUNDA-MCP-R009.9`: planned proof `tests/test_lifecycle_machines.py::test_definition_suspension_is_guarded_without_a_write_on_refusal`. Expected: Legal suspend and activate write once; every other call is refused with no write.
 - `CONN-CAMUNDA-MCP-R009.8`: planned proof `tests/test_lifecycle_machines.py::test_human_task_completes_as_the_signed_in_user`. Expected: The identity follows the task kind and an unresolved identity is refused.

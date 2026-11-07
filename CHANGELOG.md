@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.3] - 2026-11-06
+
+### Added
+- Process definition suspension is an explicit two-state machine (Active and Suspended, `CONN-CAMUNDA-MCP-R009.9`): suspending a suspended definition, or activating an active one, is refused with `ILLEGAL_TRANSITION` before any engine write. The graph mirror carries `lifecycleState` on process definitions, and the ontology states the machine.
+
 ## [3.0.2] - 2026-11-06
 
 ### Added

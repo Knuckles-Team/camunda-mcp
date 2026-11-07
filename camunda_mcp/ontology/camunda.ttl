@@ -671,8 +671,8 @@
 :lifecycleState a owl:ObjectProperty ;
     rdfs:label "lifecycle state" ;
     rdfs:comment "The one persisted state of a process instance or user task: a state class of its machine. The engine holds the authoritative state; the graph mirrors it." ;
-    rdfs:domain [ a owl:Class ; owl:unionOf ( :ProcessInstance :CamundaUserTask ) ] ;
-    rdfs:range [ a owl:Class ; owl:unionOf ( :InstanceCreatedState :InstanceActiveState :InstanceSuspendedState :InstanceIncidentState :InstanceCompletedState :InstanceCanceledState :InstanceTerminatedState :TaskCreatedState :TaskClaimedState :TaskCompletedState :TaskCanceledState :TaskDeletedState ) ] .
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :ProcessInstance :CamundaUserTask :BusinessProcess ) ] ;
+    rdfs:range [ a owl:Class ; owl:unionOf ( :InstanceCreatedState :InstanceActiveState :InstanceSuspendedState :InstanceIncidentState :InstanceCompletedState :InstanceCanceledState :InstanceTerminatedState :DefinitionActiveState :DefinitionSuspendedState :TaskCreatedState :TaskClaimedState :TaskCompletedState :TaskCanceledState :TaskDeletedState ) ] .
 
 :ProcessInstanceLifecycle a owl:Class ;
     rdfs:subClassOf :StateMachine ;
@@ -1020,6 +1020,60 @@
 :TaskTransitionRefusedUnknownEngineState a owl:Class ;
     rdfs:subClassOf :TaskTransitionRefused ;
     rdfs:label "Task refusal UnknownEngineState" ;
+    :refusalReason "UnknownEngineState" .
+
+:ProcessDefinitionLifecycle a owl:Class ;
+    rdfs:subClassOf :StateMachine ;
+    rdfs:label "Process definition lifecycle" ;
+    rdfs:comment "The closed machine of a process definition: Active and Suspended, no terminal state. A suspended definition starts no new instance." .
+
+:DefinitionActiveState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Definition Active" ;
+    rdfs:comment "The Active state of the definition machine." .
+
+:DefinitionSuspendedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Definition Suspended" ;
+    rdfs:comment "The Suspended state of the definition machine." .
+
+:DefinitionSuspendEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Definition suspend" ;
+    rdfs:comment "Suspends a process definition." .
+
+:DefinitionActivateEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Definition activate" ;
+    rdfs:comment "Activates a suspended process definition." .
+
+:DefinitionActiveSuspendTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Definition Active on suspend" ;
+    :transitionSource :DefinitionActiveState ;
+    :transitionTarget :DefinitionSuspendedState ;
+    :transitionEvent :DefinitionSuspendEvent .
+
+:DefinitionSuspendedActivateTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Definition Suspended on activate" ;
+    :transitionSource :DefinitionSuspendedState ;
+    :transitionTarget :DefinitionActiveState ;
+    :transitionEvent :DefinitionActivateEvent .
+
+:DefinitionTransitionRefused a owl:Class ;
+    rdfs:subClassOf :TransitionRefused ;
+    rdfs:label "Definition transition refused" ;
+    rdfs:comment "The typed refusal of an illegal definition move (code ILLEGAL_TRANSITION)." .
+
+:DefinitionTransitionRefusedIllegalEdge a owl:Class ;
+    rdfs:subClassOf :DefinitionTransitionRefused ;
+    rdfs:label "Definition refusal IllegalEdge" ;
+    :refusalReason "IllegalEdge" .
+
+:DefinitionTransitionRefusedUnknownEngineState a owl:Class ;
+    rdfs:subClassOf :DefinitionTransitionRefused ;
+    rdfs:label "Definition refusal UnknownEngineState" ;
     :refusalReason "UnknownEngineState" .
 
 # ---------------------------------------------------------------------------

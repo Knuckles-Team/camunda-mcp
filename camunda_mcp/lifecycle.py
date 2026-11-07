@@ -18,6 +18,7 @@ from typing import Any
 
 MACHINE_INSTANCE = "process_instance"
 MACHINE_TASK = "user_task"
+MACHINE_DEFINITION = "process_definition"
 ILLEGAL_TRANSITION = "ILLEGAL_TRANSITION"
 
 
@@ -56,6 +57,16 @@ class TaskEvent(StrEnum):
     COMPLETE = "complete"
     CANCEL = "cancel"
     DELETE = "delete"
+
+
+class DefinitionState(StrEnum):
+    ACTIVE = "Active"
+    SUSPENDED = "Suspended"
+
+
+class DefinitionEvent(StrEnum):
+    SUSPEND = "suspend"
+    ACTIVATE = "activate"
 
 
 class Reason(StrEnum):
@@ -126,6 +137,12 @@ INSTANCE_TERMINAL = frozenset({_I.COMPLETED, _I.CANCELED, _I.TERMINATED})
 #: Incident is a sub-state of Active: Active's parent role, same events but one.
 INSTANCE_PARENT = {_I.INCIDENT: _I.ACTIVE}
 
+_D, _DE = DefinitionState, DefinitionEvent
+DEFINITION_TABLE: dict[tuple[DefinitionState, DefinitionEvent], DefinitionState] = {
+    (_D.ACTIVE, _DE.SUSPEND): _D.SUSPENDED,
+    (_D.SUSPENDED, _DE.ACTIVATE): _D.ACTIVE,
+}
+
 _T, _V = TaskState, TaskEvent
 TASK_TABLE: dict[tuple[TaskState, TaskEvent], TaskState] = {
     (_T.CREATED, _V.CLAIM): _T.CLAIMED,
@@ -154,6 +171,22 @@ def instance_transition(
         Reason.TERMINAL_STATE if state in INSTANCE_TERMINAL else Reason.ILLEGAL_EDGE
     )
     raise IllegalTransition(MACHINE_INSTANCE, state, event, reason, entity, id)
+
+
+def definition_transition(
+    state: DefinitionState,
+    event: DefinitionEvent,
+    *,
+    entity: str = "ProcessDefinition",
+    id: str = "",
+) -> DefinitionState:
+    """The only transition function of the process definition machine."""
+    nxt = DEFINITION_TABLE.get((state, event))
+    if nxt is not None:
+        return nxt
+    raise IllegalTransition(
+        MACHINE_DEFINITION, state, event, Reason.ILLEGAL_EDGE, entity, id
+    )
 
 
 def task_transition(
@@ -237,6 +270,16 @@ def instance_state_of(
         if state in _G8_INSTANCE:
             return _G8_INSTANCE[state]
     raise _unknown(MACHINE_INSTANCE, state, "ProcessInstance", rid)
+
+
+def definition_state_of(record: Mapping[str, Any]) -> DefinitionState:
+    """Map an engine process definition record (``suspended`` flag) onto the machine."""
+    suspended = record.get("suspended")
+    if isinstance(suspended, bool):
+        return _D.SUSPENDED if suspended else _D.ACTIVE
+    raise _unknown(
+        MACHINE_DEFINITION, suspended, "ProcessDefinition", str(record.get("id") or "")
+    )
 
 
 def task_state_of(generation: int | str, record: Mapping[str, Any]) -> TaskState:
@@ -352,6 +395,12 @@ def read_instance_state(client: Any, generation: int | str, id: str) -> Instance
     return instance_state_of(7, record)
 
 
+def read_definition_state(client: Any, id: str) -> DefinitionState:
+    return definition_state_of(
+        client._call("GET", "/process-definition/{id}", path={"id": id})
+    )
+
+
 def read_task(client: Any, generation: int | str, id: str) -> tuple[TaskState, dict]:
     if str(generation) == "8":
         record = client._call("GET", f"{client.tasklist_url}/v1/tasks/{id}")
@@ -407,7 +456,13 @@ def guarded(kind: str, generation: int | str, event: Any) -> Callable:
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             bound = sig.bind(self, *args, **kwargs).arguments
             ev = event
-            if kind == "instance_suspension":
+            if kind == "definition_suspension":
+                body = bound.get("body")
+                flag = body.get("suspended") if isinstance(body, Mapping) else None
+                ev = DefinitionEvent.SUSPEND if flag else DefinitionEvent.ACTIVATE
+                did = str(bound["id"])
+                definition_transition(read_definition_state(self, did), ev, id=did)
+            elif kind == "instance_suspension":
                 ev, ids = _suspension_targets(bound)
                 for pid in ids:
                     instance_transition(
