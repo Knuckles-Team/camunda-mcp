@@ -24,3 +24,4 @@ Each task line reads `- [ ] T001 [P] [US1] <ID>-R012.4 description`. Order is pr
 - [ ] T018 [US2] CONN-CAMUNDA-MCP-R009.5 Guard claim, unclaim and complete for user tasks.
 - [ ] T019 [US2] CONN-CAMUNDA-MCP-R009.6 Lifecycle state is one typed field in the knowledge-graph mirror.
 - [ ] T020 [US2] CONN-CAMUNDA-MCP-R009.7 Wiring and hot-path proof: an illegal move never reaches the engine.
+- [ ] T021 [US2] CONN-CAMUNDA-MCP-R009.9 Process definition suspension is an explicit two-state machine.

@@ -455,3 +455,73 @@ def test_complete_writes_only_for_the_assignee(served, monkeypatch):
     engine = _task_engine(assignee="arbora-agent", definition=_XML)
     served(engine, "camunda7_complete", {"id": "t1"})
     assert engine.writes == [("POST", "/task/t1/complete")]
+
+
+# --- process definition suspension (CONN-CAMUNDA-MCP-R009.9) ---------------
+
+DefState, DefEvent = lc.DefinitionState, lc.DefinitionEvent
+DEFINITION_EDGES = {
+    "active-suspend": (DefState.ACTIVE, DefEvent.SUSPEND, DefState.SUSPENDED),
+    "suspended-activate": (DefState.SUSPENDED, DefEvent.ACTIVATE, DefState.ACTIVE),
+}
+OTHER_DEFINITION = [
+    pytest.param(s, e, id=f"{s.name.lower()}-{e.value}")
+    for s in DefState
+    for e in DefEvent
+    if (s, e) not in {(a, b) for a, b, _ in DEFINITION_EDGES.values()}
+]
+
+
+@pytest.mark.parametrize("edge", DEFINITION_EDGES.values(), ids=DEFINITION_EDGES)
+def test_every_legal_definition_transition_reaches_its_state(edge):
+    state, event, expected = edge
+    assert lc.definition_transition(state, event) is expected
+
+
+@pytest.mark.parametrize("state,event", OTHER_DEFINITION)
+def test_every_other_definition_pair_is_refused_with_a_typed_error(state, event):
+    with pytest.raises(IllegalTransition) as err:
+        lc.definition_transition(state, event, id="d1")
+    assert err.value.machine == "process_definition"
+    assert err.value.from_state == state and err.value.event == event
+
+
+def test_definition_state_is_read_from_the_suspended_flag():
+    assert lc.definition_state_of({"suspended": False}) is DefState.ACTIVE
+    assert lc.definition_state_of({"suspended": True}) is DefState.SUSPENDED
+    with pytest.raises(IllegalTransition, match="UnknownEngineState"):
+        lc.definition_state_of({"id": "d1"})
+
+
+@pytest.mark.parametrize(
+    "suspended,request_suspend",
+    [
+        pytest.param(False, True, id="active-suspend"),
+        pytest.param(True, False, id="suspended-activate"),
+        pytest.param(True, True, id="suspended-suspend"),
+        pytest.param(False, False, id="active-activate"),
+    ],
+)
+def test_definition_suspension_is_guarded_without_a_write_on_refusal(
+    served, suspended, request_suspend
+):
+    engine = _Engine({"/process-definition/d1": {"id": "d1", "suspended": suspended}})
+    args = {"id": "d1", "body": {"suspended": request_suspend}}
+    if suspended != request_suspend:
+        served(
+            engine, "camunda7_update_process_definition_suspension_state_by_id", args
+        )
+        assert [w[0] for w in engine.writes] == ["PUT"]
+    else:
+        with pytest.raises(Exception, match="ILLEGAL_TRANSITION"):
+            served(
+                engine,
+                "camunda7_update_process_definition_suspension_state_by_id",
+                args,
+            )
+        assert engine.writes == []
+
+
+def test_definition_node_carries_lifecycle_state():
+    src = (Path(lc.__file__).parent / "kg_ingest.py").read_text()
+    assert "definition_state_of(d)" in src

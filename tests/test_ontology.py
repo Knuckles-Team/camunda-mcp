@@ -164,3 +164,29 @@ def test_ontology_states_and_transitions_equal_the_code_machines():
     }
     assert ":processState" not in TTL and ":suspended " not in TTL
     assert ":lifecycleState a owl:ObjectProperty" in TTL
+
+
+def test_ontology_definition_machine_equals_the_code_machine():
+    from camunda_mcp.lifecycle import DEFINITION_TABLE, DefinitionState
+
+    states = {
+        n for n in BLOCKS if re.match(r"Definition(?!TransitionRefused)\w+State$", n)
+    }
+    assert states == {f"Definition{m.name.capitalize()}State" for m in DefinitionState}
+    found = {}
+    for name, body in BLOCKS.items():
+        if re.match(r"Definition\w+Transition$", name):
+            found[name] = tuple(
+                re.search(rf":{prop} :(\w+)", body).group(1)
+                for prop in ("transitionSource", "transitionTarget", "transitionEvent")
+            )
+    expected = {
+        f"Definition{a.name.capitalize()}{_camel(e.value)}Transition": (
+            f"Definition{a.name.capitalize()}State",
+            f"Definition{b.name.capitalize()}State",
+            f"Definition{_camel(e.value)}Event",
+        )
+        for (a, e), b in DEFINITION_TABLE.items()
+    }
+    assert found == expected
+    assert "StateMachine" in _ancestors("ProcessDefinitionLifecycle")

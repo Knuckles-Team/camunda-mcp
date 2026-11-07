@@ -3,6 +3,7 @@
 from typing import Any
 
 from camunda_mcp.api.api_client_base import ApiClientBase
+from camunda_mcp.lifecycle import guarded
 
 
 class Camunda7ProcessDefinition(ApiClientBase):
@@ -1081,6 +1082,7 @@ class Camunda7ProcessDefinition(ApiClientBase):
             body=body,
         )
 
+    @guarded("definition_suspension", 7, None)
     def update_process_definition_suspension_state_by_id(
         self,
         id: str,
