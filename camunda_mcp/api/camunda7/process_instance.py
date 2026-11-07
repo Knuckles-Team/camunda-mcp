@@ -3,6 +3,7 @@
 from typing import Any
 
 from camunda_mcp.api.api_client_base import ApiClientBase, upload_part
+from camunda_mcp.lifecycle import InstanceEvent, guarded
 
 
 class Camunda7ProcessInstance(ApiClientBase):
@@ -49,6 +50,7 @@ class Camunda7ProcessInstance(ApiClientBase):
             body=body,
         )
 
+    @guarded("instance", 7, InstanceEvent.TERMINATE)
     def delete_process_instance(
         self,
         id: str,
@@ -600,6 +602,7 @@ class Camunda7ProcessInstance(ApiClientBase):
             body=body,
         )
 
+    @guarded("instance_suspension", 7, None)
     def update_suspension_state(
         self,
         *,
@@ -641,6 +644,7 @@ class Camunda7ProcessInstance(ApiClientBase):
             body=body,
         )
 
+    @guarded("instance_suspension", 7, None)
     def update_suspension_state_by_id(
         self,
         id: str,

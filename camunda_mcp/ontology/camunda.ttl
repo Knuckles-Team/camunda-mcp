@@ -628,10 +628,6 @@
     rdfs:comment "Caller-supplied key tying an instance to a business record (an invoice number, an order id); the federation key toward other systems." ;
     rdfs:range xsd:string .
 
-:suspended a owl:DatatypeProperty ;
-    rdfs:label "suspended" ;
-    rdfs:range xsd:boolean .
-
 :assignee a owl:DatatypeProperty ;
     rdfs:label "assignee" ;
     rdfs:range xsd:string .
@@ -644,10 +640,387 @@
     rdfs:label "incident type" ;
     rdfs:range xsd:string .
 
-:processState a owl:DatatypeProperty ;
-    rdfs:label "process state" ;
-    rdfs:comment "ACTIVE, SUSPENDED, COMPLETED, EXTERNALLY_TERMINATED or INTERNALLY_TERMINATED." ;
-    rdfs:range xsd:string .
+# ---------------------------------------------------------------------------
+# 2b. Lifecycle state machines (organization constitution Article XXXI)
+# ---------------------------------------------------------------------------
+# The process instance and the user task are explicit state machines. Every
+# class extends the core state-machine vocabulary (StateMachine, State,
+# Transition, Event, Guard, TransitionRefused). The state set and the transition
+# table equal camunda_mcp/lifecycle.py; tests/test_ontology.py checks it.
+
+:transitionSource a owl:AnnotationProperty ;
+    rdfs:label "transition source" ;
+    rdfs:comment "The state class a transition leaves." .
+
+:transitionTarget a owl:AnnotationProperty ;
+    rdfs:label "transition target" ;
+    rdfs:comment "The state class a transition reaches." .
+
+:transitionEvent a owl:AnnotationProperty ;
+    rdfs:label "transition event" ;
+    rdfs:comment "The event class that fires a transition." .
+
+:transitionGuard a owl:AnnotationProperty ;
+    rdfs:label "transition guard" ;
+    rdfs:comment "The guard class a transition needs, if any." .
+
+:refusalReason a owl:AnnotationProperty ;
+    rdfs:label "refusal reason" ;
+    rdfs:comment "The reason code a refusal class carries." .
+
+:lifecycleState a owl:ObjectProperty ;
+    rdfs:label "lifecycle state" ;
+    rdfs:comment "The one persisted state of a process instance or user task: a state class of its machine. The engine holds the authoritative state; the graph mirrors it." ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :ProcessInstance :CamundaUserTask ) ] ;
+    rdfs:range [ a owl:Class ; owl:unionOf ( :InstanceCreatedState :InstanceActiveState :InstanceSuspendedState :InstanceIncidentState :InstanceCompletedState :InstanceCanceledState :InstanceTerminatedState :TaskCreatedState :TaskClaimedState :TaskCompletedState :TaskCanceledState :TaskDeletedState ) ] .
+
+:ProcessInstanceLifecycle a owl:Class ;
+    rdfs:subClassOf :StateMachine ;
+    rdfs:label "Process instance lifecycle" ;
+    rdfs:comment "The closed machine of a process instance, one for both engine generations. Terminal states: Completed, Canceled, Terminated." .
+
+:UserTaskLifecycle a owl:Class ;
+    rdfs:subClassOf :StateMachine ;
+    rdfs:label "User task lifecycle" ;
+    rdfs:comment "The closed machine of a user task. The assignee is data of the Claimed state. Terminal states: Completed, Canceled, Deleted." .
+
+:InstanceCreatedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Instance Created" ;
+    rdfs:comment "The Created state of the instance machine." .
+
+:InstanceActiveState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Instance Active" ;
+    rdfs:comment "The Active state of the instance machine." .
+
+:InstanceSuspendedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Instance Suspended" ;
+    rdfs:comment "The Suspended state of the instance machine." .
+
+:InstanceIncidentState a owl:Class ;
+    rdfs:subClassOf :InstanceActiveState ;
+    rdfs:label "Instance Incident" ;
+    rdfs:comment "The Incident state of the instance machine." .
+
+:InstanceCompletedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Instance Completed" ;
+    rdfs:comment "The Completed state of the instance machine." .
+
+:InstanceCanceledState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Instance Canceled" ;
+    rdfs:comment "The Canceled state of the instance machine." .
+
+:InstanceTerminatedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Instance Terminated" ;
+    rdfs:comment "The Terminated state of the instance machine." .
+
+:TaskCreatedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Task Created" ;
+    rdfs:comment "The Created state of the task machine." .
+
+:TaskClaimedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Task Claimed" ;
+    rdfs:comment "The Claimed state of the task machine." .
+
+:TaskCompletedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Task Completed" ;
+    rdfs:comment "The Completed state of the task machine." .
+
+:TaskCanceledState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Task Canceled" ;
+    rdfs:comment "The Canceled state of the task machine." .
+
+:TaskDeletedState a owl:Class ;
+    rdfs:subClassOf :State ;
+    rdfs:label "Task Deleted" ;
+    rdfs:comment "The Deleted state of the task machine." .
+
+:InstanceStartEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance start" ;
+    rdfs:comment "The start event of the instance machine." .
+
+:InstanceSuspendEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance suspend" ;
+    rdfs:comment "The suspend event of the instance machine." .
+
+:InstanceActivateEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance activate" ;
+    rdfs:comment "The activate event of the instance machine." .
+
+:InstanceRaiseIncidentEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance raise_incident" ;
+    rdfs:comment "The raise_incident event of the instance machine." .
+
+:InstanceResolveIncidentEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance resolve_incident" ;
+    rdfs:comment "The resolve_incident event of the instance machine." .
+
+:InstanceCompleteEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance complete" ;
+    rdfs:comment "The complete event of the instance machine." .
+
+:InstanceCancelEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance cancel" ;
+    rdfs:comment "The cancel event of the instance machine." .
+
+:InstanceTerminateEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Instance terminate" ;
+    rdfs:comment "The terminate event of the instance machine." .
+
+:TaskClaimEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Task claim" ;
+    rdfs:comment "The claim event of the task machine." .
+
+:TaskUnclaimEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Task unclaim" ;
+    rdfs:comment "The unclaim event of the task machine." .
+
+:TaskCompleteEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Task complete" ;
+    rdfs:comment "The complete event of the task machine." .
+
+:TaskCancelEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Task cancel" ;
+    rdfs:comment "The cancel event of the task machine." .
+
+:TaskDeleteEvent a owl:Class ;
+    rdfs:subClassOf :Event ;
+    rdfs:label "Task delete" ;
+    rdfs:comment "The delete event of the task machine." .
+
+:TaskCompleteGuard a owl:Class ;
+    rdfs:subClassOf :Guard ;
+    rdfs:label "Task complete guard" ;
+    rdfs:comment "The acting identity equals the assignee. Human tasks act as the signed-in user, tasks whose definition carries automated=true act as the Arbora agent account." .
+
+:InstanceCreatedStartTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Created on start" ;
+    :transitionSource :InstanceCreatedState ;
+    :transitionTarget :InstanceActiveState ;
+    :transitionEvent :InstanceStartEvent .
+
+:InstanceActiveSuspendTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Active on suspend" ;
+    :transitionSource :InstanceActiveState ;
+    :transitionTarget :InstanceSuspendedState ;
+    :transitionEvent :InstanceSuspendEvent .
+
+:InstanceSuspendedActivateTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Suspended on activate" ;
+    :transitionSource :InstanceSuspendedState ;
+    :transitionTarget :InstanceActiveState ;
+    :transitionEvent :InstanceActivateEvent .
+
+:InstanceActiveRaiseIncidentTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Active on raise_incident" ;
+    :transitionSource :InstanceActiveState ;
+    :transitionTarget :InstanceIncidentState ;
+    :transitionEvent :InstanceRaiseIncidentEvent .
+
+:InstanceIncidentResolveIncidentTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Incident on resolve_incident" ;
+    :transitionSource :InstanceIncidentState ;
+    :transitionTarget :InstanceActiveState ;
+    :transitionEvent :InstanceResolveIncidentEvent .
+
+:InstanceIncidentSuspendTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Incident on suspend" ;
+    :transitionSource :InstanceIncidentState ;
+    :transitionTarget :InstanceSuspendedState ;
+    :transitionEvent :InstanceSuspendEvent .
+
+:InstanceActiveCompleteTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Active on complete" ;
+    :transitionSource :InstanceActiveState ;
+    :transitionTarget :InstanceCompletedState ;
+    :transitionEvent :InstanceCompleteEvent .
+
+:InstanceIncidentCompleteTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Incident on complete" ;
+    :transitionSource :InstanceIncidentState ;
+    :transitionTarget :InstanceCompletedState ;
+    :transitionEvent :InstanceCompleteEvent .
+
+:InstanceActiveCancelTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Active on cancel" ;
+    :transitionSource :InstanceActiveState ;
+    :transitionTarget :InstanceCanceledState ;
+    :transitionEvent :InstanceCancelEvent .
+
+:InstanceSuspendedCancelTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Suspended on cancel" ;
+    :transitionSource :InstanceSuspendedState ;
+    :transitionTarget :InstanceCanceledState ;
+    :transitionEvent :InstanceCancelEvent .
+
+:InstanceIncidentCancelTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Incident on cancel" ;
+    :transitionSource :InstanceIncidentState ;
+    :transitionTarget :InstanceCanceledState ;
+    :transitionEvent :InstanceCancelEvent .
+
+:InstanceActiveTerminateTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Active on terminate" ;
+    :transitionSource :InstanceActiveState ;
+    :transitionTarget :InstanceTerminatedState ;
+    :transitionEvent :InstanceTerminateEvent .
+
+:InstanceSuspendedTerminateTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Suspended on terminate" ;
+    :transitionSource :InstanceSuspendedState ;
+    :transitionTarget :InstanceTerminatedState ;
+    :transitionEvent :InstanceTerminateEvent .
+
+:InstanceIncidentTerminateTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Instance Incident on terminate" ;
+    :transitionSource :InstanceIncidentState ;
+    :transitionTarget :InstanceTerminatedState ;
+    :transitionEvent :InstanceTerminateEvent .
+
+:TaskCreatedClaimTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Created on claim" ;
+    :transitionSource :TaskCreatedState ;
+    :transitionTarget :TaskClaimedState ;
+    :transitionEvent :TaskClaimEvent .
+
+:TaskClaimedUnclaimTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Claimed on unclaim" ;
+    :transitionSource :TaskClaimedState ;
+    :transitionTarget :TaskCreatedState ;
+    :transitionEvent :TaskUnclaimEvent .
+
+:TaskClaimedCompleteTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Claimed on complete" ;
+    :transitionSource :TaskClaimedState ;
+    :transitionTarget :TaskCompletedState ;
+    :transitionEvent :TaskCompleteEvent ;
+    :transitionGuard :TaskCompleteGuard .
+
+:TaskCreatedCancelTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Created on cancel" ;
+    :transitionSource :TaskCreatedState ;
+    :transitionTarget :TaskCanceledState ;
+    :transitionEvent :TaskCancelEvent .
+
+:TaskClaimedCancelTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Claimed on cancel" ;
+    :transitionSource :TaskClaimedState ;
+    :transitionTarget :TaskCanceledState ;
+    :transitionEvent :TaskCancelEvent .
+
+:TaskCreatedDeleteTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Created on delete" ;
+    :transitionSource :TaskCreatedState ;
+    :transitionTarget :TaskDeletedState ;
+    :transitionEvent :TaskDeleteEvent .
+
+:TaskClaimedDeleteTransition a owl:Class ;
+    rdfs:subClassOf :Transition ;
+    rdfs:label "Task Claimed on delete" ;
+    :transitionSource :TaskClaimedState ;
+    :transitionTarget :TaskDeletedState ;
+    :transitionEvent :TaskDeleteEvent .
+
+:InstanceTransitionRefused a owl:Class ;
+    rdfs:subClassOf :TransitionRefused ;
+    rdfs:label "Instance transition refused" ;
+    rdfs:comment "A instance move the machine refuses before any engine call (code ILLEGAL_TRANSITION)." .
+
+:InstanceTransitionRefusedIllegalEdge a owl:Class ;
+    rdfs:subClassOf :InstanceTransitionRefused ;
+    rdfs:label "Instance refusal IllegalEdge" ;
+    :refusalReason "IllegalEdge" .
+
+:InstanceTransitionRefusedTerminalState a owl:Class ;
+    rdfs:subClassOf :InstanceTransitionRefused ;
+    rdfs:label "Instance refusal TerminalState" ;
+    :refusalReason "TerminalState" .
+
+:InstanceTransitionRefusedUnknownEngineState a owl:Class ;
+    rdfs:subClassOf :InstanceTransitionRefused ;
+    rdfs:label "Instance refusal UnknownEngineState" ;
+    :refusalReason "UnknownEngineState" .
+
+:TaskTransitionRefused a owl:Class ;
+    rdfs:subClassOf :TransitionRefused ;
+    rdfs:label "Task transition refused" ;
+    rdfs:comment "A task move the machine refuses before any engine call (code ILLEGAL_TRANSITION)." .
+
+:TaskTransitionRefusedIllegalEdge a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal IllegalEdge" ;
+    :refusalReason "IllegalEdge" .
+
+:TaskTransitionRefusedTerminalState a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal TerminalState" ;
+    :refusalReason "TerminalState" .
+
+:TaskTransitionRefusedAlreadyClaimed a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal AlreadyClaimed" ;
+    :refusalReason "AlreadyClaimed" .
+
+:TaskTransitionRefusedNotClaimed a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal NotClaimed" ;
+    :refusalReason "NotClaimed" .
+
+:TaskTransitionRefusedClaimedByOther a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal ClaimedByOther" ;
+    :refusalReason "ClaimedByOther" .
+
+:TaskTransitionRefusedNoActingIdentity a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal NoActingIdentity" ;
+    :refusalReason "NoActingIdentity" .
+
+:TaskTransitionRefusedUnknownEngineState a owl:Class ;
+    rdfs:subClassOf :TaskTransitionRefused ;
+    rdfs:label "Task refusal UnknownEngineState" ;
+    :refusalReason "UnknownEngineState" .
 
 # ---------------------------------------------------------------------------
 # 3. Data location

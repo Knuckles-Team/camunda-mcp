@@ -26,6 +26,8 @@ from scion_sdk.ingest import (
     current_ingest,
 )
 
+from camunda_mcp.lifecycle import instance_state_of, task_state_of
+
 _BINDING = IngestBinding(connector="camunda-mcp", stream="camunda")
 
 _ENTITY_RESERVED_KEYS = frozenset({"id", "node_type"})
@@ -136,7 +138,6 @@ async def ingest_process_definitions(
                 "name": d.get("name") or d.get("key"),
                 "processDefinitionKey": d.get("key"),
                 "bpmnVersion": d.get("version"),
-                "suspended": d.get("suspended"),
                 "category": d.get("category"),
                 "tenantId": d.get("tenantId"),
                 "externalToolId": str(did),
@@ -161,6 +162,11 @@ async def ingest_process_definitions(
     return await ingest_entities(entities, relationships, ingest=ingest)
 
 
+def _generation(record: dict[str, Any]) -> int:
+    """Generation 8 records are keyed by ``key`` and carry no ``id``."""
+    return 8 if record.get("key") is not None and record.get("id") is None else 7
+
+
 async def ingest_process_instances(
     instances: list[dict[str, Any]],
     *,
@@ -178,8 +184,7 @@ async def ingest_process_instances(
                 "id": f"camunda:instance:{iid}",
                 "node_type": "ProcessInstance",
                 "businessKey": i.get("businessKey"),
-                "suspended": i.get("suspended"),
-                "processState": i.get("state"),
+                "lifecycleState": instance_state_of(_generation(i), i).value,
                 "ended": i.get("ended"),
                 "tenantId": i.get("tenantId"),
                 "externalToolId": str(iid),
@@ -215,6 +220,7 @@ async def ingest_tasks(
                 "node_type": "CamundaUserTask",
                 "name": t.get("name"),
                 "assignee": t.get("assignee"),
+                "lifecycleState": task_state_of(8 if "taskState" in t else 7, t).value,
                 "activityId": t.get("taskDefinitionKey"),
                 "priority": t.get("priority"),
                 "created": t.get("created"),

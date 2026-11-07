@@ -81,3 +81,86 @@ def test_flow_nodes_carry_graph_kind_and_tools_exist():
                 "BpmnDataStoreReference",
             ):
                 assert ":dagNodeKind" in body, name
+
+
+# --- CONNECTOR-CONTENT-R004: lifecycle machines ---------------------------------
+
+import pytest  # noqa: E402
+
+from camunda_mcp.lifecycle import (  # noqa: E402
+    INSTANCE_TABLE,
+    TASK_TABLE,
+    InstanceEvent,
+    InstanceState,
+    Reason,
+    TaskEvent,
+    TaskState,
+)
+
+
+def _ancestors(name: str) -> set[str]:
+    seen, todo = set(), [name]
+    while todo:
+        cls = todo.pop()
+        if cls in seen:
+            continue
+        seen.add(cls)
+        todo += _parents(BLOCKS[cls]) if cls in BLOCKS else []
+    return seen
+
+
+def _camel(value: str) -> str:
+    return "".join(p.capitalize() for p in value.split("_"))
+
+
+@pytest.mark.parametrize(
+    "kind,pattern,core",
+    [
+        ("machine", r"(ProcessInstanceLifecycle|UserTaskLifecycle)$", "StateMachine"),
+        ("state", r"(Instance|Task)(?!TransitionRefused)\w+State$", "State"),
+        ("transition", r"(Instance|Task)\w+Transition$", "Transition"),
+        ("event", r"(Instance|Task)\w+Event$", "Event"),
+        ("guard", r"TaskCompleteGuard$", "Guard"),
+        ("refusal", r"(Instance|Task)TransitionRefused\w*$", "TransitionRefused"),
+    ],
+)
+def test_lifecycle_classes_extend_core_state_machine_classes(kind, pattern, core):
+    names = [n for n in BLOCKS if re.match(pattern, n)]
+    assert names, kind
+    for name in names:
+        assert core in _ancestors(name), name
+
+
+def test_ontology_states_and_transitions_equal_the_code_machines():
+    states = {
+        n
+        for n in BLOCKS
+        if re.match(r"(Instance|Task)(?!TransitionRefused)\w+State$", n)
+    }
+    assert states == {f"Instance{m.name.capitalize()}State" for m in InstanceState} | {
+        f"Task{m.name.capitalize()}State" for m in TaskState
+    }
+    expected = {}
+    for pre, table in (("Instance", INSTANCE_TABLE), ("Task", TASK_TABLE)):
+        for (a, e), b in table.items():
+            expected[f"{pre}{a.name.capitalize()}{_camel(e.value)}Transition"] = (
+                f"{pre}{a.name.capitalize()}State",
+                f"{pre}{b.name.capitalize()}State",
+                f"{pre}{_camel(e.value)}Event",
+            )
+    found = {}
+    for name, body in BLOCKS.items():
+        if re.match(r"(Instance|Task)\w+Transition$", name):
+            found[name] = tuple(
+                re.search(rf":{prop} :(\w+)", body).group(1)
+                for prop in ("transitionSource", "transitionTarget", "transitionEvent")
+            )
+    assert found == expected
+    reasons = {m.group(1) for m in re.finditer(r':refusalReason "(\w+)"', TTL)}
+    assert reasons == {r.value for r in Reason}
+    events = {n for n in BLOCKS if re.match(r"(Instance|Task)\w+Event$", n)}
+    assert events == {f"Instance{_camel(e.value)}Event" for e in InstanceEvent} | {
+        f"Task{_camel(e.value)}Event" for e in TaskEvent
+    }
+    assert ":processState" not in TTL and ":suspended " not in TTL
+    assert ":lifecycleState a owl:ObjectProperty" in TTL
