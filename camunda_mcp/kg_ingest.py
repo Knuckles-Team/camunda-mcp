@@ -1,4 +1,4 @@
-"""Epistemic-graph ingestion for Camunda records (typed graph nodes).
+"""Medulla ingestion for Camunda records (typed graph nodes).
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. camunda-mcp pushes its
 process-automation data into the ONE medulla knowledge graph as **typed
