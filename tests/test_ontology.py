@@ -30,7 +30,7 @@ def test_every_class_reaches_a_core_class():
                 continue
             seen.add(cls)
             if cls not in BLOCKS:
-                reached = True  # a core class (http://knuckles.team/kg#)
+                reached = True  # a core class (https://knuckles-team.github.io/ontology/core#)
                 continue
             parents = _parents(BLOCKS[cls])
             assert parents, f"{cls} has no rdfs:subClassOf"
@@ -120,8 +120,8 @@ def _camel(value: str) -> str:
         ("state", r"(Instance|Task)(?!TransitionRefused)\w+State$", "State"),
         ("transition", r"(Instance|Task)\w+Transition$", "Transition"),
         ("event", r"(Instance|Task)\w+Event$", "Event"),
-        ("guard", r"TaskCompleteGuard$", "Guard"),
-        ("refusal", r"(Instance|Task)TransitionRefused\w*$", "TransitionRefused"),
+        ("guard", r"TaskCompleteGuard$", "TransitionGuard"),
+        ("refusal", r"(Instance|Task)TransitionRefused\w*$", "RefusalCode"),
     ],
 )
 def test_lifecycle_classes_extend_core_state_machine_classes(kind, pattern, core):
