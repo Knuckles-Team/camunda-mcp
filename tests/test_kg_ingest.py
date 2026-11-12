@@ -1,4 +1,4 @@
-"""Epistemic-graph typed-node ingestion — Wire-First coverage.
+"""Medulla typed-node ingestion — Wire-First coverage.
 
 Exercises the real ``ingest_entities`` / ``ingest_process_definitions`` /
 ``ingest_process_instances`` / ``ingest_tasks`` seam against a fake

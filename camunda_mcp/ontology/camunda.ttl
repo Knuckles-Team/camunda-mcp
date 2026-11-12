@@ -1,4 +1,5 @@
-@prefix : <http://knuckles.team/kg#> .
+@prefix : <https://knuckles-team.github.io/ontology/connector/camunda#> .
+@prefix core: <https://knuckles-team.github.io/ontology/core#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -23,7 +24,7 @@
 # are declared in camunda_mcp/connector_contracts.py and served as
 # ontology://camunda-mcp/contracts.ttl.
 
-<http://knuckles.team/kg/camunda> a owl:Ontology ;
+<https://knuckles-team.github.io/ontology/connector/camunda> a owl:Ontology ;
     rdfs:label "Camunda business-process ontology" ;
     rdfs:comment "BPMN 2.0 / DMN model constructs, Operaton (Camunda 7) engine records and their data location, rolled up to the core ontology by subclassing." .
 
@@ -48,13 +49,13 @@
 # ---------------------------------------------------------------------------
 
 :BpmnDefinitions a owl:Class ;
-    rdfs:subClassOf :Document ;
+    rdfs:subClassOf core:Document ;
     rdfs:label "BPMN definitions" ;
     :bpmnElement "definitions" ;
     rdfs:comment "One BPMN 2.0 XML resource: the definitions root holding processes, collaborations and diagrams. Deployed to the engine as a deployment resource." .
 
 :BpmnProcess a owl:Class ;
-    rdfs:subClassOf :ProcessModel ;
+    rdfs:subClassOf core:ProcessModel ;
     rdfs:label "BPMN process" ;
     :bpmnElement "process" ;
     :dagNodeKind "graph" ;
@@ -62,12 +63,12 @@
     rdfs:comment "A BPMN process model: the flow elements, lanes and data a workflow graph is generated from. One deployed version of it is a :CamundaProcessDefinition." .
 
 :BpmnFlowElement a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN flow element" ;
     rdfs:comment "Any element contained in a process: a flow node or a flow." .
 
 :BpmnFlowNode a owl:Class ;
-    rdfs:subClassOf :BpmnFlowElement, :TaskStep ;
+    rdfs:subClassOf :BpmnFlowElement, core:TaskStep ;
     rdfs:label "BPMN flow node" ;
     rdfs:comment "A node of the process graph (activity, gateway or event). Becomes one node of a generated workflow graph; sequence flows become its edges." .
 
@@ -239,7 +240,7 @@
     rdfs:comment "Attached to an activity (:attachedTo): when its trigger fires (a timer for escalation, an error, a message) it starts an alternative path, interrupting the activity unless cancelActivity is false." .
 
 :BpmnEventDefinition a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN event definition" ;
     rdfs:comment "The trigger or result of an event." .
 
@@ -311,31 +312,31 @@
     rdfs:comment "A message passed between two pools. Becomes a cross-graph message edge." .
 
 :BpmnParticipant a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN participant (pool)" ;
     :bpmnElement "participant" ;
     rdfs:comment "A party of a collaboration, usually one organisation or system, holding one process." .
 
 :BpmnLaneSet a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN lane set" ;
     :bpmnElement "laneSet" ;
     rdfs:comment "The partition of a process into lanes." .
 
 :BpmnLane a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN lane" ;
     :bpmnElement "lane" ;
     rdfs:comment "A partition of a process by performer. Its :laneRole names the business role (and so the agent prompt) that performs the flow nodes in it." .
 
 :BpmnDataObject a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN data object" ;
     :bpmnElement "dataObject" ;
     rdfs:comment "Data produced or used inside one instance; at run time it is a :ProcessVariable." .
 
 :BpmnDataStoreReference a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "BPMN data store" ;
     :bpmnElement "dataStoreReference" ;
     rdfs:comment "A store outside the instance that steps read or write (an ERP, a document store). Links a step to the connector that holds the data." .
@@ -343,13 +344,13 @@
 # --- DMN ---
 
 :DmnDecisionRequirements a owl:Class ;
-    rdfs:subClassOf :Document ;
+    rdfs:subClassOf core:Document ;
     rdfs:label "DMN decision requirements" ;
     :bpmnElement "definitions (DMN)" ;
     rdfs:comment "One DMN resource: a decision requirements graph of decisions, inputs and knowledge sources." .
 
 :DmnDecision a owl:Class ;
-    rdfs:subClassOf :Policy ;
+    rdfs:subClassOf core:Policy ;
     rdfs:label "DMN decision" ;
     :bpmnElement "decision" ;
     :dagNodeKind "decision" ;
@@ -365,7 +366,7 @@
 # --- BPMN model properties ---
 
 :containsFlowElement a owl:ObjectProperty ;
-    rdfs:subPropertyOf :hasPart ;
+    rdfs:subPropertyOf core:hasPart ;
     rdfs:label "contains flow element" ;
     rdfs:domain :BpmnProcess ;
     rdfs:range :BpmnFlowElement .
@@ -383,7 +384,7 @@
     rdfs:range :BpmnFlowNode .
 
 :flowsTo a owl:ObjectProperty ;
-    rdfs:subPropertyOf :precedes ;
+    rdfs:subPropertyOf core:precedes ;
     rdfs:label "flows to" ;
     rdfs:comment "Shortcut: flow node A has a sequence flow to flow node B. The edge relation of a generated graph." ;
     rdfs:domain :BpmnFlowNode ;
@@ -398,7 +399,7 @@
     rdfs:label "lane role" ;
     rdfs:comment "The business role that performs the nodes of a lane." ;
     rdfs:domain :BpmnLane ;
-    rdfs:range :Role .
+    rdfs:range core:Role .
 
 :hasEventDefinition a owl:ObjectProperty ;
     rdfs:label "has event definition" ;
@@ -424,7 +425,7 @@
     rdfs:label "model of" ;
     rdfs:comment "Links a BPMN process model to the business process it describes." ;
     rdfs:domain :BpmnProcess ;
-    rdfs:range :BusinessProcess .
+    rdfs:range core:BusinessProcess .
 
 :bpmnElementId a owl:DatatypeProperty ;
     rdfs:label "BPMN element id" ;
@@ -511,17 +512,17 @@
 # ---------------------------------------------------------------------------
 
 :CamundaEngine a owl:Class ;
-    rdfs:subClassOf :Application ;
+    rdfs:subClassOf core:Application ;
     rdfs:label "Camunda engine" ;
     rdfs:comment "One Operaton / Camunda 7 process engine reached through the connector: the instance that holds definitions, instances, tasks and history. Named by its connector setting (CAMUNDA7_URL) and engine name (default)." .
 
 :CamundaDeployment a owl:Class ;
-    rdfs:subClassOf :RunEvent ;
+    rdfs:subClassOf core:RunEvent ;
     rdfs:label "Camunda deployment" ;
     rdfs:comment "One deployment: a named bundle of BPMN, DMN and form resources sent to an engine in one call. Deleting it with cascade removes its definitions, instances and history." .
 
 :CamundaProcessDefinition a owl:Class ;
-    rdfs:subClassOf :BusinessProcess ;
+    rdfs:subClassOf core:BusinessProcess ;
     rdfs:label "Camunda process definition" ;
     rdfs:comment "One deployed version of a BPMN process (key + version). Its model is a :BpmnProcess." .
 
@@ -532,42 +533,42 @@
     rdfs:comment "One deployed version of a DMN decision (key + version)." .
 
 :ProcessInstance a owl:Class ;
-    rdfs:subClassOf :DurableExecutionUnit ;
+    rdfs:subClassOf core:DurableExecutionUnit ;
     rdfs:label "Process instance" ;
     rdfs:comment "One running or finished execution of a process definition, keyed by id and optionally a business key." .
 
 :ProcessStep a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Process step" ;
     rdfs:comment "One activity instance inside a process instance (a historic activity instance): which flow node ran, when, and how long." .
 
 :CamundaUserTask a owl:Class ;
-    rdfs:subClassOf :Task ;
+    rdfs:subClassOf core:Task ;
     rdfs:label "Camunda user task" ;
     rdfs:comment "One open or finished human work item created by a :BpmnUserTask: assignee, candidates, due date, priority." .
 
 :CamundaExternalTask a owl:Class ;
-    rdfs:subClassOf :Job ;
+    rdfs:subClassOf core:Job ;
     rdfs:label "Camunda external task" ;
     rdfs:comment "One work item of a :BpmnServiceTask on an external topic, fetched and locked by a worker." .
 
 :CamundaJob a owl:Class ;
-    rdfs:subClassOf :Job ;
+    rdfs:subClassOf core:Job ;
     rdfs:label "Camunda job" ;
     rdfs:comment "One engine job: a timer, an asynchronous continuation or a batch step, with retries and a due date." .
 
 :CamundaIncident a owl:Class ;
-    rdfs:subClassOf :Incident ;
+    rdfs:subClassOf core:Incident ;
     rdfs:label "Camunda incident" ;
     rdfs:comment "A failure the engine raised against an instance (failedJob, failedExternalTask) when retries ran out." .
 
 :ProcessVariable a owl:Class ;
-    rdfs:subClassOf :Concept ;
+    rdfs:subClassOf core:Concept ;
     rdfs:label "Process variable" ;
     rdfs:comment "A typed named value of an instance, execution or task (String, Integer, Double, Boolean, Json, File)." .
 
 :DecisionResult a owl:Class ;
-    rdfs:subClassOf :Decision ;
+    rdfs:subClassOf core:Decision ;
     rdfs:label "Decision result" ;
     rdfs:comment "One evaluation of a decision: inputs, matched rules and outputs (a historic decision instance)." .
 
@@ -582,7 +583,7 @@
 :instanceOf a owl:ObjectProperty ;
     rdfs:label "instance of" ;
     rdfs:domain :ProcessInstance ;
-    rdfs:range :BusinessProcess .
+    rdfs:range core:BusinessProcess .
 
 :hasStep a owl:ObjectProperty ;
     rdfs:label "has step" ;
@@ -595,7 +596,7 @@
     rdfs:range :CamundaUserTask .
 
 :partOfInstance a owl:ObjectProperty ;
-    rdfs:subPropertyOf :partOf ;
+    rdfs:subPropertyOf core:partOf ;
     rdfs:label "part of instance" ;
     rdfs:comment "Links a task, external task, job, incident or variable to its process instance." ;
     rdfs:range :ProcessInstance .
@@ -608,7 +609,7 @@
 :assignedTo a owl:ObjectProperty ;
     rdfs:label "assigned to" ;
     rdfs:domain :CamundaUserTask ;
-    rdfs:range :Person .
+    rdfs:range core:Person .
 
 :hasIncident a owl:ObjectProperty ;
     rdfs:label "has incident" ;
@@ -671,31 +672,31 @@
 :lifecycleState a owl:ObjectProperty ;
     rdfs:label "lifecycle state" ;
     rdfs:comment "The one persisted state of a process instance or user task: a state class of its machine. The engine holds the authoritative state; the graph mirrors it." ;
-    rdfs:domain [ a owl:Class ; owl:unionOf ( :ProcessInstance :CamundaUserTask :BusinessProcess ) ] ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :ProcessInstance :CamundaUserTask core:BusinessProcess ) ] ;
     rdfs:range [ a owl:Class ; owl:unionOf ( :InstanceCreatedState :InstanceActiveState :InstanceSuspendedState :InstanceIncidentState :InstanceCompletedState :InstanceCanceledState :InstanceTerminatedState :DefinitionActiveState :DefinitionSuspendedState :TaskCreatedState :TaskClaimedState :TaskCompletedState :TaskCanceledState :TaskDeletedState ) ] .
 
 :ProcessInstanceLifecycle a owl:Class ;
-    rdfs:subClassOf :StateMachine ;
+    rdfs:subClassOf core:StateMachine ;
     rdfs:label "Process instance lifecycle" ;
     rdfs:comment "The closed machine of a process instance, one for both engine generations. Terminal states: Completed, Canceled, Terminated." .
 
 :UserTaskLifecycle a owl:Class ;
-    rdfs:subClassOf :StateMachine ;
+    rdfs:subClassOf core:StateMachine ;
     rdfs:label "User task lifecycle" ;
     rdfs:comment "The closed machine of a user task. The assignee is data of the Claimed state. Terminal states: Completed, Canceled, Deleted." .
 
 :InstanceCreatedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Instance Created" ;
     rdfs:comment "The Created state of the instance machine." .
 
 :InstanceActiveState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Instance Active" ;
     rdfs:comment "The Active state of the instance machine." .
 
 :InstanceSuspendedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Instance Suspended" ;
     rdfs:comment "The Suspended state of the instance machine." .
 
@@ -705,229 +706,229 @@
     rdfs:comment "The Incident state of the instance machine." .
 
 :InstanceCompletedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Instance Completed" ;
     rdfs:comment "The Completed state of the instance machine." .
 
 :InstanceCanceledState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Instance Canceled" ;
     rdfs:comment "The Canceled state of the instance machine." .
 
 :InstanceTerminatedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Instance Terminated" ;
     rdfs:comment "The Terminated state of the instance machine." .
 
 :TaskCreatedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Task Created" ;
     rdfs:comment "The Created state of the task machine." .
 
 :TaskClaimedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Task Claimed" ;
     rdfs:comment "The Claimed state of the task machine." .
 
 :TaskCompletedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Task Completed" ;
     rdfs:comment "The Completed state of the task machine." .
 
 :TaskCanceledState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Task Canceled" ;
     rdfs:comment "The Canceled state of the task machine." .
 
 :TaskDeletedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Task Deleted" ;
     rdfs:comment "The Deleted state of the task machine." .
 
 :InstanceStartEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance start" ;
     rdfs:comment "The start event of the instance machine." .
 
 :InstanceSuspendEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance suspend" ;
     rdfs:comment "The suspend event of the instance machine." .
 
 :InstanceActivateEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance activate" ;
     rdfs:comment "The activate event of the instance machine." .
 
 :InstanceRaiseIncidentEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance raise_incident" ;
     rdfs:comment "The raise_incident event of the instance machine." .
 
 :InstanceResolveIncidentEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance resolve_incident" ;
     rdfs:comment "The resolve_incident event of the instance machine." .
 
 :InstanceCompleteEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance complete" ;
     rdfs:comment "The complete event of the instance machine." .
 
 :InstanceCancelEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance cancel" ;
     rdfs:comment "The cancel event of the instance machine." .
 
 :InstanceTerminateEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Instance terminate" ;
     rdfs:comment "The terminate event of the instance machine." .
 
 :TaskClaimEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Task claim" ;
     rdfs:comment "The claim event of the task machine." .
 
 :TaskUnclaimEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Task unclaim" ;
     rdfs:comment "The unclaim event of the task machine." .
 
 :TaskCompleteEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Task complete" ;
     rdfs:comment "The complete event of the task machine." .
 
 :TaskCancelEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Task cancel" ;
     rdfs:comment "The cancel event of the task machine." .
 
 :TaskDeleteEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Task delete" ;
     rdfs:comment "The delete event of the task machine." .
 
 :TaskCompleteGuard a owl:Class ;
-    rdfs:subClassOf :Guard ;
+    rdfs:subClassOf core:TransitionGuard ;
     rdfs:label "Task complete guard" ;
     rdfs:comment "The acting identity equals the assignee. Human tasks act as the signed-in user, tasks whose definition carries automated=true act as the Arbora agent account." .
 
 :InstanceCreatedStartTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Created on start" ;
     :transitionSource :InstanceCreatedState ;
     :transitionTarget :InstanceActiveState ;
     :transitionEvent :InstanceStartEvent .
 
 :InstanceActiveSuspendTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Active on suspend" ;
     :transitionSource :InstanceActiveState ;
     :transitionTarget :InstanceSuspendedState ;
     :transitionEvent :InstanceSuspendEvent .
 
 :InstanceSuspendedActivateTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Suspended on activate" ;
     :transitionSource :InstanceSuspendedState ;
     :transitionTarget :InstanceActiveState ;
     :transitionEvent :InstanceActivateEvent .
 
 :InstanceActiveRaiseIncidentTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Active on raise_incident" ;
     :transitionSource :InstanceActiveState ;
     :transitionTarget :InstanceIncidentState ;
     :transitionEvent :InstanceRaiseIncidentEvent .
 
 :InstanceIncidentResolveIncidentTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Incident on resolve_incident" ;
     :transitionSource :InstanceIncidentState ;
     :transitionTarget :InstanceActiveState ;
     :transitionEvent :InstanceResolveIncidentEvent .
 
 :InstanceIncidentSuspendTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Incident on suspend" ;
     :transitionSource :InstanceIncidentState ;
     :transitionTarget :InstanceSuspendedState ;
     :transitionEvent :InstanceSuspendEvent .
 
 :InstanceActiveCompleteTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Active on complete" ;
     :transitionSource :InstanceActiveState ;
     :transitionTarget :InstanceCompletedState ;
     :transitionEvent :InstanceCompleteEvent .
 
 :InstanceIncidentCompleteTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Incident on complete" ;
     :transitionSource :InstanceIncidentState ;
     :transitionTarget :InstanceCompletedState ;
     :transitionEvent :InstanceCompleteEvent .
 
 :InstanceActiveCancelTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Active on cancel" ;
     :transitionSource :InstanceActiveState ;
     :transitionTarget :InstanceCanceledState ;
     :transitionEvent :InstanceCancelEvent .
 
 :InstanceSuspendedCancelTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Suspended on cancel" ;
     :transitionSource :InstanceSuspendedState ;
     :transitionTarget :InstanceCanceledState ;
     :transitionEvent :InstanceCancelEvent .
 
 :InstanceIncidentCancelTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Incident on cancel" ;
     :transitionSource :InstanceIncidentState ;
     :transitionTarget :InstanceCanceledState ;
     :transitionEvent :InstanceCancelEvent .
 
 :InstanceActiveTerminateTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Active on terminate" ;
     :transitionSource :InstanceActiveState ;
     :transitionTarget :InstanceTerminatedState ;
     :transitionEvent :InstanceTerminateEvent .
 
 :InstanceSuspendedTerminateTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Suspended on terminate" ;
     :transitionSource :InstanceSuspendedState ;
     :transitionTarget :InstanceTerminatedState ;
     :transitionEvent :InstanceTerminateEvent .
 
 :InstanceIncidentTerminateTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Instance Incident on terminate" ;
     :transitionSource :InstanceIncidentState ;
     :transitionTarget :InstanceTerminatedState ;
     :transitionEvent :InstanceTerminateEvent .
 
 :TaskCreatedClaimTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Created on claim" ;
     :transitionSource :TaskCreatedState ;
     :transitionTarget :TaskClaimedState ;
     :transitionEvent :TaskClaimEvent .
 
 :TaskClaimedUnclaimTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Claimed on unclaim" ;
     :transitionSource :TaskClaimedState ;
     :transitionTarget :TaskCreatedState ;
     :transitionEvent :TaskUnclaimEvent .
 
 :TaskClaimedCompleteTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Claimed on complete" ;
     :transitionSource :TaskClaimedState ;
     :transitionTarget :TaskCompletedState ;
@@ -935,35 +936,35 @@
     :transitionGuard :TaskCompleteGuard .
 
 :TaskCreatedCancelTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Created on cancel" ;
     :transitionSource :TaskCreatedState ;
     :transitionTarget :TaskCanceledState ;
     :transitionEvent :TaskCancelEvent .
 
 :TaskClaimedCancelTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Claimed on cancel" ;
     :transitionSource :TaskClaimedState ;
     :transitionTarget :TaskCanceledState ;
     :transitionEvent :TaskCancelEvent .
 
 :TaskCreatedDeleteTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Created on delete" ;
     :transitionSource :TaskCreatedState ;
     :transitionTarget :TaskDeletedState ;
     :transitionEvent :TaskDeleteEvent .
 
 :TaskClaimedDeleteTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Task Claimed on delete" ;
     :transitionSource :TaskClaimedState ;
     :transitionTarget :TaskDeletedState ;
     :transitionEvent :TaskDeleteEvent .
 
 :InstanceTransitionRefused a owl:Class ;
-    rdfs:subClassOf :TransitionRefused ;
+    rdfs:subClassOf core:RefusalCode ;
     rdfs:label "Instance transition refused" ;
     rdfs:comment "A instance move the machine refuses before any engine call (code ILLEGAL_TRANSITION)." .
 
@@ -983,7 +984,7 @@
     :refusalReason "UnknownEngineState" .
 
 :TaskTransitionRefused a owl:Class ;
-    rdfs:subClassOf :TransitionRefused ;
+    rdfs:subClassOf core:RefusalCode ;
     rdfs:label "Task transition refused" ;
     rdfs:comment "A task move the machine refuses before any engine call (code ILLEGAL_TRANSITION)." .
 
@@ -1023,46 +1024,46 @@
     :refusalReason "UnknownEngineState" .
 
 :ProcessDefinitionLifecycle a owl:Class ;
-    rdfs:subClassOf :StateMachine ;
+    rdfs:subClassOf core:StateMachine ;
     rdfs:label "Process definition lifecycle" ;
     rdfs:comment "The closed machine of a process definition: Active and Suspended, no terminal state. A suspended definition starts no new instance." .
 
 :DefinitionActiveState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Definition Active" ;
     rdfs:comment "The Active state of the definition machine." .
 
 :DefinitionSuspendedState a owl:Class ;
-    rdfs:subClassOf :State ;
+    rdfs:subClassOf core:State ;
     rdfs:label "Definition Suspended" ;
     rdfs:comment "The Suspended state of the definition machine." .
 
 :DefinitionSuspendEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Definition suspend" ;
     rdfs:comment "Suspends a process definition." .
 
 :DefinitionActivateEvent a owl:Class ;
-    rdfs:subClassOf :Event ;
+    rdfs:subClassOf core:Event ;
     rdfs:label "Definition activate" ;
     rdfs:comment "Activates a suspended process definition." .
 
 :DefinitionActiveSuspendTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Definition Active on suspend" ;
     :transitionSource :DefinitionActiveState ;
     :transitionTarget :DefinitionSuspendedState ;
     :transitionEvent :DefinitionSuspendEvent .
 
 :DefinitionSuspendedActivateTransition a owl:Class ;
-    rdfs:subClassOf :Transition ;
+    rdfs:subClassOf core:Transition ;
     rdfs:label "Definition Suspended on activate" ;
     :transitionSource :DefinitionSuspendedState ;
     :transitionTarget :DefinitionActiveState ;
     :transitionEvent :DefinitionActivateEvent .
 
 :DefinitionTransitionRefused a owl:Class ;
-    rdfs:subClassOf :TransitionRefused ;
+    rdfs:subClassOf core:RefusalCode ;
     rdfs:label "Definition transition refused" ;
     rdfs:comment "The typed refusal of an illegal definition move (code ILLEGAL_TRANSITION)." .
 
