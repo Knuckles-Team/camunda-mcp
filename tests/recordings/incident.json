@@ -1,0 +1,19 @@
+[
+  {
+    "id": "inc-1",
+    "processDefinitionId": "invoice:2:7d1f",
+    "processInstanceId": "pi-77",
+    "executionId": "ex-77",
+    "incidentTimestamp": "2026-11-01T10:00:00.000+0000",
+    "incidentType": "failedJob",
+    "activityId": "checkInvoice",
+    "failedActivityId": "checkInvoice",
+    "causeIncidentId": "inc-1",
+    "rootCauseIncidentId": "inc-1",
+    "configuration": "job-9",
+    "incidentMessage": "Retries exhausted",
+    "tenantId": null,
+    "jobDefinitionId": "jd-1",
+    "annotation": null
+  }
+]

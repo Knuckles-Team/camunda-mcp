@@ -1,0 +1,36 @@
+@prefix ac: <https://knuckles-team.github.io/ontology/access#> .
+@prefix core: <https://knuckles-team.github.io/ontology/core#> .
+@prefix camunda: <https://knuckles-team.github.io/ontology/connector/camunda#> .
+@prefix camac: <https://knuckles-team.github.io/ontology/connector/camunda-access#> .
+
+# Read contracts for the competency reads of the Camunda connector: deployed
+# process definitions and incidents. Each names the existing read tool that
+# serves it; no new tool is introduced.
+
+camac:processDefinitionAccess a ac:AccessContract ;
+    ac:classIri camunda:CamundaProcessDefinition ;
+    ac:sourceId "camunda-mcp" ;
+    ac:entity "process_definition" ;
+    ac:keyField "key" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "camunda7_get_process_definitions" ;
+    ac:pagination "none" .
+
+camac:processDefinitionName a ac:PropertyBinding ;
+    ac:contract camac:processDefinitionAccess ; ac:property core:name ; ac:field "name" .
+camac:processDefinitionDeployed a ac:PropertyBinding ;
+    ac:contract camac:processDefinitionAccess ; ac:property camunda:deployed ; ac:field "deploymentId" .
+
+camac:incidentAccess a ac:AccessContract ;
+    ac:classIri camunda:CamundaIncident ;
+    ac:sourceId "camunda-mcp" ;
+    ac:entity "incident" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "camunda7_get_incidents" ;
+    ac:pagination "none" .
+
+camac:incidentProcessInstanceId a ac:PropertyBinding ;
+    ac:contract camac:incidentAccess ; ac:property camunda:processInstanceId ; ac:field "processInstanceId" .
+camac:incidentActivityId a ac:PropertyBinding ;
+    ac:contract camac:incidentAccess ; ac:property camunda:activityId ; ac:field "activityId" .
