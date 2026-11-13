@@ -1,0 +1,16 @@
+[
+  {
+    "id": "invoice:2:7d1f",
+    "key": "invoice",
+    "category": "http://bpmn.io/schema/bpmn",
+    "name": "Invoice approval",
+    "version": 2,
+    "resource": "invoice.bpmn",
+    "deploymentId": "d-100",
+    "suspended": false,
+    "tenantId": null,
+    "versionTag": null,
+    "historyTimeToLive": 180,
+    "startableInTasklist": true
+  }
+]

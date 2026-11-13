@@ -637,6 +637,18 @@
     rdfs:label "activity id" ;
     rdfs:range xsd:string .
 
+:processInstanceId a owl:DatatypeProperty ;
+    rdfs:label "process instance id" ;
+    rdfs:comment "Id of the process instance an incident was raised against." ;
+    rdfs:domain :CamundaIncident ;
+    rdfs:range xsd:string .
+
+:deployed a owl:DatatypeProperty ;
+    rdfs:label "deployed" ;
+    rdfs:comment "Id of the deployment a process definition was deployed from." ;
+    rdfs:domain :CamundaProcessDefinition ;
+    rdfs:range xsd:string .
+
 :incidentType a owl:DatatypeProperty ;
     rdfs:label "incident type" ;
     rdfs:range xsd:string .
