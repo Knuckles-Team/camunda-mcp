@@ -13,3 +13,4 @@ Each task line reads `- [ ] T001 [P] [US1] <ID>-R012.4 description`. Order is pr
 - [ ] T007 [US2] CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.1 State, transition and machine classes roll up to the core vocabulary.
 - [ ] T008 [US2] CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.2 The ontology states equal the code enums and replace the raw state fields.
 - [ ] T009 [US2] CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.3 Skills and prompts state the legal moves and the refusals.
+- [x] T010 [US1] CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R005 Pack extends only the core ontology.

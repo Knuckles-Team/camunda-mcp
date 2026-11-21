@@ -32,11 +32,13 @@ The engine reads this system's documents through the connector and sends governe
 **Acceptance Scenarios**:
 
 1. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003` is exercised, **Then** its rollup test passes.
+4. **Given** the connector is configured, **When** the behaviour of row `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R005` (pack extends only the core ontology) is exercised, **Then** no core class or property is redeclared and no retired IRI base remains. Test: `tests/test_pack_extends_core.py::test_pack_declares_no_core_term`.
 
 ### Edge Cases
 
 - If `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001` is not met, its proving test fails: default content.
 - If `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002` is not met, its proving test fails: declare access contracts for the competency reads of camunda-mcp.
+- If `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R005` is not met, its proving test fails: pack extends only the core ontology.
 
 ## Requirements
 
@@ -44,11 +46,13 @@ The engine reads this system's documents through the connector and sends governe
 - **FR-002**: Declare access contracts for the competency reads of camunda-mcp. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002`.
 - **FR-003**: Process and decision definition documents as federated pack sources. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R003`.
 - **FR-004**: The instance and user task machines are described in the ontology (rollup). Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.1`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.2`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.3`.
+- **FR-005**: Pack extends only the core ontology. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R005`.
 
 ## Success Criteria
 
 - **SC-001**: `resources/list` includes `skill://` and `ontology://`; `prompts/list` includes each packaged prompt. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001`.
 - **SC-002**: Declare access contracts for the competency reads of camunda-mcp. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002`.
+- **SC-005**: No pack term redeclares a core term and no retired IRI base remains. Rows: `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R005`.
 
 ## Assumptions
 
@@ -62,3 +66,4 @@ The engine reads this system's documents through the connector and sends governe
 | FR-001 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R001` | [plan.md](plan.md) | T-001 | [test-spec.md](test-spec.md) |
 | FR-002 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R002` | [plan.md](plan.md) | T-002 | [test-spec.md](test-spec.md) |
 | FR-004 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.1`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.2`, `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R004.3` | [plan.md](plan.md) | T-004 | [test-spec.md](test-spec.md) |
+| FR-005 | `CONN-CAMUNDA-MCP-CONNECTOR-CONTENT-R005` | [plan.md](plan.md) | T-002 | [test-spec.md](test-spec.md) |
