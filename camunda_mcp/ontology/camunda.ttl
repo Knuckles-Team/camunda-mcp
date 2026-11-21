@@ -62,185 +62,14 @@
     :executedByTool "camunda7_start_process_instance_by_key", "camunda7_get_process_definition_bpmn20_xml_by_key" ;
     rdfs:comment "A BPMN process model: the flow elements, lanes and data a workflow graph is generated from. One deployed version of it is a :CamundaProcessDefinition." .
 
-:BpmnFlowElement a owl:Class ;
-    rdfs:subClassOf core:Concept ;
-    rdfs:label "BPMN flow element" ;
-    rdfs:comment "Any element contained in a process: a flow node or a flow." .
-
-:BpmnFlowNode a owl:Class ;
-    rdfs:subClassOf :BpmnFlowElement, core:TaskStep ;
-    rdfs:label "BPMN flow node" ;
-    rdfs:comment "A node of the process graph (activity, gateway or event). Becomes one node of a generated workflow graph; sequence flows become its edges." .
-
 # --- activities ---
-
-:BpmnActivity a owl:Class ;
-    rdfs:subClassOf :BpmnFlowNode ;
-    rdfs:label "BPMN activity" ;
-    rdfs:comment "Work performed in a process: a task, a sub-process or a call activity." .
-
-:BpmnTask a owl:Class ;
-    rdfs:subClassOf :BpmnActivity ;
-    rdfs:label "BPMN task" ;
-    :bpmnElement "task" ;
-    :dagNodeKind "agent" ;
-    rdfs:comment "An atomic activity. The specific kind (user, service, script, business rule, send, receive, manual) decides who performs it." .
-
-:BpmnUserTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN user task" ;
-    :bpmnElement "userTask" ;
-    :dagNodeKind "human" ;
-    :executedByTool "camunda7_get_tasks", "camunda7_claim", "camunda7_complete", "camunda7_set_assignee", "camunda7_delegate_task" ;
-    rdfs:comment "Work done by a person through the task queue: assignee, candidate users and candidate groups say who may claim it. A generated graph waits here for a human (approval, review, data entry)." .
-
-:BpmnServiceTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN service task" ;
-    :bpmnElement "serviceTask" ;
-    :dagNodeKind "agent" ;
-    :executedByTool "camunda7_fetch_and_lock", "camunda7_complete_external_task_resource", "camunda7_handle_failure", "camunda7_handle_external_task_bpmn_error", "camunda7_extend_lock" ;
-    rdfs:comment "Automated work. With an external topic (:externalTaskTopic) an outside worker (an agent) fetches, locks and completes it; that topic is what binds the step to an agent skill or tool." .
-
-:BpmnScriptTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN script task" ;
-    :bpmnElement "scriptTask" ;
-    :dagNodeKind "agent" ;
-    rdfs:comment "A script the engine runs itself. No agent is involved; the graph treats it as an engine-side step." .
-
-:BpmnBusinessRuleTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN business rule task" ;
-    :bpmnElement "businessRuleTask" ;
-    :dagNodeKind "decision" ;
-    :executedByTool "camunda7_evaluate_decision_by_key" ;
-    rdfs:comment "Evaluates a DMN decision (:evaluatesDecision) and maps its result into process variables." .
-
-:BpmnSendTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN send task" ;
-    :bpmnElement "sendTask" ;
-    :dagNodeKind "agent" ;
-    rdfs:comment "Sends a message to another participant; implemented like a service task." .
-
-:BpmnReceiveTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN receive task" ;
-    :bpmnElement "receiveTask" ;
-    :dagNodeKind "wait" ;
-    :executedByTool "camunda7_deliver_message" ;
-    rdfs:comment "Waits for a named message (:messageName); a message correlation moves it on." .
-
-:BpmnManualTask a owl:Class ;
-    rdfs:subClassOf :BpmnTask ;
-    rdfs:label "BPMN manual task" ;
-    :bpmnElement "manualTask" ;
-    :dagNodeKind "human" ;
-    rdfs:comment "Work done outside any system; the engine passes through it. The graph records it as a human step without a queue." .
-
-:BpmnSubProcess a owl:Class ;
-    rdfs:subClassOf :BpmnActivity ;
-    rdfs:label "BPMN sub-process" ;
-    :bpmnElement "subProcess" ;
-    :dagNodeKind "call" ;
-    rdfs:comment "An embedded sub-graph with its own start and end; an event sub-process starts on an event instead." .
-
-:BpmnCallActivity a owl:Class ;
-    rdfs:subClassOf :BpmnActivity ;
-    rdfs:label "BPMN call activity" ;
-    :bpmnElement "callActivity" ;
-    :dagNodeKind "call" ;
-    rdfs:comment "Starts another deployed process (:callsProcess by :calledElement key) and waits for it." .
 
 # --- gateways ---
 
-:BpmnGateway a owl:Class ;
-    rdfs:subClassOf :BpmnFlowNode ;
-    rdfs:label "BPMN gateway" ;
-    rdfs:comment "Controls how the flow splits and merges." .
-
-:BpmnExclusiveGateway a owl:Class ;
-    rdfs:subClassOf :BpmnGateway ;
-    rdfs:label "BPMN exclusive gateway" ;
-    :bpmnElement "exclusiveGateway" ;
-    :dagNodeKind "branch" ;
-    rdfs:comment "Takes exactly one outgoing flow: the first whose condition holds, else the default flow." .
-
-:BpmnParallelGateway a owl:Class ;
-    rdfs:subClassOf :BpmnGateway ;
-    rdfs:label "BPMN parallel gateway" ;
-    :bpmnElement "parallelGateway" ;
-    :dagNodeKind "fork" ;
-    rdfs:comment "Splits into all outgoing flows (fork) or waits for all incoming flows (join)." .
-
-:BpmnInclusiveGateway a owl:Class ;
-    rdfs:subClassOf :BpmnGateway ;
-    rdfs:label "BPMN inclusive gateway" ;
-    :bpmnElement "inclusiveGateway" ;
-    :dagNodeKind "fork" ;
-    rdfs:comment "Takes every outgoing flow whose condition holds; as a join it waits for the flows that were taken." .
-
-:BpmnEventBasedGateway a owl:Class ;
-    rdfs:subClassOf :BpmnGateway ;
-    rdfs:label "BPMN event-based gateway" ;
-    :bpmnElement "eventBasedGateway" ;
-    :dagNodeKind "wait" ;
-    rdfs:comment "Waits for the first of several events (message, timer, signal) and follows that one." .
-
-:BpmnComplexGateway a owl:Class ;
-    rdfs:subClassOf :BpmnGateway ;
-    rdfs:label "BPMN complex gateway" ;
-    :bpmnElement "complexGateway" ;
-    :dagNodeKind "join" ;
-    rdfs:comment "A gateway with a custom activation rule. The engine does not execute it; models using it are rejected at deployment." .
-
 # --- events ---
 
-:BpmnEvent a owl:Class ;
-    rdfs:subClassOf :BpmnFlowNode ;
-    rdfs:label "BPMN event" ;
-    rdfs:comment "Something that happens: starts, ends, or interrupts the flow. Its trigger is its :hasEventDefinition." .
-
-:BpmnStartEvent a owl:Class ;
-    rdfs:subClassOf :BpmnEvent ;
-    rdfs:label "BPMN start event" ;
-    :bpmnElement "startEvent" ;
-    :dagNodeKind "start" ;
-    :executedByTool "camunda7_start_process_instance_by_key", "camunda7_deliver_message", "camunda7_throw_signal" ;
-    rdfs:comment "Where an instance begins: on a start call, or on a message, signal, timer or condition." .
-
-:BpmnEndEvent a owl:Class ;
-    rdfs:subClassOf :BpmnEvent ;
-    rdfs:label "BPMN end event" ;
-    :bpmnElement "endEvent" ;
-    :dagNodeKind "end" ;
-    rdfs:comment "Where a path ends; with an error, escalation, terminate or message definition it also signals." .
-
-:BpmnIntermediateCatchEvent a owl:Class ;
-    rdfs:subClassOf :BpmnEvent ;
-    rdfs:label "BPMN intermediate catch event" ;
-    :bpmnElement "intermediateCatchEvent" ;
-    :dagNodeKind "wait" ;
-    :executedByTool "camunda7_deliver_message", "camunda7_throw_signal", "camunda7_execute_job" ;
-    rdfs:comment "Waits in the flow for a timer, message, signal or condition." .
-
-:BpmnIntermediateThrowEvent a owl:Class ;
-    rdfs:subClassOf :BpmnEvent ;
-    rdfs:label "BPMN intermediate throw event" ;
-    :bpmnElement "intermediateThrowEvent" ;
-    :dagNodeKind "agent" ;
-    rdfs:comment "Emits a signal, message, escalation or compensation and continues." .
-
-:BpmnBoundaryEvent a owl:Class ;
-    rdfs:subClassOf :BpmnEvent ;
-    rdfs:label "BPMN boundary event" ;
-    :bpmnElement "boundaryEvent" ;
-    :dagNodeKind "boundary" ;
-    rdfs:comment "Attached to an activity (:attachedTo): when its trigger fires (a timer for escalation, an error, a message) it starts an alternative path, interrupting the activity unless cancelActivity is false." .
-
 :BpmnEventDefinition a owl:Class ;
-    rdfs:subClassOf core:Concept ;
+    rdfs:subClassOf core:BpmnFlowElement ;
     rdfs:label "BPMN event definition" ;
     rdfs:comment "The trigger or result of an event." .
 
@@ -300,13 +129,13 @@
 # --- flows, lanes, pools, data ---
 
 :BpmnSequenceFlow a owl:Class ;
-    rdfs:subClassOf :BpmnFlowElement ;
+    rdfs:subClassOf core:BpmnFlowElement ;
     rdfs:label "BPMN sequence flow" ;
     :bpmnElement "sequenceFlow" ;
     rdfs:comment "A directed edge between two flow nodes of one process (:sourceNode, :targetNode), optionally guarded by :conditionExpression or marked :isDefaultFlow. Becomes one edge of a generated graph." .
 
 :BpmnMessageFlow a owl:Class ;
-    rdfs:subClassOf :BpmnFlowElement ;
+    rdfs:subClassOf core:BpmnFlowElement ;
     rdfs:label "BPMN message flow" ;
     :bpmnElement "messageFlow" ;
     rdfs:comment "A message passed between two pools. Becomes a cross-graph message edge." .
@@ -369,30 +198,23 @@
     rdfs:subPropertyOf core:hasPart ;
     rdfs:label "contains flow element" ;
     rdfs:domain :BpmnProcess ;
-    rdfs:range :BpmnFlowElement .
+    rdfs:range core:BpmnFlowElement .
 
 :sourceNode a owl:ObjectProperty ;
     rdfs:label "source node" ;
     rdfs:comment "The flow node a sequence or message flow leaves." ;
-    rdfs:domain :BpmnFlowElement ;
-    rdfs:range :BpmnFlowNode .
+    rdfs:domain core:BpmnFlowElement ;
+    rdfs:range core:BpmnFlowNode .
 
 :targetNode a owl:ObjectProperty ;
     rdfs:label "target node" ;
     rdfs:comment "The flow node a sequence or message flow enters." ;
-    rdfs:domain :BpmnFlowElement ;
-    rdfs:range :BpmnFlowNode .
-
-:flowsTo a owl:ObjectProperty ;
-    rdfs:subPropertyOf core:precedes ;
-    rdfs:label "flows to" ;
-    rdfs:comment "Shortcut: flow node A has a sequence flow to flow node B. The edge relation of a generated graph." ;
-    rdfs:domain :BpmnFlowNode ;
-    rdfs:range :BpmnFlowNode .
+    rdfs:domain core:BpmnFlowElement ;
+    rdfs:range core:BpmnFlowNode .
 
 :inLane a owl:ObjectProperty ;
     rdfs:label "in lane" ;
-    rdfs:domain :BpmnFlowNode ;
+    rdfs:domain core:BpmnFlowNode ;
     rdfs:range :BpmnLane .
 
 :laneRole a owl:ObjectProperty ;
@@ -403,22 +225,17 @@
 
 :hasEventDefinition a owl:ObjectProperty ;
     rdfs:label "has event definition" ;
-    rdfs:domain :BpmnEvent ;
+    rdfs:domain core:BpmnEvent ;
     rdfs:range :BpmnEventDefinition .
-
-:attachedTo a owl:ObjectProperty ;
-    rdfs:label "attached to" ;
-    rdfs:domain :BpmnBoundaryEvent ;
-    rdfs:range :BpmnActivity .
 
 :evaluatesDecision a owl:ObjectProperty ;
     rdfs:label "evaluates decision" ;
-    rdfs:domain :BpmnBusinessRuleTask ;
+    rdfs:domain core:BpmnBusinessRuleTask ;
     rdfs:range :DmnDecision .
 
 :callsProcess a owl:ObjectProperty ;
     rdfs:label "calls process" ;
-    rdfs:domain :BpmnCallActivity ;
+    rdfs:domain core:BpmnCallActivity ;
     rdfs:range :BpmnProcess .
 
 :modelOf a owl:ObjectProperty ;
@@ -451,32 +268,32 @@
 :externalTaskTopic a owl:DatatypeProperty ;
     rdfs:label "external task topic" ;
     rdfs:comment "The topic a worker subscribes to for a service task; binds the step to the agent skill or tool that does the work." ;
-    rdfs:domain :BpmnServiceTask ;
+    rdfs:domain core:BpmnServiceTask ;
     rdfs:range xsd:string .
 
 :candidateUsers a owl:DatatypeProperty ;
     rdfs:label "candidate users" ;
-    rdfs:domain :BpmnUserTask ;
+    rdfs:domain core:BpmnUserTask ;
     rdfs:range xsd:string .
 
 :candidateGroups a owl:DatatypeProperty ;
     rdfs:label "candidate groups" ;
-    rdfs:domain :BpmnUserTask ;
+    rdfs:domain core:BpmnUserTask ;
     rdfs:range xsd:string .
 
 :formKey a owl:DatatypeProperty ;
     rdfs:label "form key" ;
-    rdfs:domain :BpmnUserTask ;
+    rdfs:domain core:BpmnUserTask ;
     rdfs:range xsd:string .
 
 :calledElement a owl:DatatypeProperty ;
     rdfs:label "called element" ;
-    rdfs:domain :BpmnCallActivity ;
+    rdfs:domain core:BpmnCallActivity ;
     rdfs:range xsd:string .
 
 :decisionRef a owl:DatatypeProperty ;
     rdfs:label "decision reference" ;
-    rdfs:domain :BpmnBusinessRuleTask ;
+    rdfs:domain core:BpmnBusinessRuleTask ;
     rdfs:range xsd:string .
 
 :timerDefinition a owl:DatatypeProperty ;
@@ -526,16 +343,10 @@
     rdfs:label "Camunda process definition" ;
     rdfs:comment "One deployed version of a BPMN process (key + version). Its model is a :BpmnProcess." .
 
-
 :CamundaDecisionDefinition a owl:Class ;
     rdfs:subClassOf :DmnDecision ;
     rdfs:label "Camunda decision definition" ;
     rdfs:comment "One deployed version of a DMN decision (key + version)." .
-
-:ProcessInstance a owl:Class ;
-    rdfs:subClassOf core:DurableExecutionUnit ;
-    rdfs:label "Process instance" ;
-    rdfs:comment "One running or finished execution of a process definition, keyed by id and optionally a business key." .
 
 :ProcessStep a owl:Class ;
     rdfs:subClassOf core:Event ;
@@ -574,46 +385,20 @@
 
 # --- record links ---
 
-:definedBy a owl:ObjectProperty ;
-    rdfs:label "defined by" ;
-    rdfs:comment "Links a process definition to its BPMN model." ;
-    rdfs:domain :CamundaProcessDefinition ;
-    rdfs:range :BpmnProcess .
-
-:instanceOf a owl:ObjectProperty ;
-    rdfs:label "instance of" ;
-    rdfs:domain :ProcessInstance ;
-    rdfs:range core:BusinessProcess .
-
-:hasStep a owl:ObjectProperty ;
-    rdfs:label "has step" ;
-    rdfs:domain :ProcessInstance ;
-    rdfs:range :ProcessStep .
-
-:hasTask a owl:ObjectProperty ;
-    rdfs:label "has task" ;
-    rdfs:domain :ProcessInstance ;
-    rdfs:range :CamundaUserTask .
-
 :partOfInstance a owl:ObjectProperty ;
     rdfs:subPropertyOf core:partOf ;
     rdfs:label "part of instance" ;
     rdfs:comment "Links a task, external task, job, incident or variable to its process instance." ;
-    rdfs:range :ProcessInstance .
+    rdfs:range core:ProcessInstance .
 
 :createdByNode a owl:ObjectProperty ;
     rdfs:label "created by node" ;
     rdfs:comment "Links a user task, external task, job or step to the BPMN flow node it runs." ;
-    rdfs:range :BpmnFlowNode .
-
-:assignedTo a owl:ObjectProperty ;
-    rdfs:label "assigned to" ;
-    rdfs:domain :CamundaUserTask ;
-    rdfs:range core:Person .
+    rdfs:range core:BpmnFlowNode .
 
 :hasIncident a owl:ObjectProperty ;
     rdfs:label "has incident" ;
-    rdfs:domain :ProcessInstance ;
+    rdfs:domain core:ProcessInstance ;
     rdfs:range :CamundaIncident .
 
 :processDefinitionKey a owl:DatatypeProperty ;
@@ -680,12 +465,6 @@
 :refusalReason a owl:AnnotationProperty ;
     rdfs:label "refusal reason" ;
     rdfs:comment "The reason code a refusal class carries." .
-
-:lifecycleState a owl:ObjectProperty ;
-    rdfs:label "lifecycle state" ;
-    rdfs:comment "The one persisted state of a process instance or user task: a state class of its machine. The engine holds the authoritative state; the graph mirrors it." ;
-    rdfs:domain [ a owl:Class ; owl:unionOf ( :ProcessInstance :CamundaUserTask core:BusinessProcess ) ] ;
-    rdfs:range [ a owl:Class ; owl:unionOf ( :InstanceCreatedState :InstanceActiveState :InstanceSuspendedState :InstanceIncidentState :InstanceCompletedState :InstanceCanceledState :InstanceTerminatedState :DefinitionActiveState :DefinitionSuspendedState :TaskCreatedState :TaskClaimedState :TaskCompletedState :TaskCanceledState :TaskDeletedState ) ] .
 
 :ProcessInstanceLifecycle a owl:Class ;
     rdfs:subClassOf core:StateMachine ;

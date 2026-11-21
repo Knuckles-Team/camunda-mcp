@@ -42,13 +42,6 @@ def test_no_import_of_core_and_bpmn_constructs_modelled():
     assert "owl:imports" not in TTL
     for cls in (
         "BpmnProcess",
-        "BpmnUserTask",
-        "BpmnServiceTask",
-        "BpmnBusinessRuleTask",
-        "BpmnExclusiveGateway",
-        "BpmnParallelGateway",
-        "BpmnStartEvent",
-        "BpmnBoundaryEvent",
         "BpmnTimerEventDefinition",
         "BpmnSequenceFlow",
         "BpmnLane",
@@ -57,6 +50,20 @@ def test_no_import_of_core_and_bpmn_constructs_modelled():
         "CamundaEngine",
     ):
         assert cls in BLOCKS, cls
+    # The BPMN flow-element classes are core classes: referenced, never declared here.
+    for cls in (
+        "BpmnFlowElement",
+        "BpmnFlowNode",
+        "BpmnActivity",
+        "BpmnUserTask",
+        "BpmnServiceTask",
+        "BpmnBusinessRuleTask",
+        "BpmnExclusiveGateway",
+        "BpmnParallelGateway",
+        "BpmnStartEvent",
+        "BpmnBoundaryEvent",
+    ):
+        assert cls not in BLOCKS, cls
 
 
 def test_flow_nodes_carry_graph_kind_and_tools_exist():
@@ -163,7 +170,9 @@ def test_ontology_states_and_transitions_equal_the_code_machines():
         f"Task{_camel(e.value)}Event" for e in TaskEvent
     }
     assert ":processState" not in TTL and ":suspended " not in TTL
-    assert ":lifecycleState a owl:ObjectProperty" in TTL
+    assert (
+        ":lifecycleState a owl:ObjectProperty" not in TTL
+    )  # the core property is reused
 
 
 def test_ontology_definition_machine_equals_the_code_machine():
