@@ -2,7 +2,7 @@
 name: camunda-engine-process-control
 skill_type: skill
 description: >-
-  Process definitions, instances, executions, messages, signals, migration and modification. Use when the request is about controlling running processes beyond the basic start and monitor skills: suspend and activate, migrate or modify instances, correlate messages, throw signals, evaluate conditions, run batches. Do NOT use for the business workflows covered by camunda-deploy-business-process, camunda-run-and-monitor-instance, camunda-work-human-task-queue and camunda-incident-recovery.
+  Process definitions, instances, executions, messages, signals, migration and modification. Use when the request is about controlling running processes beyond the basic start and monitor skills: suspend and activate, migrate or modify instances, correlate messages, throw signals, evaluate conditions, run batches.
 license: MIT
 tags: [camunda, operaton, engine-rest]
 metadata:
@@ -10,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # Process definitions, instances, executions, messages, signals, migration and modification
+
+Scope: Process definitions, instances, executions, messages, signals, migration and modification. Use when the request is about controlling running processes beyond the basic start and monitor skills: suspend and activate, migrate or modify instances, correlate messages, throw signals, evaluate conditions, run batches. Do NOT use for the business workflows covered by camunda-deploy-business-process, camunda-run-and-monitor-instance, camunda-work-human-task-queue and camunda-incident-recovery.
 
 Every operation here is its own typed `camunda7_<operation>` tool; arguments follow the engine REST API
 (path parameters are required, query filters are snake_case optional arguments, a JSON request body is the

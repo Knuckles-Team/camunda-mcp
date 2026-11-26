@@ -2,15 +2,7 @@
 name: camunda-run-and-monitor-instance
 skill_type: skill
 description: >-
-  Run and monitor business process instances on the Operaton / Camunda 7 engine
-  through camunda-mcp: start an instance with a business key and typed variables,
-  read and change its variables, see where it is and what it already did, work
-  its service tasks as an external-task worker, deliver messages and signals, and
-  read its history. Use when the agent must kick off a business process, push it
-  forward or report on it. Do NOT use to deploy models (use
-  camunda-deploy-business-process), for human approvals (use
-  camunda-work-human-task-queue) or to repair a failed instance (use
-  camunda-incident-recovery).
+  Run and monitor business process instances on the Operaton / Camunda 7 engine through camunda-mcp: start an instance with a business key and typed variables, read and change its variables, see where it is and what it already did, work its service tasks as an external-task worker, deliver messages and signals, and read its history.
 license: MIT
 tags: [camunda, operaton, bpmn, process-instance, external-task, monitoring]
 metadata:
@@ -18,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # Run and monitor an instance
+
+Scope: Run and monitor business process instances on the Operaton / Camunda 7 engine through camunda-mcp: start an instance with a business key and typed variables, read and change its variables, see where it is and what it already did, work its service tasks as an external-task worker, deliver messages and signals, and read its history. Use when the agent must kick off a business process, push it forward or report on it. Do NOT use to deploy models (use camunda-deploy-business-process), for human approvals (use camunda-work-human-task-queue) or to repair a failed instance (use camunda-incident-recovery).
 
 Contracts: `start-process-instance`, `set-instance-variables`,
 `monitor-process-instance`, `work-external-tasks`, `correlate-message`,

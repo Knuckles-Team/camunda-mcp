@@ -2,13 +2,7 @@
 name: camunda-deploy-business-process
 skill_type: skill
 description: >-
-  Deploy a business process to the Operaton / Camunda 7 engine through camunda-mcp:
-  write or check the BPMN 2.0 and DMN XML, deploy them as one named deployment,
-  read back the process and decision definitions, evaluate a decision, and retire
-  an old deployment. Use when the agent must put a new or changed business process
-  or business rule into the engine. Do NOT use to start or monitor instances (use
-  camunda-run-and-monitor-instance) or to work human tasks (use
-  camunda-work-human-task-queue).
+  Deploy a business process to the Operaton / Camunda 7 engine through camunda-mcp: write or check the BPMN 2.0 and DMN XML, deploy them as one named deployment, read back the process and decision definitions, evaluate a decision, and retire an old deployment. Use when the agent must put a new or changed business process or business rule into the engine.
 license: MIT
 tags: [camunda, operaton, bpmn, dmn, deployment, business-process]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # Deploy a business process
+
+Scope: Deploy a business process to the Operaton / Camunda 7 engine through camunda-mcp: write or check the BPMN 2.0 and DMN XML, deploy them as one named deployment, read back the process and decision definitions, evaluate a decision, and retire an old deployment. Use when the agent must put a new or changed business process or business rule into the engine. Do NOT use to start or monitor instances (use camunda-run-and-monitor-instance) or to work human tasks (use camunda-work-human-task-queue).
 
 Contracts: `deploy-business-process`, `evaluate-decision`, `retire-deployment`
 (`ontology://camunda-mcp/contracts.ttl`). Data location: `process-models`.

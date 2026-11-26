@@ -2,13 +2,7 @@
 name: camunda-incident-recovery
 skill_type: skill
 description: >-
-  Diagnose and recover stuck process instances on the Operaton / Camunda 7 engine
-  through camunda-mcp: find incidents, read the failing job's stack trace or the
-  external task's error details, fix the cause, give the job or external task new
-  retries, annotate the incident, and confirm the instance moves on. Use when an
-  instance is blocked by a failed job, a failed external task or an incident. Do
-  NOT use for deploying (camunda-deploy-business-process), starting or monitoring
-  (camunda-run-and-monitor-instance) or human tasks (camunda-work-human-task-queue).
+  Diagnose and recover stuck process instances on the Operaton / Camunda 7 engine through camunda-mcp: find incidents, read the failing job's stack trace or the external task's error details, fix the cause, give the job or external task new retries, annotate the incident, and confirm the instance moves on. Use when an instance is blocked by a failed job, a failed external task or an incident.
 license: MIT
 tags: [camunda, operaton, incident, jobs, external-task, recovery]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # Incident recovery
+
+Scope: Diagnose and recover stuck process instances on the Operaton / Camunda 7 engine through camunda-mcp: find incidents, read the failing job's stack trace or the external task's error details, fix the cause, give the job or external task new retries, annotate the incident, and confirm the instance moves on. Use when an instance is blocked by a failed job, a failed external task or an incident. Do NOT use for deploying (camunda-deploy-business-process), starting or monitoring (camunda-run-and-monitor-instance) or human tasks (camunda-work-human-task-queue).
 
 Contract: `recover-incident`. Data location: `process-runtime`. Incidents are
 `:CamundaIncident` nodes linked to their `:ProcessInstance` by `:hasIncident`.
