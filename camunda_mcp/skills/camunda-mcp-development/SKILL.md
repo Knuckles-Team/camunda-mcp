@@ -2,9 +2,7 @@
 name: camunda-mcp-development
 skill_type: skill
 description: >-
-  Develop and verify camunda-mcp as a connector-owned package while preserving
-  its SDK Connector wiring, Camunda 7 and 8 authentication/TLS boundaries,
-  typed operation tools, packaged content, and source-backed spec delivery.
+  Develop and verify camunda-mcp as a connector-owned package while preserving its SDK Connector wiring, Camunda 7 and 8 authentication/TLS boundaries, typed operation tools, packaged content, and source-backed spec delivery.
 license: MIT
 tags: [camunda-mcp, development, connector, test, gates, camunda]
 tier: repository

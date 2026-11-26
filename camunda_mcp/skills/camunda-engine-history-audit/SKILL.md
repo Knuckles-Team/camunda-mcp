@@ -2,7 +2,7 @@
 name: camunda-engine-history-audit
 skill_type: skill
 description: >-
-  History, audit, metrics and engine health. Use when the request is about what already happened or how the engine is doing: historic instances, tasks, variables, jobs, incidents, user-operation logs, history cleanup, metrics, telemetry, schema log, version and engine names. Do NOT use for the business workflows covered by camunda-deploy-business-process, camunda-run-and-monitor-instance, camunda-work-human-task-queue and camunda-incident-recovery.
+  History, audit, metrics and engine health. Use when the request is about what already happened or how the engine is doing: historic instances, tasks, variables, jobs, incidents, user-operation logs, history cleanup, metrics, telemetry, schema log, version and engine names.
 license: MIT
 tags: [camunda, operaton, engine-rest]
 metadata:
@@ -10,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # History, audit, metrics and engine health
+
+Scope: History, audit, metrics and engine health. Use when the request is about what already happened or how the engine is doing: historic instances, tasks, variables, jobs, incidents, user-operation logs, history cleanup, metrics, telemetry, schema log, version and engine names. Do NOT use for the business workflows covered by camunda-deploy-business-process, camunda-run-and-monitor-instance, camunda-work-human-task-queue and camunda-incident-recovery.
 
 Every operation here is its own typed `camunda7_<operation>` tool; arguments follow the engine REST API
 (path parameters are required, query filters are snake_case optional arguments, a JSON request body is the

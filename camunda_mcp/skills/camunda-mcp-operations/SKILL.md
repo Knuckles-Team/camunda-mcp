@@ -2,14 +2,7 @@
 name: camunda-mcp-operations
 skill_type: skill
 description: >-
-  Operate any camunda-mcp tool: the full Operaton / Camunda 7 engine REST surface
-  (one camunda7_<operation> tool per REST operation, grouped by area), the Camunda 8
-  REST tools and the knowledge-graph ingest. Use to find the right tool for an
-  engine operation that the task skills do not cover (identity, authorizations,
-  tenants, filters, batches, migration, history cleanup, metrics) or to mirror
-  processes into the knowledge graph. For the business workflows prefer
-  camunda-deploy-business-process, camunda-run-and-monitor-instance,
-  camunda-work-human-task-queue and camunda-incident-recovery.
+  Operate any camunda-mcp tool: the full Operaton / Camunda 7 engine REST surface (one camunda7_<operation> tool per REST operation, grouped by area), the Camunda 8 REST tools and the knowledge-graph ingest. For the business workflows prefer camunda-deploy-business-process, camunda-run-and-monitor-instance, camunda-work-human-task-queue and camunda-incident-recovery.
 license: MIT
 tags: [camunda, operaton, engine-rest, catalog, knowledge-graph]
 metadata:
@@ -17,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # camunda-mcp operations
+
+Scope: Operate any camunda-mcp tool: the full Operaton / Camunda 7 engine REST surface (one camunda7_<operation> tool per REST operation, grouped by area), the Camunda 8 REST tools and the knowledge-graph ingest. Use to find the right tool for an engine operation that the task skills do not cover (identity, authorizations, tenants, filters, batches, migration, history cleanup, metrics) or to mirror processes into the knowledge graph. For the business workflows prefer camunda-deploy-business-process, camunda-run-and-monitor-instance, camunda-work-human-task-queue and camunda-incident-recovery.
 
 Every engine REST operation is its own typed tool named `camunda7_<operation id in
 snake case>`; [the catalog](references/catalog.md) lists them by REST area with

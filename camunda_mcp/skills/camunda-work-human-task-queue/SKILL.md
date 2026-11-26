@@ -2,13 +2,7 @@
 name: camunda-work-human-task-queue
 skill_type: skill
 description: >-
-  Work the human task queue of the Operaton / Camunda 7 engine through
-  camunda-mcp: list the open approvals, reviews and data-entry tasks for a user or
-  group, claim one, read its context, record a comment, complete it with typed
-  outputs, or hand it over (unclaim, reassign, delegate). Use when a process waits
-  on a person or an agent acting for one. Do NOT use to start processes (use
-  camunda-run-and-monitor-instance) or for automated service-task work (external
-  tasks, same skill).
+  Work the human task queue of the Operaton / Camunda 7 engine through camunda-mcp: list the open approvals, reviews and data-entry tasks for a user or group, claim one, read its context, record a comment, complete it with typed outputs, or hand it over (unclaim, reassign, delegate). Use when a process waits on a person or an agent acting for one.
 license: MIT
 tags: [camunda, operaton, user-task, approval, tasklist, human-in-the-loop]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '1.0.0'
 ---
 # Work the human task queue
+
+Scope: Work the human task queue of the Operaton / Camunda 7 engine through camunda-mcp: list the open approvals, reviews and data-entry tasks for a user or group, claim one, read its context, record a comment, complete it with typed outputs, or hand it over (unclaim, reassign, delegate). Use when a process waits on a person or an agent acting for one. Do NOT use to start processes (use camunda-run-and-monitor-instance) or for automated service-task work (external tasks, same skill).
 
 Contracts: `work-human-task-queue`, `hand-over-human-task`. Data location:
 `human-task-queue`.
