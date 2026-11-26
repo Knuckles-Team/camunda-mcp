@@ -1,5 +1,5 @@
 # Camunda Mcp
-## API | MCP Server | A2A Agent
+## API | MCP | Agent
 
 ![PyPI - Version](https://img.shields.io/pypi/v/camunda-mcp)
 ![MCP Server](https://badge.mcpx.dev?type=server 'MCP Server')
@@ -20,19 +20,25 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/camunda-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/camunda-mcp)
 
+> **Documentation** — Installation, deployment, and usage across the API, CLI, MCP,
+> and A2A agent interfaces are maintained in the
+> [official documentation](https://knuckles-team.github.io/camunda-mcp/).
+
+---
+
+## Overview
+
 Camunda (7 & 8) process automation **API + MCP Server + A2A Agent** for the
 scion-sdk ecosystem.
-
-> **Documentation** — Installation, deployment, usage across the API, CLI, and MCP
-> interfaces, and guidance for provisioning the Camunda platform are maintained in the
-> [official documentation](https://knuckles-team.github.io/camunda-mcp/).
 
 `camunda-mcp` wraps the Camunda process automation APIs with thin, deterministic MCP
 tools, targeting both platforms from a single server: the **Camunda 7** Engine REST
 API and the **Camunda 8** Zeebe / Operate / Tasklist REST APIs. It also ships
 agent for agent-to-agent orchestration.
 
-## What it provides
+---
+
+## Key Features
 
 - **`Api`** (`camunda_mcp.api_client`) — a facade holding both the Camunda 7 Engine
   REST client (`Camunda7Api`) and the Camunda 8 Zeebe / Operate / Tasklist client
@@ -45,7 +51,11 @@ agent for agent-to-agent orchestration.
   for the full surface.
   [`a2a.json`](a2a.json)) wrapping the tool surface in a Pydantic-AI graph agent.
 
-## Available MCP Tools
+---
+
+## MCP
+
+### Available MCP Tools
 
 _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hook)._
 
@@ -59,6 +69,29 @@ _Auto-generated — do not edit (synced by the `mcp-readme-table` pre-commit hoo
 
 _1 intent tool(s) · 0 operation(s). Call an operation as `act(action='<operation>', params={...})` (`ask` for reads); `find(action='describe', params={'action': '<operation>'})` returns its arguments. An operation is enabled unless its `<DOMAIN>TOOL` toggle is set false. Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
+
+### MCP config
+
+Register in the multiplexer under nickname `camun` (tools surface as
+`camun__process`, `camun__instance`, `camun__task`, …). See
+`camunda_mcp/mcp_config.json`.
+
+<!-- BEGIN GENERATED: additional-deployment-options -->
+### Additional Deployment Options
+
+`camunda-mcp` can run as a local stdio process or container, or behind a remote
+network boundary. The
+[Deployment guide](https://knuckles-team.github.io/camunda-mcp/deployment/) carries
+the detailed transport contract.
+
+- **Local container** — launch a reviewed immutable image as a least-privilege
+  stdio child with no listener or published port.
+- **Remote URL** — connect through an operator-supplied authenticated HTTPS
+  ingress. Keep its URL, outbound identity references, trust profile, and exact
+  `MCP_ALLOWED_HOSTS` in `AgentConfig`.
+<!-- END GENERATED: additional-deployment-options -->
+
+---
 
 ## Environment Variables
 
@@ -173,6 +206,8 @@ See the [Available MCP Tools](#available-mcp-tools) table above for the authorit
 | `MODEL_ID` | Model id (e.g. `gpt-4o`) | `gpt-4o` |
 | `ENABLE_WEB_UI` | Serve the AG-UI web interface | `True` |
 
+---
+
 ## Installation
 
 Pick the extra that matches what the operator want to run:
@@ -225,26 +260,7 @@ Deployment recipes (single-node + Raft HA), connection configuration, and archit
 diagrams are documented in the
 [medulla deployment guide](https://knuckles-team.github.io/medulla/deployment/).
 
-## MCP config
-
-Register in the multiplexer under nickname `camun` (tools surface as
-`camun__process`, `camun__instance`, `camun__task`, …). See
-`camunda_mcp/mcp_config.json`.
-
-<!-- BEGIN GENERATED: additional-deployment-options -->
-### Additional Deployment Options
-
-`camunda-mcp` can run as a local stdio process or container, or behind a remote
-network boundary. The
-[Deployment guide](https://knuckles-team.github.io/camunda-mcp/deployment/) carries
-the detailed transport contract.
-
-- **Local container** — launch a reviewed immutable image as a least-privilege
-  stdio child with no listener or published port.
-- **Remote URL** — connect through an operator-supplied authenticated HTTPS
-  ingress. Keep its URL, outbound identity references, trust profile, and exact
-  `MCP_ALLOWED_HOSTS` in `AgentConfig`.
-<!-- END GENERATED: additional-deployment-options -->
+---
 
 ## Documentation
 
@@ -263,7 +279,24 @@ recommended reference for installation, deployment, and day-to-day operation.
 
 `AGENTS.md` is the canonical contributor/agent guidance.
 
+---
 
+## Repository Owners
+
+<img width="100%" height="180em" src="https://github-readme-stats.vercel.app/api?username=example&show_icons=true&hide_border=true&&count_private=true&include_all_commits=true" />
+
+![GitHub followers](https://img.shields.io/github/followers/example)
+![GitHub User's stars](https://img.shields.io/github/stars/example)
+
+---
+
+## Contribute
+
+Contributions are welcome! Please ensure code quality by running local checks before submitting pull requests:
+- Format code using `ruff format .`
+- Lint code using `ruff check .`
+- Validate type-safety with `mypy .`
+- Run test suites using `pytest`
 
 <!-- GOVERNED-CAPABILITY:START -->
 ## Governed capability contract
